@@ -1,14 +1,27 @@
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase MariaDBDAO encargada de manejar la conexión y operaciones
+ * con la base de datos MariaDB.
+ *
+ * Contiene métodos para insertar, obtener, actualizar y eliminar registros
+ * de estudiantes.
+ *
+ * @author Diego
+ */
 public class MariaDBDAO {
 
-    // INSERTAR
+    /**
+     * Inserta un nuevo estudiante en la base de datos.
+     *
+     * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
+     * @return true si la inserción fue exitosa, false en caso contrario.
+     */
     public boolean insertarEstudiante(Modelo_Estudiante estudiante) {
         String sql = "INSERT INTO estudiantes (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
@@ -28,7 +41,11 @@ public class MariaDBDAO {
         }
     }
 
-    // OBTENER TODOS
+    /**
+     * Obtiene todos los estudiantes de la base de datos.
+     *
+     * @return Lista con todos los estudiantes encontrados.
+     */
     public List<Modelo_Estudiante> obtenerTodos() {
         List<Modelo_Estudiante> lista = new ArrayList<>();
         String sql = "SELECT * FROM estudiantes";
@@ -53,7 +70,12 @@ public class MariaDBDAO {
         return lista;
     }
 
-    // EDITAR
+    /**
+     * Actualiza los datos de un estudiante existente.
+     *
+     * @param estudiante Objeto con los nuevos datos del estudiante.
+     * @return true si la actualización fue exitosa, false si ocurrió un error.
+     */
     public boolean actualizarEstudiante(Modelo_Estudiante estudiante) {
         String sql = "UPDATE estudiantes SET nombre = ?, apellidos = ?, casa = ?, curso = ?, patronus = ? WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
@@ -74,7 +96,12 @@ public class MariaDBDAO {
         }
     }
 
-    // ELIMINAR
+    /**
+     * Elimina un estudiante de la base de datos por su ID.
+     *
+     * @param id Identificador del estudiante a eliminar.
+     * @return true si el estudiante fue eliminado correctamente, false en caso contrario.
+     */
     public boolean eliminarEstudiante(int id) {
         String sql = "DELETE FROM estudiantes WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
@@ -90,5 +117,6 @@ public class MariaDBDAO {
         }
     }
 }
+
 
 
