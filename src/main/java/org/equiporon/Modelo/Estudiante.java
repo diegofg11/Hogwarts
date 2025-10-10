@@ -35,6 +35,8 @@ public class Estudiante {
      * @param nombre nombre de la persona.
      * @param apellidos apellido de la persona.
      * @param casa casa del alumno de Hogwarts.
+     * @param curso curso del alumno de Hogwarts.
+     * @param patronus (animal espiritual) patronus del alumno de Hogwarts.
      */
     public Estudiante(int id, String nombre, String apellidos, String casa, int curso,String patronus) {
         this.id = id;
@@ -44,6 +46,47 @@ public class Estudiante {
         this.curso = curso;
         this.patronus = patronus;
     }
+
+    //Setters
+    public void setId(int id) {
+        this.id = id;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+    public void setCasa(String casa) {
+        this.casa = casa;
+    }
+    public void setCurso(int curso) {
+        this.curso = curso;
+    }
+    public void setPatronus(String patronus) {
+        this.patronus = patronus;
+    }
+
+    //Getters
+    public Integer getId() {
+        return id;
+    }
+    public String getNombre() {
+        return nombre;
+    }
+    public String getApellidos() {
+        return apellidos;
+    }
+    public String getCasa() {
+        return casa;
+    }
+    public Integer getCurso() {
+        return curso;
+    }
+    public String getPatronus() {
+        return patronus;
+    }
+
 
     //TODO: Getters y Setters
 
