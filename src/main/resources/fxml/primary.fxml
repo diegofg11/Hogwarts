@@ -83,7 +83,7 @@
                 </HBox>
                 <HBox GridPane.rowIndex="2">
                     <children>
-                        <Pane><Label text="Casa: " /></Pane>
+                        <Pane><Label text="Casa: " fx:id="lblCasa" /></Pane>
                     </children>
                 </HBox>
                 <HBox GridPane.rowIndex="3">

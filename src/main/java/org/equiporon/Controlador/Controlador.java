@@ -1,8 +1,12 @@
 package org.equiporon.Controlador;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.equiporon.DAO.*;
+import org.equiporon.Modelo.Modelo_Estudiante;
 
 public class Controlador {
 
@@ -66,7 +70,8 @@ public class Controlador {
     @FXML
     private TextField txtPatronus;
 
-
+    @FXML
+    private Label lblCasa;
 
     @FXML
     void clickOnAdd(ActionEvent event) {
@@ -133,6 +138,30 @@ public class Controlador {
     }
 
     private void seleccionarCasa(String casa) {
-        //TODO
+        // 1️⃣ Actualizar el Label con la casa seleccionada
+        lblCasaSeleccionada.setText(casa);
+
+        // 2️⃣ Mostrar u ocultar la columna 'Casa' en la tabla
+        if (tableCasa != null) { // asegurarse que la columna existe
+            tableCasa.setVisible(casa.equals("Hogwarts"));
+            lblCasa.setVisible(casa.equals("Hogwarts"));
+            txtCasa.setVisible(casa.equals("Hogwarts"));
+        }
+
+        // 3️⃣ Cargar datos según la casa seleccionada usando tus DAOs
+        //    Suponiendo que tienes un metodo obtenerTodos() en cada DAO:
+        ObservableList<Modelo_Estudiante> lista = FXCollections.observableArrayList();
+
+        switch (casa) {
+            case "Gryffindor" -> lista.addAll(DerbyDAO.obtenerTodos());
+            case "Hufflepuff" -> lista.addAll(H2DAO.obtenerTodos());
+            case "Ravenclaw" -> lista.addAll(OracleDAO.obtenerTodos());
+            case "Slytherin" -> lista.addAll(HSQLDBDAO.obtenerTodos());
+            case "Hogwarts" -> lista.addAll(MariaDBDAO.obtenerTodos());
+        }
+
+        // Suponiendo que tu TableView se llama tablaEstudiantes
+        tablaEstudiantes.setItems(lista);
     }
+
 }
