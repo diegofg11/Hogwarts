@@ -2,12 +2,12 @@ package org.equiporon.Controlador;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Menu;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 public class Controlador {
+
+    @FXML
+    private Label lblCasaSeleccionada;
 
     @FXML
     private Button botAdd;
@@ -103,4 +103,36 @@ public class Controlador {
 
     }
 
+
+    /**
+     * Inicializa el controlador una vez cargado el archivo FXML.
+     * <p>
+     * Este metodo se ejecuta automáticamente al crear la interfaz.
+     * Añade dinámicamente al menú {@code menuCasas} las cinco casas
+     * del universo de Harry Potter: Gryffindor, Hufflepuff, Ravenclaw,
+     * Slytherin y Hogwarts.
+     * </p>
+     * <p>
+     * Cada elemento del menú invoca el metodo {@link #seleccionarCasa(String)}
+     * al ser seleccionado por el usuario.
+     * </p>
+     *
+     * @see #seleccionarCasa(String)
+     */
+    @FXML
+    public void initialize() {
+        // Crear las casas de Harry Potter
+        String[] casas = {"Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin", "Hogwarts"};
+
+        for (String casa : casas) {
+            MenuItem item = new MenuItem(casa);
+            // Asignamos acción a cada item del menú
+            item.setOnAction(event -> seleccionarCasa(casa));
+            menuCasas.getItems().add(item);
+        }
+    }
+
+    private void seleccionarCasa(String casa) {
+        //TODO
+    }
 }
