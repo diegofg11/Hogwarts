@@ -66,6 +66,8 @@ public class Controlador {
     @FXML
     private TextField txtPatronus;
 
+
+
     @FXML
     void clickOnAdd(ActionEvent event) {
 
