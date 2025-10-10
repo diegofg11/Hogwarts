@@ -37,6 +37,8 @@ public class Estudiante {
      * @param casa casa del alumno de Hogwarts.
      * @param curso curso del alumno de Hogwarts.
      * @param patronus (animal espiritual) patronus del alumno de Hogwarts.
+     *
+     * @author Rubén
      */
     public Estudiante(int id, String nombre, String apellidos, String casa, int curso,String patronus) {
         this.id = id;
@@ -48,56 +50,114 @@ public class Estudiante {
     }
 
     //Setters
+
+    /**
+     * Establece o modifica el identificador único del objeto.
+     * @param id El nuevo identificador numérico.
+     */
     public void setId(int id) {
         this.id = id;
     }
+
+    /**
+     * Establece o modifica el nombre.
+     * @param nombre El nuevo nombre.
+     */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    /**
+     * Establece o modifica los apellidos.
+     * @param apellidos Los nuevos apellidos.
+     */
     public void setApellidos(String apellidos) {
         this.apellidos = apellidos;
     }
+
+    /**
+     * Establece o modifica la casa de Hogwarts a la que pertenece.
+     * @param casa La nueva casa (ej. "Gryffindor", "Slytherin").
+     */
     public void setCasa(String casa) {
         this.casa = casa;
     }
+
+    /**
+     * Establece o modifica el curso actual.
+     * @param curso El nuevo número de curso.
+     */
     public void setCurso(int curso) {
         this.curso = curso;
     }
+
+    /**
+     * Establece o modifica el Patronus.
+     * @param patronus El nuevo Patronus.
+     */
     public void setPatronus(String patronus) {
         this.patronus = patronus;
     }
 
-    //Getters
+//Getters
+
+    /**
+     * Obtiene el identificador único.
+     * @return El identificador del objeto.
+     */
     public Integer getId() {
         return id;
     }
+
+    /**
+     * Obtiene el nombre.
+     * @return El nombre actual.
+     */
     public String getNombre() {
         return nombre;
     }
+
+    /**
+     * Obtiene los apellidos.
+     * @return Los apellidos actuales.
+     */
     public String getApellidos() {
         return apellidos;
     }
+
+    /**
+     * Obtiene la casa de Hogwarts.
+     * @return La casa a la que pertenece.
+     */
     public String getCasa() {
         return casa;
     }
+
+    /**
+     * Obtiene el curso actual.
+     * @return El número del curso actual.
+     */
     public Integer getCurso() {
         return curso;
     }
+
+    /**
+     * Obtiene el Patronus.
+     * @return El Patronus actual.
+     */
     public String getPatronus() {
         return patronus;
     }
-
-
-    //TODO: Getters y Setters
 
     /**
      * Devuelve una representación legible del objeto {@code Estudiante}.
      *
      * @return cadena de texto con formato.
+     *
+     * @author Rubén
      */
     @Override
     public String toString() {
-        //TODO: To string de los campos
         return nombre + " " + apellidos + " ( casa: " + casa + " ,curso: " +  curso + " ,patronus: " + patronus + ")";
     }
 }
