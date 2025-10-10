@@ -53,33 +53,7 @@ public class MariaDBDAO {
         return lista;
     }
 
-    // OBTENER POR ID
-    public Modelo_Estudiante obtenerPorId(int id) {
-        Modelo_Estudiante e = null;
-        String sql = "SELECT * FROM estudiantes WHERE id = ?";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                e = new Modelo_Estudiante();
-                e.setId(rs.getInt("id"));
-                e.setNombre(rs.getString("nombre"));
-                e.setApellidos(rs.getString("apellidos"));
-                e.setCasa(rs.getString("casa"));
-                e.setCurso(rs.getInt("curso"));
-                e.setPatronus(rs.getString("patronus"));
-            }
-
-        } catch (SQLException ex) {
-            System.out.println("Error al obtener estudiante: " + ex.getMessage());
-        }
-        return e;
-    }
-
-    // ACTUALIZAR
+    // EDITAR
     public boolean actualizarEstudiante(Modelo_Estudiante estudiante) {
         String sql = "UPDATE estudiantes SET nombre = ?, apellidos = ?, casa = ?, curso = ?, patronus = ? WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
