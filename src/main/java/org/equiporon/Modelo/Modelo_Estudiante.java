@@ -7,7 +7,7 @@ package org.equiporon.Modelo;
  * @author Rubén
  * @version 1.0
  */
-public class Estudiante {
+public class Modelo_Estudiante {
 
     /** Identificador único de la persona (clave primaria en la base de datos). */
     private int id;
@@ -40,7 +40,7 @@ public class Estudiante {
      *
      * @author Rubén
      */
-    public Estudiante(int id, String nombre, String apellidos, String casa, int curso,String patronus) {
+    public Modelo_Estudiante(int id, String nombre, String apellidos, String casa, int curso, String patronus) {
         this.id = id;
         this.nombre = nombre;
         this.apellidos = apellidos;
