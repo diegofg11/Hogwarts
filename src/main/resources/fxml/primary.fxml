@@ -66,7 +66,6 @@
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="80.0" prefWidth="100.0" />
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints minHeight="10.0" percentHeight="16.6" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -74,47 +73,36 @@
                 <RowConstraints minHeight="10.0" percentHeight="16.6" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <!-- Labels -->
                 <HBox>
-                    <children>
-                        <Pane>
-                            <children><Label text="ID: " /></children>
-                        </Pane>
-                    </children>
-                </HBox>
-                <HBox GridPane.rowIndex="1">
                     <children>
                         <Pane><Label text="Nombre: " /></Pane>
                     </children>
                 </HBox>
-                <HBox GridPane.rowIndex="2">
+                <HBox GridPane.rowIndex="1">
                     <children>
                         <Pane><Label text="Apellidos: " /></Pane>
                     </children>
                 </HBox>
-                <HBox GridPane.rowIndex="3">
+                <HBox GridPane.rowIndex="2">
                     <children>
                         <Pane><Label text="Casa: " /></Pane>
                     </children>
                 </HBox>
-                <HBox GridPane.rowIndex="4">
+                <HBox GridPane.rowIndex="3">
                     <children>
                         <Pane><Label text="Curso: " /></Pane>
                     </children>
                 </HBox>
-                <HBox GridPane.rowIndex="5">
+                <HBox GridPane.rowIndex="4">
                     <children>
                         <Pane><Label text="Patronus: " /></Pane>
                     </children>
                 </HBox>
-
-                <!-- TextFields -->
-                <TextField fx:id="txtId" GridPane.columnIndex="1" />
-                <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <TextField fx:id="txtCasa" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <TextField fx:id="txtNombre" GridPane.columnIndex="1" />
+                <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="txtCasa" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </children>
         </GridPane>
 
