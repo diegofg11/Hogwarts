@@ -1,6 +1,8 @@
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
+import org.equiporon.Modelo.Modelo_Estudiante;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
