@@ -7,14 +7,14 @@ import java.sql.SQLException;
 /**
  * Clase DAO para gestionar operaciones CRUD en la base de datos Oracle
  * sobre la tabla ESTUDIANTES.
- * <p>
+ *
  * Métodos implementados:
  * - aniadir: inserta un nuevo estudiante.
- * - editar: actualiza nombre, apellidos y curso (ID y Patronus no se modifican).
+ * - editar: actualiza nombre, apellidos, curso y patronus.
  * - borrar: elimina un estudiante por ID.
  *
- *  @author Xiker
- *
+ * @author Xiker
+ * @version 1.1
  */
 public class OracleDAO {
 
@@ -54,21 +54,21 @@ public class OracleDAO {
 
     /**
      * Edita los datos de un estudiante existente.
-     * <p>
-     * Nota: El ID y el Patronus no pueden modificarse.
      *
      * @param id        Identificador único del estudiante a actualizar.
      * @param nombre    Nuevo nombre.
      * @param apellidos Nuevos apellidos.
      * @param curso     Nuevo curso.
+     * @param patronus  Nuevo patronus.
      */
-    public void editar(String id, String nombre, String apellidos, String curso) {
-        String sql = "UPDATE ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ? WHERE ID = ?";
+    public void editar(String id, String nombre, String apellidos, String curso, String patronus) {
+        String sql = "UPDATE ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ?, PATRONUS = ? WHERE ID = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, nombre);
             ps.setString(2, apellidos);
             ps.setString(3, curso);
-            ps.setString(4, id);
+            ps.setString(4, patronus);
+            ps.setString(5, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error al editar estudiante en Oracle: " + e.getMessage());
