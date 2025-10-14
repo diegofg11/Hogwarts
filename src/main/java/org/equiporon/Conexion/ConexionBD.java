@@ -12,7 +12,12 @@ import java.sql.SQLException;
  */
 public class ConexionBD {
 
-    // Método general para casas
+    /**
+     * Devuelve una conexión JDBC según la casa seleccionada.
+     *
+     * @param casa Nombre de la casa seleccionada.
+     * @return Objeto Connection o null si la conexión falla.
+     */
     public static Connection conectarCasa(String casa) {
         String url = "";
 
@@ -43,7 +48,7 @@ public class ConexionBD {
     }
 
     /**
-     * Devuelve una conexión a la base de datos central Hogwarts (MariaDB/MySQL).
+     * Devuelve una conexión a la base central Hogwarts (MariaDB).
      *
      * @return conexión a MariaDB o null si ocurre un error.
      */
