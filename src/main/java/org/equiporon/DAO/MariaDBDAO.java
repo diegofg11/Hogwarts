@@ -1,6 +1,8 @@
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
+import org.equiporon.Modelo.Modelo_Estudiante;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,15 +56,16 @@ public class MariaDBDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                Modelo_Estudiante e = new Modelo_Estudiante();
-                e.setId(rs.getInt("id"));
-                e.setNombre(rs.getString("nombre"));
-                e.setApellidos(rs.getString("apellidos"));
-                e.setCasa(rs.getString("casa"));
-                e.setCurso(rs.getInt("curso"));
-                e.setPatronus(rs.getString("patronus"));
-                lista.add(e);
+                lista.add(new Modelo_Estudiante(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("apellidos"),
+                        rs.getString("casa"),
+                        rs.getInt("curso"),
+                        rs.getString("patronus")
+                ));
             }
+
 
         } catch (SQLException e) {
             System.out.println("Error al obtener estudiantes: " + e.getMessage());
