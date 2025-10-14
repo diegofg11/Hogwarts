@@ -123,7 +123,7 @@ public class Controlador {
      * </p>
      *
      * @see #seleccionarCasa(String)
-     */
+     *//*
     @FXML
     public void initialize() {
         // Crear las casas de Harry Potter
@@ -150,6 +150,7 @@ public class Controlador {
 
         // 3️⃣ Cargar datos según la casa seleccionada usando tus DAOs
         //    Suponiendo que tienes un metodo obtenerTodos() en cada DAO:
+
         ObservableList<Modelo_Estudiante> lista = FXCollections.observableArrayList();
 
         switch (casa) {
@@ -163,4 +164,5 @@ public class Controlador {
         // Suponiendo que tu TableView se llama tablaEstudiantes
         tablaEstudiantes.setItems(lista);
     }
+    */
 }
