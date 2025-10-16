@@ -40,7 +40,9 @@ public class ConexionBD {
         }
 
         try {
-            return DriverManager.getConnection(url, Config.USER, Config.PASSWORD);
+            Connection conn = DriverManager.getConnection(url, Config.USER, Config.PASSWORD);
+            System.out.println("Conectado correctamente a " + casa);
+            return conn;
         } catch (SQLException e) {
             System.out.println("Error al conectar con la base de datos de " + casa + ": " + e.getMessage());
             return null;
