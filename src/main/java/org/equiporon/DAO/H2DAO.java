@@ -1,6 +1,5 @@
 package org.equiporon.DAO;
 
-import org.equiporon.Conexion.ConexionH2; // 👈 Conexión a H2
 import org.equiporon.Modelo.Modelo_Estudiante;
 import java.sql.*;
 import java.util.ArrayList;
