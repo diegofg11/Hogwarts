@@ -1,92 +1,98 @@
 package org.equiporon.DAO;
 
+import org.equiporon.Conexion.ConexionBD;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Clase DAO para gestionar operaciones CRUD en la base de datos Oracle
+ * DAO para gestionar operaciones CRUD en Oracle (Ravenclaw)
  * sobre la tabla ESTUDIANTES.
  *
- * Métodos implementados:
- * - aniadir: inserta un nuevo estudiante.
- * - editar: actualiza nombre, apellidos, curso y patronus.
- * - borrar: elimina un estudiante por ID.
- *
  * @author Xiker
- * @version 1.1
+ * @version 1.2
  */
 public class OracleDAO {
 
-    private final Connection connection;
+    private final String casa = "Ravenclaw";
 
     /**
-     * Constructor que recibe la conexión a la base de datos Oracle.
-     *
-     * @param connection Objeto Connection ya inicializado.
-     */
-    public OracleDAO(Connection connection) {
-        this.connection = connection;
-    }
-
-    /**
-     * Inserta un nuevo registro en la tabla ESTUDIANTES.
+     * Inserta un nuevo estudiante.
      *
      * @param id        Identificador único (DNI u otro).
      * @param nombre    Nombre del estudiante.
      * @param apellidos Apellidos del estudiante.
      * @param curso     Curso actual.
      * @param patronus  Patronus del estudiante.
+     * @return true si se inserta correctamente, false en caso de error.
      */
-    public void aniadir(String id, String nombre, String apellidos, String curso, String patronus) {
+    public boolean aniadir(String id, String nombre, String apellidos, int curso, String patronus) {
         String sql = "INSERT INTO ESTUDIANTES (ID, NOMBRE, APELLIDOS, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = ConexionBD.conectarCasa(casa);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, id);
             ps.setString(2, nombre);
             ps.setString(3, apellidos);
-            ps.setString(4, curso);
+            ps.setInt(4, curso);
             ps.setString(5, patronus);
             ps.executeUpdate();
+            return true;
+
         } catch (SQLException e) {
-            System.err.println("Error al añadir estudiante en Oracle: " + e.getMessage());
+            System.out.println("Error al añadir estudiante en Oracle: " + e.getMessage());
+            return false;
         }
     }
 
     /**
-     * Edita los datos de un estudiante existente.
+     * Edita un estudiante existente.
      *
-     * @param id        Identificador único del estudiante a actualizar.
+     * @param id        Identificador del estudiante.
      * @param nombre    Nuevo nombre.
      * @param apellidos Nuevos apellidos.
      * @param curso     Nuevo curso.
      * @param patronus  Nuevo patronus.
+     * @return true si se actualiza correctamente, false en caso de error.
      */
-    public void editar(String id, String nombre, String apellidos, String curso, String patronus) {
+    public boolean editar(String id, String nombre, String apellidos, int curso, String patronus) {
         String sql = "UPDATE ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ?, PATRONUS = ? WHERE ID = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = ConexionBD.conectarCasa(casa);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, nombre);
             ps.setString(2, apellidos);
-            ps.setString(3, curso);
+            ps.setInt(3, curso);
             ps.setString(4, patronus);
             ps.setString(5, id);
             ps.executeUpdate();
+            return true;
+
         } catch (SQLException e) {
-            System.err.println("Error al editar estudiante en Oracle: " + e.getMessage());
+            System.out.println("Error al editar estudiante en Oracle: " + e.getMessage());
+            return false;
         }
     }
 
     /**
      * Borra un estudiante por su ID.
      *
-     * @param id Identificador único del estudiante a eliminar.
+     * @param id Identificador del estudiante.
+     * @return true si se borra correctamente, false en caso de error.
      */
-    public void borrar(String id) {
+    public boolean borrar(String id) {
         String sql = "DELETE FROM ESTUDIANTES WHERE ID = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = ConexionBD.conectarCasa(casa);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, id);
             ps.executeUpdate();
+            return true;
+
         } catch (SQLException e) {
-            System.err.println("Error al borrar estudiante en Oracle: " + e.getMessage());
+            System.out.println("Error al borrar estudiante en Oracle: " + e.getMessage());
+            return false;
         }
     }
 }
