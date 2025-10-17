@@ -21,6 +21,16 @@ public class Controlador {
 
     private String casaActual = null;
 
+    /**
+     * Este metodo se llama automáticamente después de que el archivo fxml ha sido cargado.
+     * Lo usamos para establecer un estado inicial, conectando a Hogwarts por defecto.
+     */
+    @FXML
+    private void initialize() {
+        // Llama al metodo para seleccionar Hogwarts al iniciar la aplicación
+        seleccionarCasa("Hogwarts");
+    }
+
     @FXML
     void clickGryffindor(ActionEvent event) {
         seleccionarCasa("Gryffindor");
