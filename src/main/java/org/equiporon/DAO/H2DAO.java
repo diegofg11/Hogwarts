@@ -1,6 +1,6 @@
 package org.equiporon.DAO;
 
-import org.equiporon.Conexion.ConexionH2; // 👈 Conexión a H2
+import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.Modelo.Modelo_Estudiante;
 import java.sql.*;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class H2DAO {
         final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiante ORDER BY id";
         logger.debug("Ejecutando consulta SÍNCRONA Hufflepuff: {}", SQL);
 
-        try (Connection conn = ConexionH2.getConnection(); // 👈 USA CONEXIÓN H2
+        try (Connection conn = ConexionBD.getConnection(); // 👈 USA CONEXIÓN H2
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SQL)) {
 
@@ -62,7 +62,7 @@ public class H2DAO {
     private Modelo_Estudiante insertEstudianteSync(Modelo_Estudiante e) throws SQLException {
         final String SQL = "INSERT INTO estudiante (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConexionH2.getConnection(); // 👈 USA CONEXIÓN H2
+        try (Connection conn = ConexionBD.getConnection(); // 👈 USA CONEXIÓN H2
              PreparedStatement pstmt = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, e.getNombre());

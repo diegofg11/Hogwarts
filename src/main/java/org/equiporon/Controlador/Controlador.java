@@ -2,105 +2,82 @@ package org.equiporon.Controlador;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Menu;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import org.equiporon.Conexion.ConexionBD;
 
+import java.sql.Connection;
+
+/**
+ * Controlador principal del proyecto Hogwarts.
+ * Permite seleccionar una casa desde el menú y conectarse
+ * a la base de datos correspondiente.
+ *
+ * @author Diego,Ruben,Unai
+ */
 public class Controlador {
 
-    @FXML
-    private Button botAdd;
+    @FXML private Label lblCasaSeleccionada;
+
+    private String casaActual = null;
 
     @FXML
-    private Button botBorrar;
-
-    @FXML
-    private Button botEditar;
-
-    @FXML
-    private Menu menuCasas;
-
-    @FXML
-    private Menu menuEdit;
-
-    @FXML
-    private Menu menuFile;
-
-    @FXML
-    private Menu menuHelp;
-
-    @FXML
-    private TableColumn<?, ?> tableApellidos;
-
-    @FXML
-    private TableColumn<?, ?> tableCasa;
-
-    @FXML
-    private TableColumn<?, ?> tableCurso;
-
-    @FXML
-    private TableColumn<?, ?> tableId;
-
-    @FXML
-    private TableColumn<?, ?> tableNombre;
-
-    @FXML
-    private TableColumn<?, ?> tablePatronus;
-
-    @FXML
-    private TextField txtApellidos;
-
-    @FXML
-    private TextField txtCasa;
-
-    @FXML
-    private TextField txtCurso;
-
-    @FXML
-    private TextField txtId;
-
-    @FXML
-    private TextField txtNombre;
-
-    @FXML
-    private TextField txtPatronus;
-
-
-
-    @FXML
-    void clickOnAdd(ActionEvent event) {
-
+    void clickGryffindor(ActionEvent event) {
+        seleccionarCasa("Gryffindor");
     }
 
     @FXML
-    void clickOnBorrar(ActionEvent event) {
-
+    void clickHufflepuff(ActionEvent event) {
+        seleccionarCasa("Hufflepuff");
     }
 
     @FXML
-    void clickOnCasas(ActionEvent event) {
-
+    void clickRavenclaw(ActionEvent event) {
+        seleccionarCasa("Ravenclaw");
     }
 
     @FXML
-    void clickOnEdit(ActionEvent event) {
-
+    void clickSlytherin(ActionEvent event) {
+        seleccionarCasa("Slytherin");
     }
 
     @FXML
-    void clickOnEditar(ActionEvent event) {
-
+    void clickHogwarts(ActionEvent event) {
+        seleccionarCasa("Hogwarts");
     }
 
-    @FXML
-    void clickOnFile(ActionEvent event) {
+    /**
+     * Lógica común para conectarse a la base de datos según la casa seleccionada.
+     */
+    private void seleccionarCasa(String casa) {
+        casaActual = casa;
+        lblCasaSeleccionada.setText("Casa seleccionada: " + casa);
 
+        try (Connection conn = ConexionBD.conectarCasa(casa)) {
+            if (conn != null) {
+                mostrarInfo("Conectado correctamente a " + casa + " 🧙‍♂️");
+                System.out.println("Conectado a " + casa);
+            } else {
+                mostrarError("Error al conectar con " + casa);
+            }
+        } catch (Exception e) {
+            mostrarError("Error al conectar con " + casa + ": " + e.getMessage());
+        }
     }
 
-    @FXML
-    void clickOnHelp(ActionEvent event) {
-
+    private void mostrarInfo(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Conexión exitosa");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
+    private void mostrarError(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error de conexión");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
 }
