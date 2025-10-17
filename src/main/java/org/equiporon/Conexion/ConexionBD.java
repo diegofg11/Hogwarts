@@ -4,24 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Clase encargada de gestionar las conexiones JDBC
- * tanto a las casas como a la base central Hogwarts.
- *
- * @author Diego
- */
 public class ConexionBD {
 
-    /**
-     * Devuelve una conexión JDBC según la casa seleccionada.
-     *
-     * @param casa Nombre de la casa seleccionada.
-     * @return Objeto Connection o null si la conexión falla.
-     */
     public static Connection conectarCasa(String casa) {
-        String url = null;
-        String user = null;
-        String password = null;
+        String url, user, password;
 
         switch (casa) {
             case "Gryffindor" -> {
@@ -59,11 +45,6 @@ public class ConexionBD {
         }
     }
 
-    /**
-     * Devuelve una conexión a la base central Hogwarts (MariaDB).
-     *
-     * @return conexión a MariaDB o null si ocurre un error.
-     */
     public static Connection getConnection() {
         try {
             Connection conn = DriverManager.getConnection(
@@ -78,4 +59,5 @@ public class ConexionBD {
         }
     }
 }
+
 
