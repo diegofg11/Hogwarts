@@ -41,7 +41,7 @@
         </MenuBar>
 
         <!-- Selector de casa -->
-        <HBox layoutX="198.0" layoutY="40.0" spacing="10" AnchorPane.leftAnchor="198.0" AnchorPane.topAnchor="40.0" />
+        <HBox spacing="10" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="40.0" />
 
         <!-- Formulario -->
         <GridPane hgap="5.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="90.0">
@@ -49,13 +49,6 @@
                 <ColumnConstraints percentWidth="30.0" />
                 <ColumnConstraints percentWidth="70.0" />
             </columnConstraints>
-            <rowConstraints>
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-            </rowConstraints>
 
             <children>
                 <Label text="Nombre:" GridPane.rowIndex="0" />
@@ -71,11 +64,18 @@
                 <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                 <Label fx:id="lblCasa" text="Casa:" GridPane.rowIndex="4" />
-                <TextField fx:id="txtCasa" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <TextField fx:id="txtCasa" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </children>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
         </GridPane>
 
-        <!-- Botones grandes -->
+        <!-- Botones grandes (como la versión original) -->
         <GridPane layoutX="389.0" layoutY="95.0" prefHeight="180.0" prefWidth="161.0" vgap="10.0" AnchorPane.rightAnchor="50.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -106,7 +106,6 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
-          <ChoiceBox fx:id="choiceCasas" layoutX="218.0" layoutY="40.0" prefHeight="36.0" prefWidth="163.0" />
-
+          <ChoiceBox fx:id="choiceCasas" layoutX="228.0" layoutY="39.0" prefHeight="36.0" prefWidth="163.0" />
     </children>
 </AnchorPane>
