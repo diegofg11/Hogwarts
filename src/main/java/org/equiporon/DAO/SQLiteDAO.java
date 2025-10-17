@@ -2,10 +2,15 @@ package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.Modelo.Modelo_Estudiante;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Clase SQLiteDAO encargada de manejar la conexión y operaciones
@@ -17,6 +22,42 @@ import java.util.List;
  * @author Diego
  */
 public class SQLiteDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(DerbyDAO.class);
+    private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1); // Pool dedicado
+
+
+    // --- MÉTODOS ASÍNCRONOS (Public) ---
+
+    /**
+     * Inserta un nuevo estudiante de forma asíncrona.
+     * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
+     * @return Future<Boolean> que indica si la inserción fue exitosa.
+     */
+    public Future<Boolean> aniadirAsync(Modelo_Estudiante estudiante) {
+        return dbExecutor.submit(() -> aniadirSync(estudiante));
+    }
+
+    /**
+     * Edita un estudiante existente de forma asíncrona.
+     * @param estudiante Objeto Modelo_Estudiante con los nuevos datos (incluyendo ID).
+     * @return Future<Boolean> que indica si la edición fue exitosa.
+     */
+    public Future<Boolean> editarAsync(Modelo_Estudiante estudiante) {
+        return dbExecutor.submit(() -> editarSync(estudiante));
+    }
+
+    /**
+     * Borra un estudiante por su ID de forma asíncrona.
+     * @param id Identificador del estudiante a borrar.
+     * @return Future<Boolean> que indica si el borrado fue exitoso.
+     */
+    public Future<Boolean> borrarAsync(String id) {
+        return dbExecutor.submit(() -> borrarSync(id));
+    }
+
+    // --- MÉTODOS SÍNCRONOS (Internal) ---
+
 
     /**
      * Crea la tabla de estudiantes si no existe.
@@ -37,13 +78,13 @@ public class SQLiteDAO {
         }
     }
 
-    /**
-     * Inserta un nuevo estudiante en la base de datos.
+    /** [SÍNCRONO] Inserta un nuevo estudiante en la base de datos.
      *
      * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
      * @return true si la inserción fue exitosa, false en caso contrario.
+     * @author Diego,Unai
      */
-    public boolean insertarEstudiante(Modelo_Estudiante estudiante) {
+    public boolean aniadirSync(Modelo_Estudiante estudiante) {
         String sql = "INSERT INTO estudiantes (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -67,7 +108,7 @@ public class SQLiteDAO {
      *
      * @return Lista con todos los estudiantes encontrados.
      */
-    public List<Modelo_Estudiante> obtenerTodos() {
+    public List<Modelo_Estudiante> GetAll() {
         List<Modelo_Estudiante> lista = new ArrayList<>();
         String sql = "SELECT * FROM estudiantes";
         try (Connection conn = ConexionBD.getConnection();
@@ -98,7 +139,7 @@ public class SQLiteDAO {
      * @param estudiante Objeto con los nuevos datos del estudiante.
      * @return true si la actualización fue exitosa, false si ocurrió un error.
      */
-    public boolean actualizarEstudiante(Modelo_Estudiante estudiante) {
+    public boolean editarSync(Modelo_Estudiante estudiante) {
         String sql = "UPDATE estudiantes SET nombre = ?, apellidos = ?, casa = ?, curso = ?, patronus = ? WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -124,12 +165,12 @@ public class SQLiteDAO {
      * @param id Identificador del estudiante a eliminar.
      * @return true si el estudiante fue eliminado correctamente, false en caso contrario.
      */
-    public boolean eliminarEstudiante(int id) {
+    public boolean borrarSync(String id) {
         String sql = "DELETE FROM estudiantes WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, id);
+            stmt.setString(1, id);
             stmt.executeUpdate();
             return true;
 
