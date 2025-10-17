@@ -16,161 +16,110 @@ import java.sql.Connection;
  */
 public class Controlador {
 
+    // --- Elementos FXML Conectados ---
     @FXML private Label lblCasaSeleccionada;
+    @FXML private ChoiceBox<String> choiceCasas;
+    @FXML private Button botAdd;
+    @FXML private Button botBorrar;
+    @FXML private Button botEditar;
+    @FXML private Label lblCasa;
+    @FXML private TableView<?> tablaEstudiantes;
+    @FXML private TableColumn<?, ?> tableApellidos;
+    @FXML private TableColumn<?, ?> tableCasa;
+    @FXML private TableColumn<?, ?> tableCurso;
+    @FXML private TableColumn<?, ?> tableId;
+    @FXML private TableColumn<?, ?> tableNombre;
+    @FXML private TableColumn<?, ?> tablePatronus;
+    @FXML private TextField txtApellidos;
+    @FXML private TextField txtCasa;
+    @FXML private TextField txtCurso;
+    @FXML private TextField txtNombre;
+    @FXML private TextField txtPatronus;
 
-    @FXML
-    private Button botAdd;
-
-    @FXML
-    private Button botBorrar;
-
-    @FXML
-    private Button botEditar;
-
-    @FXML
-    private Label lblCasa;
-
-    @FXML
-    private Menu menuCasas;
-
-    @FXML
-    private Menu menuEdit;
-
-    @FXML
-    private Menu menuFile;
-
-    @FXML
-    private Menu menuHelp;
-
-    @FXML
-    private TableColumn<?, ?> tableApellidos;
-
-    @FXML
-    private TableColumn<?, ?> tableCasa;
-
-    @FXML
-    private TableColumn<?, ?> tableCurso;
-
-    @FXML
-    private TableColumn<?, ?> tableId;
-
-    @FXML
-    private TableColumn<?, ?> tableNombre;
-
-    @FXML
-    private TableColumn<?, ?> tablePatronus;
-
-    @FXML
-    private TextField txtApellidos;
-
-    @FXML
-    private TextField txtCasa;
-
-    @FXML
-    private TextField txtCurso;
-
-    @FXML
-    private TextField txtNombre;
-
-    @FXML
-    private TextField txtPatronus;
-
-    @FXML
-    void clickOnAdd(ActionEvent event) {
-
-    }
-
-    @FXML
-    void clickOnBorrar(ActionEvent event) {
-
-    }
-
-    @FXML
-    void clickOnEdit(ActionEvent event) {
-
-    }
-
-    @FXML
-    void clickOnEditar(ActionEvent event) {
-
-    }
-
-    @FXML
-    void clickOnFile(ActionEvent event) {
-
-    }
-
-    @FXML
-    void clickOnHelp(ActionEvent event) {
-
-    }
     private String casaActual = null;
 
     /**
-     * Este metodo se llama automáticamente después de que el archivo fxml ha sido cargado.
-     * Lo usamos para establecer un estado inicial, conectando a Hogwarts por defecto.
+     * Este método se llama automáticamente después de que el archivo fxml ha sido cargado.
+     * Lo usamos para configurar el estado inicial de la interfaz.
      */
     @FXML
     private void initialize() {
-        // Llama al metodo para seleccionar Hogwarts al iniciar la aplicación
-        seleccionarCasa("Hogwarts");
-    }
+        // 1. Rellena el ChoiceBox con las opciones de casas
+        choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
 
-    @FXML
-    void clickGryffindor(ActionEvent event) {
-        seleccionarCasa("Gryffindor");
-    }
+        // 2. Añade un "listener" que se activa cuando el usuario elige una casa
+        choiceCasas.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        seleccionarCasa(newValue);
+                    }
+                }
+        );
 
-    @FXML
-    void clickHufflepuff(ActionEvent event) {
-        seleccionarCasa("Hufflepuff");
-    }
-
-    @FXML
-    void clickRavenclaw(ActionEvent event) {
-        seleccionarCasa("Ravenclaw");
-    }
-
-    @FXML
-    void clickSlytherin(ActionEvent event) {
-        seleccionarCasa("Slytherin");
-    }
-
-    @FXML
-    void clickHogwarts(ActionEvent event) {
-        seleccionarCasa("Hogwarts");
+        // 3. Establece "Hogwarts" como la selección por defecto al iniciar
+        choiceCasas.setValue("Hogwarts");
     }
 
     /**
-     * Lógica común para conectarse a la base de datos según la casa seleccionada.
+     * Lógica central para conectarse a la base de datos de la casa seleccionada.
+     * Este método es llamado por el listener del ChoiceBox.
+     * @param casa El nombre de la casa a la que conectar.
      */
     private void seleccionarCasa(String casa) {
         casaActual = casa;
         lblCasaSeleccionada.setText("Casa seleccionada: " + casa);
+        txtCasa.setText(casa); // Actualiza también el campo de texto del formulario
 
         try (Connection conn = ConexionBD.conectarCasa(casa)) {
             if (conn != null) {
-                mostrarInfo("Conectado correctamente a " + casa + " 🧙‍♂️");
                 System.out.println("Conectado a " + casa);
+                // Aquí iría la lógica para cargar los datos en la tabla, por ejemplo.
             } else {
                 mostrarError("Error al conectar con " + casa);
             }
         } catch (Exception e) {
-            mostrarError("Error al conectar con " + casa + ": " + e.getMessage());
+            mostrarError("Error crítico al conectar con " + casa + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void mostrarInfo(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Conexión exitosa");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+    // --- Métodos para los botones del formulario ---
+    @FXML
+    void clickOnAdd(ActionEvent event) {
+        // Lógica para añadir un nuevo estudiante
     }
 
+    @FXML
+    void clickOnBorrar(ActionEvent event) {
+        // Lógica para borrar un estudiante seleccionado
+    }
+
+    @FXML
+    void clickOnEditar(ActionEvent event) {
+        // Lógica para editar un estudiante
+    }
+
+    // --- Métodos de la barra de menú ---
+    @FXML
+    void clickOnFile(ActionEvent event) {
+        // Lógica para el menú File -> Close
+    }
+
+    @FXML
+    void clickOnEdit(ActionEvent event) {
+        // Lógica para el menú Edit -> Delete
+    }
+
+    @FXML
+    void clickOnHelp(ActionEvent event) {
+        // Lógica para el menú Help -> About
+    }
+
+
+    // --- Métodos de utilidad para mostrar alertas ---
     private void mostrarError(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error de conexión");
+        alert.setTitle("Error de Conexión");
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
