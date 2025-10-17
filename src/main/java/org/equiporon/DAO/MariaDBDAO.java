@@ -8,34 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clase SQLiteDAO encargada de manejar la conexión y operaciones
- * con la base de datos SQLite.
+ * Clase MariaDBDAO encargada de manejar la conexión y operaciones
+ * con la base de datos MariaDB.
  *
- * Incluye métodos para crear la tabla, insertar, obtener,
- * actualizar y eliminar registros de estudiantes.
+ * Contiene métodos para insertar, obtener, actualizar y eliminar registros
+ * de estudiantes.
  *
  * @author Diego
  */
-public class SQLiteDAO {
-
-    /**
-     * Crea la tabla de estudiantes si no existe.
-     */
-    public void crearTabla() {
-        String sql = "CREATE TABLE IF NOT EXISTS estudiantes (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "nombre TEXT," +
-                "apellidos TEXT," +
-                "casa TEXT," +
-                "curso INTEGER," +
-                "patronus TEXT)";
-        try (Connection conn = ConexionBD.getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            System.out.println("Error al crear tabla: " + e.getMessage());
-        }
-    }
+public class MariaDBDAO {
 
     /**
      * Inserta un nuevo estudiante en la base de datos.
@@ -139,5 +120,6 @@ public class SQLiteDAO {
         }
     }
 }
+
 
 
