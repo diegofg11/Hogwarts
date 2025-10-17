@@ -4,6 +4,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.equiporon.Conexion.ConexionBD;
+import org.equiporon.DAO.*;
+import org.equiporon.Modelo.Modelo_Estudiante;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.sql.Connection;
 
@@ -35,11 +38,17 @@ public class Controlador {
     @FXML private TextField txtCurso;
     @FXML private TextField txtNombre;
     @FXML private TextField txtPatronus;
+    private DerbyDAO derbydao = new DerbyDAO();
+    private H2DAO h2dao  = new H2DAO();
+    private HSQLDBDAO hsqldao  = new HSQLDBDAO();
+    private MariaDBDAO mariadao  = new MariaDBDAO();
+    private OracleDAO oracledao  = new OracleDAO();
+    private SQLiteDAO sqldao  = new SQLiteDAO();
 
     private String casaActual = null;
 
     /**
-     * Este método se llama automáticamente después de que el archivo fxml ha sido cargado.
+     * Este metodo se llama automáticamente después de que el archivo fxml ha sido cargado.
      * Lo usamos para configurar el estado inicial de la interfaz.
      */
     @FXML
@@ -62,7 +71,7 @@ public class Controlador {
 
     /**
      * Lógica central para conectarse a la base de datos de la casa seleccionada.
-     * Este método es llamado por el listener del ChoiceBox.
+     * Este metodo es llamado por el listener del ChoiceBox.
      * @param casa El nombre de la casa a la que conectar.
      */
     private void seleccionarCasa(String casa) {
@@ -87,6 +96,61 @@ public class Controlador {
     @FXML
     void clickOnAdd(ActionEvent event) {
         // Lógica para añadir un nuevo estudiante
+        String nombre = txtNombre.getText();
+        String apellido = txtApellidos.getText();
+        String curso = txtCurso.getText();
+        String casa = txtCasa.getText();
+        String patronus = txtPatronus.getText();
+
+
+        if (nombre.isEmpty() || apellido.isEmpty() || curso.isEmpty()  || patronus.isEmpty() ) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Rellena todos los campos");
+            alert.showAndWait();
+            return;
+        }
+        Modelo_Estudiante est = new Modelo_Estudiante(0, nombre, apellido, casa, curso, patronus);
+
+        switch (casaActual) {
+            case "Hogwarts":
+
+                break;
+
+            case "Gryffindor":
+
+
+                if(derbydao.aniadir(est)){
+
+                }
+                break;
+
+            case "Ravenclaw":
+
+
+                if(oracledao.aniadir(est)){
+
+                }
+                break;
+
+            case "Slytherin":
+                if(hsqldao.insertEstudianteAsync(est)){
+
+                }
+                break;
+            case "Hufflepuff":
+                if(h2dao.insertEstudianteAsync(est)){
+
+                }
+                break;
+
+            default:
+                Alert alert = new Alert(Alert.AlertType.ERROR, "No se pudo añadir la persona");
+                alert.showAndWait();
+        }
+        if (dao.insertarPersona(p)) {
+            tablaPersonas.getItems().add(p);
+            TextoFirstName.clear();
+            TextoLastName.clear();
+            Dates.setValue(null);
     }
 
     @FXML

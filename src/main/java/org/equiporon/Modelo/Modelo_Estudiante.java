@@ -22,7 +22,7 @@ public class Modelo_Estudiante {
     private String casa;
 
     /** Curso del alumno. */
-    private int curso;
+    private String curso;
 
     /** Patronus del alumno. */
     private String patronus;
@@ -40,7 +40,7 @@ public class Modelo_Estudiante {
      *
      * @author Rubén
      */
-    public Modelo_Estudiante(int id, String nombre, String apellidos, String casa, int curso, String patronus) {
+    public Modelo_Estudiante(int id, String nombre, String apellidos, String casa, String curso, String patronus) {
         this.id = id;
         this.nombre = nombre;
         this.apellidos = apellidos;
@@ -87,7 +87,7 @@ public class Modelo_Estudiante {
      * Establece o modifica el curso actual.
      * @param curso El nuevo número de curso.
      */
-    public void setCurso(int curso) {
+    public void setCurso(String curso) {
         this.curso = curso;
     }
 
@@ -137,7 +137,7 @@ public class Modelo_Estudiante {
      * Obtiene el curso actual.
      * @return El número del curso actual.
      */
-    public Integer getCurso() {
+    public String getCurso() {
         return curso;
     }
 
