@@ -1,0 +1,9 @@
+CREATE TABLE Estudiantes (
+    ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    Nombre VARCHAR(50),
+    Apellidos VARCHAR(50),
+    Curso VARCHAR(20),
+    Patronus VARCHAR(50)
+);
+
+
