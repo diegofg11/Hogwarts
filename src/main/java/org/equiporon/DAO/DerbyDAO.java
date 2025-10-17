@@ -2,9 +2,10 @@ package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.Modelo.Modelo_Estudiante;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +114,33 @@ public class DerbyDAO { // Nombre de clase conservado
         }
     }
 
+    private List<Modelo_Estudiante> getAllSync() throws SQLException {
+        List<Modelo_Estudiante> estudiantes = new ArrayList<>();
+        // Nota: Asumimos que la tabla se llama 'estudiante'
+        final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiante ORDER BY id";
+        logger.debug("Ejecutando consulta SÍNCRONA Gryffindor: {}", SQL);
+
+        try (Connection conn = ConexionBD.conectarCasa("Gryffindor"); //  CONEXIÓN CORREGIDA
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(SQL)) {
+
+            while (rs.next()) {
+                Modelo_Estudiante e = new Modelo_Estudiante(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("apellidos"),
+                        rs.getString("casa"),
+                        rs.getInt("curso"),
+                        rs.getString("patronus")
+                );
+                estudiantes.add(e);
+            }
+        } catch (SQLException e) {
+            logger.error("ERROR SÍNCRONO al obtener estudiantes de Hufflepuff (Derby).", e);
+            throw e;
+        }
+        return estudiantes;
+    }
     /** Cierra el pool de hilos. */
     public static void shutdown() {
         if (!dbExecutor.isShutdown()) {

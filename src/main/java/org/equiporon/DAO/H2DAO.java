@@ -21,17 +21,17 @@ public class H2DAO {
     // --- MÉTODOS ASÍNCRONOS (Public) ---
 
     public Future<List<Modelo_Estudiante>> getAllEstudiantesAsync() {
-        return dbExecutor.submit(this::getAllEstudiantesSync);
+        return dbExecutor.submit(this::getAllSync);
     }
 
     public Future<Modelo_Estudiante> insertEstudianteAsync(Modelo_Estudiante e) {
-        return dbExecutor.submit(() -> insertEstudianteSync(e));
+        return dbExecutor.submit(() -> aniadirSync(e));
     }
 
     // --- MÉTODOS SÍNCRONOS (Internal) ---
 
     /** [SÍNCRONO] Implementación interna para leer todos los estudiantes de Hufflepuff. */
-    private List<Modelo_Estudiante> getAllEstudiantesSync() throws SQLException {
+    private List<Modelo_Estudiante> getAllSync() throws SQLException {
         List<Modelo_Estudiante> estudiantes = new ArrayList<>();
         // Nota: Asumimos que la tabla se llama 'estudiante'
         final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiante ORDER BY id";
@@ -60,7 +60,7 @@ public class H2DAO {
     }
 
     /** [SÍNCRONO] Implementación interna para insertar un nuevo estudiante en Hufflepuff. */
-    private Modelo_Estudiante insertEstudianteSync(Modelo_Estudiante e) throws SQLException {
+    private Modelo_Estudiante aniadirSync(Modelo_Estudiante e) throws SQLException {
         final String SQL = "INSERT INTO estudiante (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.conectarCasa("Hufflepuff"); //  CONEXIÓN CORREGIDA
