@@ -2,9 +2,10 @@ package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.Modelo.Modelo_Estudiante;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,12 @@ public class OracleDAO {
 
     // --- MÉTODOS SÍNCRONOS (Internal) ---
 
-    /** [SÍNCRONO] Implementación interna para añadir. */
+    /** [SÍNCRONO] Inserta un nuevo estudiante en la base de datos.
+     *
+     * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
+     * @return true si la inserción fue exitosa, false en caso contrario.
+     * @author Xiker,Unai
+     */
     private boolean aniadirSync(Modelo_Estudiante estudiante) throws SQLException {
         // Nota: Asumimos que ID en Oracle es un String/VARCHAR
         String sql = "INSERT INTO ESTUDIANTES (ID, NOMBRE, APELLIDOS, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
@@ -71,6 +77,39 @@ public class OracleDAO {
 
         } catch (SQLException e) {
             logger.error("Error SÍNCRONO al añadir estudiante en Oracle.", e);
+            throw e;
+        }
+    }
+
+    /** [SÍNCRONO] Obtiene todos los estudiantes de la base de datos.
+     *
+     * @return Lista con todos los estudiantes encontrados.
+     * @author Unai
+     */
+    private List<Modelo_Estudiante> getAllSync() throws SQLException {
+        List<Modelo_Estudiante> estudiantes = new ArrayList<>();
+        String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiantes";
+
+        try (Connection conn = ConexionBD.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                // ... (código para construir Modelo_Estudiante)
+                Modelo_Estudiante estudiante = new Modelo_Estudiante(
+                        rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("apellidos"),
+                        rs.getString("casa"),
+                        rs.getInt("curso"),
+                        rs.getString("patronus")
+                );
+                estudiantes.add(estudiante);
+            }
+            return estudiantes;
+
+        } catch (SQLException e) {
+            logger.error("Error SÍNCRONO al obtener estudiantes de MariaDB.", e);
             throw e;
         }
     }
