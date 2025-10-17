@@ -32,7 +32,7 @@ public class HSQLDBDAO {
         List<Modelo_Estudiante> estudiantes = new ArrayList<>();
         final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiante ORDER BY id";
 
-        try (Connection conn = ConexionBD.getConnection(); // 👈 USA CONEXIÓN HSQLDB
+        try (Connection conn = ConexionBD.conectarCasa("Slytherin"); //  CONEXIÓN CORREGIDA
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SQL)) {
 
@@ -58,7 +58,7 @@ public class HSQLDBDAO {
     private Modelo_Estudiante insertEstudianteSync(Modelo_Estudiante e) throws SQLException {
         final String SQL = "INSERT INTO estudiante (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConexionBD.getConnection(); // 👈 USA CONEXIÓN HSQLDB
+        try (Connection conn = ConexionBD.conectarCasa("Slytherin"); //  CONEXIÓN CORREGIDA
              PreparedStatement pstmt = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, e.getNombre());

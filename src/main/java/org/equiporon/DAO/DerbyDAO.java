@@ -1,88 +1,123 @@
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
-
+import org.equiporon.Modelo.Modelo_Estudiante;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.function.Consumer;
+import java.util.concurrent.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * DAO para gestionar operaciones CRUD en Apache Derby (Gryffindor)
- * sobre la tabla ESTUDIANTES.
+ * DAO Asíncrono para gestionar operaciones CRUD en H2 (Gryffindor)
+ * sobre la tabla ESTUDIANTES, utilizando Modelo_Estudiante.
  *
- * @author Xiker
- * @version 1.4
+ * @author Xiker (Modificado)
+ * @version 2.0
  */
-public class DerbyDAO {
+public class DerbyDAO { // Nombre de clase conservado
 
-    private final String casa = "Gryffindor";
+    private static final Logger logger = LoggerFactory.getLogger(DerbyDAO.class);
+    private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1); // Pool dedicado
+    private final String casa = "Gryffindor"; //  CASA CAMBIADA A GRYFFINDOR (H2)
+
+    // --- MÉTODOS ASÍNCRONOS (Public) ---
 
     /**
-     * Ejecuta una operación SQL con verificación de conexión segura.
-     *
-     * @param sql         Sentencia SQL parametrizada.
-     * @param configurador Lambda para configurar el PreparedStatement.
-     * @return true si la operación fue exitosa, false en caso contrario.
+     * Inserta un nuevo estudiante de forma asíncrona.
+     * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
+     * @return Future<Boolean> que indica si la inserción fue exitosa.
      */
-    private boolean ejecutarOperacion(String sql, Consumer<PreparedStatement> configurador) {
-        try (Connection conn = ConexionBD.conectarCasa(casa)) {
+    public Future<Boolean> aniadirAsync(Modelo_Estudiante estudiante) {
+        return dbExecutor.submit(() -> aniadirSync(estudiante));
+    }
 
-            if (conn == null) {
-                System.out.println("❌ No se pudo establecer conexión con la base de datos Derby.");
-                return false;
-            }
+    /**
+     * Edita un estudiante existente de forma asíncrona.
+     * @param estudiante Objeto Modelo_Estudiante con los nuevos datos (incluyendo ID).
+     * @return Future<Boolean> que indica si la edición fue exitosa.
+     */
+    public Future<Boolean> editarAsync(Modelo_Estudiante estudiante) {
+        return dbExecutor.submit(() -> editarSync(estudiante));
+    }
 
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                configurador.accept(ps);
-                ps.executeUpdate();
-                return true;
-            }
+    /**
+     * Borra un estudiante por su ID de forma asíncrona.
+     * @param id Identificador del estudiante a borrar.
+     * @return Future<Boolean> que indica si el borrado fue exitoso.
+     */
+    public Future<Boolean> borrarAsync(String id) {
+        return dbExecutor.submit(() -> borrarSync(id));
+    }
+
+    // --- MÉTODOS SÍNCRONOS (Internal) ---
+
+    /** [SÍNCRONO] Implementación interna para añadir. */
+    private boolean aniadirSync(Modelo_Estudiante estudiante) throws SQLException {
+        // Gryffindor usa la conexión H2
+        String sql = "INSERT INTO ESTUDIANTES (ID, NOMBRE, APELLIDOS, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = ConexionBD.conectarCasa(casa); // Conexión a Gryffindor (H2)
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, String.valueOf(estudiante.getId()));
+            ps.setString(2, estudiante.getNombre());
+            ps.setString(3, estudiante.getApellidos());
+            ps.setInt(4, estudiante.getCurso());
+            ps.setString(5, estudiante.getPatronus());
+            ps.executeUpdate();
+            logger.info("Inserción exitosa en Gryffindor (H2) para ID: {}", estudiante.getId());
+            return true;
 
         } catch (SQLException e) {
-            System.out.println("❌ Error al ejecutar operación en Derby: " + e.getMessage());
-            return false;
+            logger.error("Error SÍNCRONO al añadir estudiante en Gryffindor (H2).", e);
+            throw e;
         }
     }
 
-    public boolean aniadir(String id, String nombre, String apellidos, int curso, String patronus) {
-        String sql = "INSERT INTO ESTUDIANTES (ID, NOMBRE, APELLIDOS, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
-        return ejecutarOperacion(sql, ps -> {
-            try {
-                ps.setString(1, id);
-                ps.setString(2, nombre);
-                ps.setString(3, apellidos);
-                ps.setInt(4, curso);
-                ps.setString(5, patronus);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    public boolean editar(String id, String nombre, String apellidos, int curso, String patronus) {
+    /** [SÍNCRONO] Implementación interna para editar. */
+    private boolean editarSync(Modelo_Estudiante estudiante) throws SQLException {
         String sql = "UPDATE ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ?, PATRONUS = ? WHERE ID = ?";
-        return ejecutarOperacion(sql, ps -> {
-            try {
-                ps.setString(1, nombre);
-                ps.setString(2, apellidos);
-                ps.setInt(3, curso);
-                ps.setString(4, patronus);
-                ps.setString(5, id);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        try (Connection conn = ConexionBD.conectarCasa(casa); // Conexión a Gryffindor (H2)
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, estudiante.getNombre());
+            ps.setString(2, estudiante.getApellidos());
+            ps.setInt(3, estudiante.getCurso());
+            ps.setString(4, estudiante.getPatronus());
+            ps.setString(5, String.valueOf(estudiante.getId()));
+            ps.executeUpdate();
+            logger.info("Edición exitosa en Gryffindor (H2) para ID: {}", estudiante.getId());
+            return true;
+
+        } catch (SQLException e) {
+            logger.error("Error SÍNCRONO al editar estudiante en Gryffindor (H2).", e);
+            throw e;
+        }
     }
 
-    public boolean borrar(String id) {
+    /** [SÍNCRONO] Implementación interna para borrar. */
+    private boolean borrarSync(String id) throws SQLException {
         String sql = "DELETE FROM ESTUDIANTES WHERE ID = ?";
-        return ejecutarOperacion(sql, ps -> {
-            try {
-                ps.setString(1, id);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        try (Connection conn = ConexionBD.conectarCasa(casa); // Conexión a Gryffindor (H2)
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, id);
+            ps.executeUpdate();
+            logger.info("Borrado exitoso en Gryffindor (H2) para ID: {}", id);
+            return true;
+
+        } catch (SQLException e) {
+            logger.error("Error SÍNCRONO al borrar estudiante en Gryffindor (H2).", e);
+            throw e;
+        }
+    }
+
+    /** Cierra el pool de hilos. */
+    public static void shutdown() {
+        if (!dbExecutor.isShutdown()) {
+            dbExecutor.shutdown();
+            logger.info("Pool de hilos de DerbyDAO cerrado.");
+        }
     }
 }
