@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Data Access Object (DAO) para la casa Hufflepuff (Base de Datos H2).
+ * Data Access Object (DAO) para la casa Hufflepuff (Base de Datos Derby).
+ * NOTA: La conexión a Hufflepuff apunta a la URL de Derby según ConexionBD.
  */
 public class H2DAO {
 
@@ -36,7 +37,7 @@ public class H2DAO {
         final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiante ORDER BY id";
         logger.debug("Ejecutando consulta SÍNCRONA Hufflepuff: {}", SQL);
 
-        try (Connection conn = ConexionBD.getConnection(); // 👈 USA CONEXIÓN H2
+        try (Connection conn = ConexionBD.conectarCasa("Hufflepuff"); //  CONEXIÓN CORREGIDA
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SQL)) {
 
@@ -52,7 +53,7 @@ public class H2DAO {
                 estudiantes.add(e);
             }
         } catch (SQLException e) {
-            logger.error("ERROR SÍNCRONO al obtener estudiantes de Hufflepuff (H2).", e);
+            logger.error("ERROR SÍNCRONO al obtener estudiantes de Hufflepuff (Derby).", e);
             throw e;
         }
         return estudiantes;
@@ -62,7 +63,7 @@ public class H2DAO {
     private Modelo_Estudiante insertEstudianteSync(Modelo_Estudiante e) throws SQLException {
         final String SQL = "INSERT INTO estudiante (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConexionBD.getConnection(); // 👈 USA CONEXIÓN H2
+        try (Connection conn = ConexionBD.conectarCasa("Hufflepuff"); //  CONEXIÓN CORREGIDA
              PreparedStatement pstmt = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, e.getNombre());
@@ -81,7 +82,7 @@ public class H2DAO {
                 }
             }
         } catch (SQLException ex) {
-            logger.error("ERROR SÍNCRONO al insertar estudiante en Hufflepuff (H2).", ex);
+            logger.error("ERROR SÍNCRONO al insertar estudiante en Hufflepuff (Derby).", ex);
             throw ex;
         }
         return null;
