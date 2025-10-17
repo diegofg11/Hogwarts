@@ -44,6 +44,11 @@ public class ConexionBD {
                 user = Config.getHufflepuffUser();
                 password = Config.getHufflepuffPassword();
             }
+            case "Hogwarts" -> {
+                url = Config.getMariaDBUrl();
+                user = Config.getMariaDBUser();
+                password = Config.getMariaDBPassword();
+            }
             default -> {
                 System.out.println("Casa no válida: " + casa);
                 return null;
