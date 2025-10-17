@@ -1,4 +1,4 @@
-CREATE TABLE estudiantes (
+CREATE TABLE Estudiantes (
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     Nombre TEXT,
     Apellidos TEXT,
