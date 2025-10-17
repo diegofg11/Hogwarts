@@ -12,27 +12,25 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
 <AnchorPane prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.equiporon.Controlador.Controlador">
 
     <children>
 
-        <!-- MenuBar -->
         <MenuBar prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <menus>
-                <Menu fx:id="menuFile" text="File">
+                <Menu text="File">
                     <items>
                         <MenuItem onAction="#clickOnFile" text="Close" />
                     </items>
                 </Menu>
-                <Menu fx:id="menuEdit" text="Edit">
+                <Menu text="Edit">
                     <items>
                         <MenuItem onAction="#clickOnEdit" text="Delete" />
                     </items>
                 </Menu>
-                <Menu fx:id="menuHelp" text="Help">
+                <Menu text="Help">
                     <items>
                         <MenuItem onAction="#clickOnHelp" text="About" />
                     </items>
@@ -40,10 +38,10 @@
             </menus>
         </MenuBar>
 
-        <!-- Selector de casa -->
-        <HBox layoutX="198.0" layoutY="40.0" spacing="10" AnchorPane.leftAnchor="198.0" AnchorPane.topAnchor="40.0" />
+        <ChoiceBox fx:id="choiceCasas" layoutX="218.0" layoutY="40.0" prefHeight="36.0" prefWidth="163.0" />
+        <Label fx:id="lblCasaSeleccionada" layoutX="218.0" layoutY="85.0" prefWidth="163.0" text="Casa no seleccionada" />
 
-        <!-- Formulario -->
+
         <GridPane hgap="5.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="90.0">
             <columnConstraints>
                 <ColumnConstraints percentWidth="30.0" />
@@ -75,7 +73,6 @@
             </children>
         </GridPane>
 
-        <!-- Botones grandes -->
         <GridPane layoutX="389.0" layoutY="95.0" prefHeight="180.0" prefWidth="161.0" vgap="10.0" AnchorPane.rightAnchor="50.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -92,7 +89,6 @@
             </children>
         </GridPane>
 
-        <!-- Tabla -->
         <TableView fx:id="tablaEstudiantes" prefHeight="180.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="300.0">
             <columns>
                 <TableColumn fx:id="tableId" prefWidth="75.0" text="ID" />
@@ -106,7 +102,6 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
-          <ChoiceBox fx:id="choiceCasas" layoutX="218.0" layoutY="40.0" prefHeight="36.0" prefWidth="163.0" />
 
     </children>
 </AnchorPane>
