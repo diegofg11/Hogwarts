@@ -10,6 +10,8 @@ import org.slf4j.Logger; // Necesario para el logging
 import org.slf4j.LoggerFactory;
 
 /**
+ * DAO de la base de datos de Hogwarts en MariaDB
+ *
  * Clase MariaDBDAO encargada de manejar la conexión y operaciones
  * con la base de datos MariaDB.
  *
@@ -24,25 +26,45 @@ public class MariaDBDAO {
     // 🚨 AÑADIDO: ExecutorService para ejecutar tareas en un pool separado
     private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1);
 
-    // --------------------------------------------------------
     // --- MÉTODOS ASÍNCRONOS (Public) ---
-    // --------------------------------------------------------
 
-    public Future<Boolean> insertarEstudianteAsync(Modelo_Estudiante estudiante) {
-        // Ejecuta la inserción en el hilo del pool y devuelve un Future
+    /**
+     * Inserta un nuevo estudiante de forma asíncrona.
+     * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
+     * @return Future<Boolean> que indica si la inserción fue exitosa.
+     * @author Unai
+     */
+    public Future<Boolean> aniadirAsync(Modelo_Estudiante estudiante) {
         return dbExecutor.submit(() -> aniadirSync(estudiante));
     }
 
-    public Future<List<Modelo_Estudiante>> getAllAsync() {
-        return dbExecutor.submit(this::getAllSync);
-    }
-
+    /**
+     * Edita un estudiante existente de forma asíncrona.
+     * @param estudiante Objeto Modelo_Estudiante con los nuevos datos (incluyendo ID).
+     * @return Future<Boolean> que indica si la edición fue exitosa.
+     * @author Unai
+     */
     public Future<Boolean> editarAsync(Modelo_Estudiante estudiante) {
         return dbExecutor.submit(() -> editarSync(estudiante));
     }
 
-    public Future<Boolean> borrarAsync(int id) {
+    /**
+     * Borra un estudiante por su ID de forma asíncrona.
+     * @param id Identificador del estudiante a borrar (String).
+     * @return Future<Boolean> que indica si el borrado fue exitoso.
+     * @author Unai
+     */
+    public Future<Boolean> borrarAsync(String id) {
         return dbExecutor.submit(() -> borrarSync(id));
+    }
+
+    /**
+     * Devuelve todos los alumnos de forma asíncrona.
+     * @return Future<List<Modelo_Estudiante>> que devuelve todos los alumnos.
+     * @author Unai
+     */
+    public Future<List<Modelo_Estudiante>> getAllAsync() {
+        return dbExecutor.submit(this::getAllSync);
     }
 
     // --------------------------------------------------------
@@ -56,7 +78,7 @@ public class MariaDBDAO {
      * @author Diego,Unai
      */
     private boolean aniadirSync(Modelo_Estudiante estudiante) throws SQLException {
-        String sql = "INSERT INTO estudiantes (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ESTUDIANTES (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
         // 🚨 USO DE LOGGER EN LUGAR DE System.out.println
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -83,7 +105,7 @@ public class MariaDBDAO {
      */
     private List<Modelo_Estudiante> getAllSync() throws SQLException {
         List<Modelo_Estudiante> estudiantes = new ArrayList<>();
-        String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiantes";
+        String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES";
 
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
@@ -116,7 +138,7 @@ public class MariaDBDAO {
      * @author Diego,Unai
      */
     private boolean editarSync(Modelo_Estudiante estudiante) throws SQLException {
-        String sql = "UPDATE estudiantes SET nombre = ?, apellidos = ?, casa = ?, curso = ?, patronus = ? WHERE id = ?";
+        String sql = "UPDATE ESTUDIANTES SET nombre = ?, apellidos = ?, casa = ?, curso = ?, patronus = ? WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -142,12 +164,12 @@ public class MariaDBDAO {
      * @return true si el estudiante fue eliminado correctamente, false en caso contrario.
      * @author Diego,Unai
      */
-    private boolean borrarSync(int id) throws SQLException {
-        String sql = "DELETE FROM estudiantes WHERE id = ?";
+    private boolean borrarSync(String id) throws SQLException {
+        String sql = "DELETE FROM ESTUDIANTES WHERE id = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, id);
+            stmt.setString(1, id);
             stmt.executeUpdate();
             logger.info("Eliminación exitosa en MariaDB para ID: {}", id);
             return true;

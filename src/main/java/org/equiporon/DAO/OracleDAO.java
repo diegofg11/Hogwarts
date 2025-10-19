@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * DAO Asíncrono para gestionar operaciones CRUD en Oracle (Ravenclaw)
  * sobre la tabla ESTUDIANTES, utilizando Modelo_Estudiante.
  *
- * @author Xiker (Modificado)
+ * @author Xiker, Unai
  * @version 2.0
  */
 public class OracleDAO {
@@ -29,6 +29,7 @@ public class OracleDAO {
      * Inserta un nuevo estudiante de forma asíncrona.
      * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
      * @return Future<Boolean> que indica si la inserción fue exitosa.
+     * @author Unai
      */
     public Future<Boolean> aniadirAsync(Modelo_Estudiante estudiante) {
         return dbExecutor.submit(() -> aniadirSync(estudiante));
@@ -38,6 +39,7 @@ public class OracleDAO {
      * Edita un estudiante existente de forma asíncrona.
      * @param estudiante Objeto Modelo_Estudiante con los nuevos datos (incluyendo ID).
      * @return Future<Boolean> que indica si la edición fue exitosa.
+     * @author Unai
      */
     public Future<Boolean> editarAsync(Modelo_Estudiante estudiante) {
         return dbExecutor.submit(() -> editarSync(estudiante));
@@ -47,10 +49,21 @@ public class OracleDAO {
      * Borra un estudiante por su ID de forma asíncrona.
      * @param id Identificador del estudiante a borrar (String).
      * @return Future<Boolean> que indica si el borrado fue exitoso.
+     * @author Unai
      */
     public Future<Boolean> borrarAsync(String id) {
         return dbExecutor.submit(() -> borrarSync(id));
     }
+
+    /**
+     * Devuelve todos los alumnos de forma asíncrona.
+     * @return Future<List<Modelo_Estudiante>> que devuelve todos los alumnos.
+     * @author Unai
+     */
+    public Future<List<Modelo_Estudiante>> getAllAsync() {
+        return dbExecutor.submit(this::getAllSync);
+    }
+
 
     // --- MÉTODOS SÍNCRONOS (Internal) ---
 
@@ -81,16 +94,16 @@ public class OracleDAO {
         }
     }
 
-    /** [SÍNCRONO] Obtiene todos los estudiantes de la base de datos.
+    /** [SÍNCRONO] Obtiene todos los ESTUDIANTES de la base de datos.
      *
-     * @return Lista con todos los estudiantes encontrados.
+     * @return Lista con todos los ESTUDIANTES encontrados.
      * @author Unai
      */
     private List<Modelo_Estudiante> getAllSync() throws SQLException {
         List<Modelo_Estudiante> estudiantes = new ArrayList<>();
-        String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM estudiantes";
+        String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES";
 
-        try (Connection conn = ConexionBD.getConnection();
+        try (Connection conn = ConexionBD.conectarCasa("RavenClaw");
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -109,12 +122,17 @@ public class OracleDAO {
             return estudiantes;
 
         } catch (SQLException e) {
-            logger.error("Error SÍNCRONO al obtener estudiantes de MariaDB.", e);
+            logger.error("Error SÍNCRONO al obtener estudiantes de Oracle (Ravenclaw).", e);
             throw e;
         }
     }
 
-    /** [SÍNCRONO] Implementación interna para editar. */
+    /** [SÍNCRONO] Actualiza los datos de un estudiante existente.
+     *
+     * @param estudiante Objeto con los nuevos datos del estudiante.
+     * @return true si la actualización fue exitosa, false si ocurrió un error.
+     * @author Xiker, Unai
+     */
     private boolean editarSync(Modelo_Estudiante estudiante) throws SQLException {
         String sql = "UPDATE ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ?, PATRONUS = ? WHERE ID = ?";
         try (Connection conn = ConexionBD.conectarCasa(casa);
@@ -135,7 +153,12 @@ public class OracleDAO {
         }
     }
 
-    /** [SÍNCRONO] Implementación interna para borrar. */
+    /** [SÍNCRONO] Elimina un estudiante de la base de datos por su ID.
+     *
+     * @param id Identificador del estudiante a eliminar.
+     * @return true si el estudiante fue eliminado correctamente, false en caso contrario.
+     * @author Diego,Unai
+     */
     private boolean borrarSync(String id) throws SQLException {
         String sql = "DELETE FROM ESTUDIANTES WHERE ID = ?";
         try (Connection conn = ConexionBD.conectarCasa(casa);
