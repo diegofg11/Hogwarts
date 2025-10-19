@@ -134,7 +134,7 @@ public class Controlador {
 
         switch (casaActual) {
             case "Hogwarts":
-                if(mariadao.insertarEstudiante(est) || sqldao.insertarEstudiante(est)){
+                if (mariadao.insertarEstudiante(est) || sqldao.insertarEstudiante(est)) {
                     tablaEstudiantes.getItems().add(est);
                 }
 
@@ -171,6 +171,7 @@ public class Controlador {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "No se pudo añadir la persona");
                 alert.showAndWait();
         }
+    }
 
         @FXML
         void clickOnBorrar (ActionEvent event){
@@ -196,6 +197,5 @@ public class Controlador {
         @FXML
         void clickOnHelp (ActionEvent event){
             // Lógica para el menú Help -> About
-        }
     }
 }
