@@ -20,30 +20,48 @@ import java.sql.Connection;
 public class Controlador {
 
     // --- Elementos FXML Conectados ---
-    @FXML private Label lblCasaSeleccionada;
-    @FXML private ChoiceBox<String> choiceCasas;
-    @FXML private Button botAdd;
-    @FXML private Button botBorrar;
-    @FXML private Button botEditar;
-    @FXML private Label lblCasa;
-    @FXML private TableView<?> tablaEstudiantes;
-    @FXML private TableColumn<?, ?> tableApellidos;
-    @FXML private TableColumn<?, ?> tableCasa;
-    @FXML private TableColumn<?, ?> tableCurso;
-    @FXML private TableColumn<?, ?> tableId;
-    @FXML private TableColumn<?, ?> tableNombre;
-    @FXML private TableColumn<?, ?> tablePatronus;
-    @FXML private TextField txtApellidos;
-    @FXML private TextField txtCasa;
-    @FXML private TextField txtCurso;
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtPatronus;
+    @FXML
+    private Label lblCasaSeleccionada;
+    @FXML
+    private ChoiceBox<String> choiceCasas;
+    @FXML
+    private Button botAdd;
+    @FXML
+    private Button botBorrar;
+    @FXML
+    private Button botEditar;
+    @FXML
+    private Label lblCasa;
+    @FXML
+    private TableView<?> tablaEstudiantes;
+    @FXML
+    private TableColumn<?, ?> tableApellidos;
+    @FXML
+    private TableColumn<?, ?> tableCasa;
+    @FXML
+    private TableColumn<?, ?> tableCurso;
+    @FXML
+    private TableColumn<?, ?> tableId;
+    @FXML
+    private TableColumn<?, ?> tableNombre;
+    @FXML
+    private TableColumn<?, ?> tablePatronus;
+    @FXML
+    private TextField txtApellidos;
+    @FXML
+    private TextField txtCasa;
+    @FXML
+    private TextField txtCurso;
+    @FXML
+    private TextField txtNombre;
+    @FXML
+    private TextField txtPatronus;
     private DerbyDAO derbydao = new DerbyDAO();
-    private H2DAO h2dao  = new H2DAO();
-    private HSQLDBDAO hsqldao  = new HSQLDBDAO();
-    private MariaDBDAO mariadao  = new MariaDBDAO();
-    private OracleDAO oracledao  = new OracleDAO();
-    private SQLiteDAO sqldao  = new SQLiteDAO();
+    private H2DAO h2dao = new H2DAO();
+    private HSQLDBDAO hsqldao = new HSQLDBDAO();
+    private MariaDBDAO mariadao = new MariaDBDAO();
+    private OracleDAO oracledao = new OracleDAO();
+    private SQLiteDAO sqldao = new SQLiteDAO();
 
     private String casaActual = null;
 
@@ -72,6 +90,7 @@ public class Controlador {
     /**
      * Lógica central para conectarse a la base de datos de la casa seleccionada.
      * Este metodo es llamado por el listener del ChoiceBox.
+     *
      * @param casa El nombre de la casa a la que conectar.
      */
     private void seleccionarCasa(String casa) {
@@ -84,10 +103,12 @@ public class Controlador {
                 System.out.println("Conectado a " + casa);
                 // Aquí iría la lógica para cargar los datos en la tabla, por ejemplo.
             } else {
-                mostrarError("Error al conectar con " + casa);
+                Alert alert = new Alert(Alert.AlertType.ERROR,"Error al conectar con " + casa);
+                alert.showAndWait();
             }
         } catch (Exception e) {
-            mostrarError("Error crítico al conectar con " + casa + ": " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR,"Error crítico al conectar con " + casa + ": " + e.getMessage());
+            alert.showAndWait();
             e.printStackTrace();
         }
     }
@@ -103,42 +124,46 @@ public class Controlador {
         String patronus = txtPatronus.getText();
 
 
-        if (nombre.isEmpty() || apellido.isEmpty() || curso.isEmpty()  || patronus.isEmpty() ) {
+        if (nombre.isEmpty() || apellido.isEmpty() || curso.isEmpty() || patronus.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "Rellena todos los campos");
             alert.showAndWait();
             return;
         }
+
         Modelo_Estudiante est = new Modelo_Estudiante(0, nombre, apellido, casa, curso, patronus);
 
         switch (casaActual) {
             case "Hogwarts":
+                if(mariadao.insertarEstudiante(est) || sqldao.insertarEstudiante(est)){
+                    tablaEstudiantes.getItems().add(est);
+                }
 
                 break;
 
             case "Gryffindor":
 
 
-                if(derbydao.aniadir(est)){
-
+                if (derbydao.aniadir(est)) {
+                    tablaEstudiantes.getItems().add(est);
                 }
                 break;
 
             case "Ravenclaw":
 
 
-                if(oracledao.aniadir(est)){
-
+                if (oracledao.aniadir(est)) {
+                    tablaEstudiantes.getItems().add(est);
                 }
                 break;
 
             case "Slytherin":
-                if(hsqldao.insertEstudianteAsync(est)){
-
+                if (hsqldao.insertEstudianteAsync(est)) {
+                    tablaEstudiantes.getItems().add(est);
                 }
                 break;
             case "Hufflepuff":
-                if(h2dao.insertEstudianteAsync(est)){
-
+                if (h2dao.insertEstudianteAsync(est)) {
+                    tablaEstudiantes.getItems().add(est);
                 }
                 break;
 
@@ -146,46 +171,31 @@ public class Controlador {
                 Alert alert = new Alert(Alert.AlertType.ERROR, "No se pudo añadir la persona");
                 alert.showAndWait();
         }
-        if (dao.insertarPersona(p)) {
-            tablaPersonas.getItems().add(p);
-            TextoFirstName.clear();
-            TextoLastName.clear();
-            Dates.setValue(null);
-    }
 
-    @FXML
-    void clickOnBorrar(ActionEvent event) {
-        // Lógica para borrar un estudiante seleccionado
-    }
+        @FXML
+        void clickOnBorrar (ActionEvent event){
+            // Lógica para borrar un estudiante seleccionado
+        }
 
-    @FXML
-    void clickOnEditar(ActionEvent event) {
-        // Lógica para editar un estudiante
-    }
+        @FXML
+        void clickOnEditar (ActionEvent event){
+            // Lógica para editar un estudiante
+        }
 
-    // --- Métodos de la barra de menú ---
-    @FXML
-    void clickOnFile(ActionEvent event) {
-        // Lógica para el menú File -> Close
-    }
+        // --- Métodos de la barra de menú ---
+        @FXML
+        void clickOnFile (ActionEvent event){
+            // Lógica para el menú File -> Close
+        }
 
-    @FXML
-    void clickOnEdit(ActionEvent event) {
-        // Lógica para el menú Edit -> Delete
-    }
+        @FXML
+        void clickOnEdit (ActionEvent event){
+            // Lógica para el menú Edit -> Delete
+        }
 
-    @FXML
-    void clickOnHelp(ActionEvent event) {
-        // Lógica para el menú Help -> About
-    }
-
-
-    // --- Métodos de utilidad para mostrar alertas ---
-    private void mostrarError(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error de Conexión");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+        @FXML
+        void clickOnHelp (ActionEvent event){
+            // Lógica para el menú Help -> About
+        }
     }
 }
