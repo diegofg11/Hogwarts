@@ -9,15 +9,13 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane fx:id="rootPane" prefHeight="500.0" prefWidth="600.0" stylesheets="@../styles/Styles.css"
-            xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.equiporon.Controlador.Controlador">
+<AnchorPane fx:id="rootPane" prefHeight="562.0" prefWidth="600.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.equiporon.Controlador.Controlador">
 
     <children>
 
@@ -26,91 +24,96 @@
             <menus>
                 <Menu text="File">
                     <items>
-                        <MenuItem onAction="#clickOnFile" text="Close"/>
+                        <MenuItem onAction="#clickOnFile" text="Close" />
                     </items>
                 </Menu>
                 <Menu text="Edit">
                     <items>
-                        <MenuItem onAction="#clickOnEdit" text="Delete"/>
+                        <MenuItem onAction="#clickOnEdit" text="Delete" />
                     </items>
                 </Menu>
                 <Menu text="Help">
                     <items>
-                        <MenuItem onAction="#clickOnHelp" text="About"/>
+                        <MenuItem onAction="#clickOnHelp" text="About" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
 
+        <!-- Estandarte Izquierdo -->
+        <ImageView fx:id="bannerIzquierdo" fitHeight="120.0" fitWidth="136.0" layoutX="18.0" layoutY="56.0" preserveRatio="true" AnchorPane.leftAnchor="18.0" AnchorPane.topAnchor="56.0" />
+
+        <!-- Estandarte Derecho -->
+        <ImageView fx:id="bannerDerecho" fitHeight="120.0" fitWidth="136.0" layoutX="445.0" layoutY="53.0" preserveRatio="true" AnchorPane.rightAnchor="19.0" AnchorPane.topAnchor="53.0" />
+
+        <!-- Escudo Central -->
+        <ImageView fx:id="escudoCasa" fitHeight="120.0" fitWidth="120.0" layoutX="402.0" layoutY="53.0" preserveRatio="true" AnchorPane.leftAnchor="402.0" AnchorPane.topAnchor="53.0" />
+
         <!-- Selector de casa -->
-        <HBox spacing="10" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="40.0"/>
-        <ComboBox fx:id="choiceCasas" layoutX="228.0" layoutY="39.0" prefHeight="36.0" prefWidth="163.0"/>
-        <Label fx:id="lblCasaSeleccionada" layoutX="218.0" layoutY="85.0" prefWidth="163.0" text="Casa no seleccionada"/>
+        <ComboBox fx:id="choiceCasas" layoutX="228.0" layoutY="39.0" prefHeight="36.0" prefWidth="163.0" />
+        <Label fx:id="lblCasaSeleccionada" layoutX="228.0" layoutY="75.0" prefWidth="163.0" text="Casa no seleccionada" />
 
         <!-- Formulario -->
-        <GridPane hgap="5.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="90.0">
+        <GridPane hgap="5.0" layoutX="68.0" layoutY="133.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="68.0" AnchorPane.topAnchor="133.0">
             <columnConstraints>
-                <ColumnConstraints percentWidth="30.0"/>
-                <ColumnConstraints percentWidth="70.0"/>
+                <ColumnConstraints percentWidth="30.0" />
+                <ColumnConstraints percentWidth="70.0" />
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints/>
-                <RowConstraints/>
-                <RowConstraints/>
-                <RowConstraints/>
-                <RowConstraints/>
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
             </rowConstraints>
 
             <children>
-                <Label text="Nombre:" GridPane.rowIndex="0"/>
-                <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="Nombre:" GridPane.rowIndex="0" />
+                <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                <Label text="Apellidos:" GridPane.rowIndex="1"/>
-                <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Apellidos:" GridPane.rowIndex="1" />
+                <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                <Label text="Curso:" GridPane.rowIndex="2"/>
-                <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Label text="Curso:" GridPane.rowIndex="2" />
+                <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                <Label text="Patronus:" GridPane.rowIndex="3"/>
-                <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Label text="Patronus:" GridPane.rowIndex="3" />
+                <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                <Label fx:id="lblCasa" text="Casa:" GridPane.rowIndex="4"/>
-                <TextField fx:id="txtCasa" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                <Label fx:id="lblCasa" text="Casa:" GridPane.rowIndex="4" />
+                <TextField fx:id="txtCasa" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </children>
         </GridPane>
 
         <!-- Botones -->
         <GridPane layoutX="389.0" layoutY="95.0" prefHeight="180.0" prefWidth="161.0" vgap="10.0" AnchorPane.rightAnchor="50.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES"/>
-                <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES"/>
-                <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
-            <children>
-                <Button fx:id="botAdd" onAction="#clickOnAdd" text="Añadir" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"/>
-                <Button fx:id="botBorrar" onAction="#clickOnBorrar" text="Borrar" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS"/>
-                <Button fx:id="botEditar" onAction="#clickOnEditar" text="Editar" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS"/>
-            </children>
         </GridPane>
 
         <!-- Tabla -->
-        <TableView fx:id="tablaEstudiantes" prefHeight="180.0" AnchorPane.bottomAnchor="20.0"
-                   AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="300.0">
+        <TableView fx:id="tablaEstudiantes" layoutX="87.19999999999999" layoutY="337.59999999999997" prefHeight="205.0" prefWidth="462.0" AnchorPane.bottomAnchor="38.0" AnchorPane.leftAnchor="69.0" AnchorPane.rightAnchor="69.0" AnchorPane.topAnchor="319.0">
             <columns>
-                <TableColumn fx:id="tableId" prefWidth="75.0" text="ID"/>
-                <TableColumn fx:id="tableNombre" prefWidth="75.0" text="Nombre"/>
-                <TableColumn fx:id="tableApellidos" prefWidth="75.0" text="Apellidos"/>
-                <TableColumn fx:id="tableCasa" prefWidth="75.0" text="Casa"/>
-                <TableColumn fx:id="tableCurso" prefWidth="75.0" text="Curso"/>
-                <TableColumn fx:id="tablePatronus" prefWidth="75.0" text="Patronus"/>
+                <TableColumn fx:id="tableId" prefWidth="75.0" text="ID" />
+                <TableColumn fx:id="tableNombre" prefWidth="75.0" text="Nombre" />
+                <TableColumn fx:id="tableApellidos" prefWidth="75.0" text="Apellidos" />
+                <TableColumn fx:id="tableCasa" prefWidth="75.0" text="Casa" />
+                <TableColumn fx:id="tableCurso" prefWidth="75.0" text="Curso" />
+                <TableColumn fx:id="tablePatronus" prefWidth="75.0" text="Patronus" />
             </columns>
             <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
+          <Button fx:id="botAdd" layoutX="381.0" layoutY="152.0" onAction="#clickOnAdd" text="Añadir" />
+          <Button fx:id="botBorrar" layoutX="381.0" layoutY="215.0" onAction="#clickOnBorrar" text="Borrar" />
+          <Button fx:id="botEditar" layoutX="381.0" layoutY="279.0" onAction="#clickOnEditar" text="Editar" />
 
     </children>
 </AnchorPane>

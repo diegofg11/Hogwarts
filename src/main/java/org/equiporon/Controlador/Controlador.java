@@ -3,6 +3,7 @@ package org.equiporon.Controlador;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import org.equiporon.Conexion.ConexionBD;
 
@@ -12,15 +13,16 @@ import java.sql.Connection;
  * Controlador principal del proyecto Hogwarts.
  * Permite seleccionar una casa desde el menú y conectarse
  * a la base de datos correspondiente.
- * Además, cambia los colores de la ventana según la casa seleccionada.
+ * Además, cambia los colores de la ventana según la casa seleccionada
+ * y muestra estandartes e imágenes de escudos según la casa.
  *
- * @author Diego,Ruben,Unai,Xiker
+ *
  */
 public class Controlador {
 
-    @FXML private AnchorPane rootPane; // <--- necesario para cambiar colores de toda la ventana
+    @FXML private AnchorPane rootPane;
     @FXML private Label lblCasaSeleccionada;
-    @FXML private ComboBox<String> choiceCasas; // ComboBox en lugar de ChoiceBox
+    @FXML private ComboBox<String> choiceCasas;
     @FXML private Button botAdd;
     @FXML private Button botBorrar;
     @FXML private Button botEditar;
@@ -37,11 +39,16 @@ public class Controlador {
     @FXML private TextField txtCurso;
     @FXML private TextField txtNombre;
     @FXML private TextField txtPatronus;
+    @FXML private ImageView escudoCasa;
+    @FXML private ImageView bannerIzquierdo;
+    @FXML private ImageView bannerDerecho;
 
     private String casaActual = null;
 
     /**
-     * Inicializa el controlador: llena el ComboBox, configura colores y listener.
+     * Inicializa el controlador: llena el ComboBox, configura colores, listener e imágenes iniciales.
+     * También posiciona los estandartes a 10px de los bordes y pegados arriba.
+     * @author Xiker
      */
     @FXML
     private void initialize() {
@@ -54,6 +61,7 @@ public class Controlador {
                     if (newValue != null) {
                         seleccionarCasa(newValue);
                         aplicarColorVentana(newValue);
+                        aplicarImagenesCasa(newValue);
                     }
                 }
         );
@@ -64,13 +72,39 @@ public class Controlador {
         // Selección por defecto
         choiceCasas.setValue("Hogwarts");
         aplicarColorVentana("Hogwarts");
+        aplicarImagenesCasa("Hogwarts");
+
+        // Posicionar banners
+        AnchorPane.setTopAnchor(bannerIzquierdo, 0.0);
+        AnchorPane.setLeftAnchor(bannerIzquierdo, 10.0);
+
+        AnchorPane.setTopAnchor(bannerDerecho, 0.0);
+        AnchorPane.setRightAnchor(bannerDerecho, 10.0);
+    }
+
+    /**
+     * Aplica imágenes de escudo y estandartes según la casa seleccionada.
+     * @param casa Nombre de la casa seleccionada.
+     * @author Xiker
+     */
+    private void aplicarImagenesCasa(String casa) {
+        String basePath = "/images/";
+        String nombre = casa.toLowerCase();
+
+        // Escudo
+        String escudoPath = basePath + nombre + "_escudo.png";
+        escudoCasa.setImage(new javafx.scene.image.Image(getClass().getResourceAsStream(escudoPath)));
+
+        // Banners
+        String bannerPath = basePath + nombre + "_banner.png";
+        bannerIzquierdo.setImage(new javafx.scene.image.Image(getClass().getResourceAsStream(bannerPath)));
+        bannerDerecho.setImage(new javafx.scene.image.Image(getClass().getResourceAsStream(bannerPath)));
     }
 
     /**
      * Configura los colores de los items y del botón del ComboBox.
      */
     private void setupComboBoxColors() {
-        // Colorear items del desplegable
         choiceCasas.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -85,7 +119,6 @@ public class Controlador {
             }
         });
 
-        // Colorear botón cerrado del ComboBox
         choiceCasas.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -143,7 +176,6 @@ public class Controlador {
         try (Connection conn = ConexionBD.conectarCasa(casa)) {
             if (conn != null) {
                 System.out.println("Conectado a " + casa);
-                // Lógica para cargar datos en la tabla
             } else {
                 mostrarError("Error al conectar con " + casa);
             }
@@ -153,7 +185,6 @@ public class Controlador {
         }
     }
 
-    // --- Métodos de botones y menú ---
     @FXML void clickOnAdd(ActionEvent event) {}
     @FXML void clickOnBorrar(ActionEvent event) {}
     @FXML void clickOnEditar(ActionEvent event) {}
