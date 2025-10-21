@@ -1,3 +1,4 @@
+
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
@@ -114,7 +115,7 @@ public class MariaDBDAO {
             while (rs.next()) {
                 // ... (código para construir Modelo_Estudiante)
                 Modelo_Estudiante estudiante = new Modelo_Estudiante(
-                        rs.getInt("id"),
+                        rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
                         rs.getString("casa"),
@@ -147,7 +148,7 @@ public class MariaDBDAO {
             stmt.setString(3, estudiante.getCasa());
             stmt.setInt(4, estudiante.getCurso());
             stmt.setString(5, estudiante.getPatronus());
-            stmt.setInt(6, estudiante.getId());
+            stmt.setString(6, estudiante.getId());
             stmt.executeUpdate();
             logger.info("Actualización exitosa en MariaDB para ID: {}", estudiante.getId());
             return true;
@@ -156,6 +157,7 @@ public class MariaDBDAO {
             logger.error("Error SÍNCRONO al actualizar estudiante en MariaDB.", e);
             throw e;
         }
+
     }
 
     /** [SÍNCRONO] Elimina un estudiante de la base de datos por su ID.
@@ -179,6 +181,88 @@ public class MariaDBDAO {
             throw e;
         }
     }
+    // ================================================================
+    // === MÉTODOS DE SINCRONIZACIÓN ENTRE HOGWARTS Y LAS CASAS =======
+    // ================================================================
+
+    /**
+     * Inserta un estudiante en la base central (MariaDB) procedente de una casa.
+     * @param e Estudiante a insertar.
+     * @param casaOrigen Nombre de la casa desde donde se origina el cambio.
+     * @author Gaizka
+     */
+    public boolean sincronizarInsert(Modelo_Estudiante e, String casaOrigen, String idConPrefijo) {
+        final String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, idConPrefijo);
+            ps.setString(2, e.getNombre());
+            ps.setString(3, e.getApellidos());
+            ps.setString(4, casaOrigen); // 🔹 La casa se pasa desde el DAO local
+            ps.setInt(5, e.getCurso());
+            ps.setString(6, e.getPatronus());
+            ps.executeUpdate();
+
+            logger.info("Sincronización INSERT desde {} hacia MariaDB exitosa (ID {}).", casaOrigen, e.getId());
+            return true;
+
+        } catch (SQLException ex) {
+            logger.error("Error al sincronizar INSERT desde {} hacia MariaDB.", casaOrigen, ex);
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza un estudiante en la base central (MariaDB) procedente de una casa.
+     * @param e Estudiante con datos actualizados.
+     * @param casaOrigen Nombre de la casa desde donde se origina el cambio.
+     * @author Gaizka
+     */
+    public boolean sincronizarUpdate(Modelo_Estudiante e, String casaOrigen, String idConPrefijo) {
+        final String sql = "UPDATE ESTUDIANTES SET nombre=?, apellidos=?, curso=?, patronus=?, casa=? WHERE id=?";
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, e.getNombre());
+            ps.setString(2, e.getApellidos());
+            ps.setInt(3, e.getCurso());
+            ps.setString(4, e.getPatronus());
+            ps.setString(5, casaOrigen);
+            ps.setString(6, idConPrefijo);
+            ps.executeUpdate();
+
+            logger.info("Sincronización UPDATE desde {} hacia MariaDB exitosa (ID {}).", casaOrigen, e.getId());
+            return true;
+
+        } catch (SQLException ex) {
+            logger.error("Error al sincronizar UPDATE desde {} hacia MariaDB.", casaOrigen, ex);
+            return false;
+        }
+    }
+
+    /**
+     * Elimina un estudiante en la base central (MariaDB) procedente de una casa.
+     * @param idConPrefijo ID del estudiante a eliminar.
+     * @param casaOrigen Nombre de la casa desde donde se origina el cambio.
+     * @author Gaizka
+     */
+    public boolean sincronizarDelete(String idConPrefijo, String casaOrigen) {
+        final String sql = "DELETE FROM ESTUDIANTES WHERE id = ?";
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, idConPrefijo);
+            ps.executeUpdate();
+
+            logger.info("Sincronización DELETE desde {} hacia MariaDB exitosa (ID {}).", casaOrigen, idConPrefijo);
+            return true;
+
+        } catch (SQLException ex) {
+            logger.error("Error al sincronizar DELETE desde {} hacia MariaDB.", casaOrigen, ex);
+            return false;
+        }
+    }
 
     /** Cierra el pool de hilos. */
     public static void shutdown() {
@@ -187,4 +271,5 @@ public class MariaDBDAO {
             logger.info("Pool de hilos de MariaDBDAO cerrado.");
         }
     }
+
 }
