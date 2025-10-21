@@ -138,7 +138,7 @@ public class SQLiteDAO {
             stmt.setString(3, estudiante.getCasa());
             stmt.setInt(4, estudiante.getCurso());
             stmt.setString(5, estudiante.getPatronus());
-            stmt.setInt(6, estudiante.getId());
+            stmt.setString(6, estudiante.getId());
             stmt.executeUpdate();
             return true;
 
@@ -185,7 +185,7 @@ public class SQLiteDAO {
             while (rs.next()) {
                 // ... (código para construir Modelo_Estudiante)
                 Modelo_Estudiante estudiante = new Modelo_Estudiante(
-                        rs.getInt("id"),
+                        rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
                         rs.getString("casa"),

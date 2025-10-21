@@ -22,6 +22,7 @@ public class OracleDAO {
     private static final Logger logger = LoggerFactory.getLogger(OracleDAO.class);
     private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1); // Pool dedicado para Oracle/Ravenclaw
     private final String casa = "Ravenclaw";
+    private final MariaDBDAO mariaDBDAO = new MariaDBDAO();
 
     // --- MÉTODOS ASÍNCRONOS (Public) ---
 
@@ -74,22 +75,36 @@ public class OracleDAO {
      * @author Xiker,Unai
      */
     private boolean aniadirSync(Modelo_Estudiante estudiante) throws SQLException {
-        // Nota: Asumimos que ID en Oracle es un String/VARCHAR
-        String sql = "INSERT INTO ESTUDIANTES (ID, NOMBRE, APELLIDOS, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
+        // En Oracle se usa SEQUENCE para generar IDs
+        final String SQL = "INSERT INTO ESTUDIANTES (ID, NOMBRE, APELLIDOS, CASA, CURSO, PATRONUS) " +
+                "VALUES (SEQ_ESTUDIANTES.NEXTVAL, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.conectarCasa(casa);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(SQL, new String[]{"ID"})) {
 
-            ps.setString(1, String.valueOf(estudiante.getId())); // Usamos el ID del modelo
-            ps.setString(2, estudiante.getNombre());
-            ps.setString(3, estudiante.getApellidos());
+            ps.setString(1, estudiante.getNombre());
+            ps.setString(2, estudiante.getApellidos());
+            ps.setString(3, casa);
             ps.setInt(4, estudiante.getCurso());
             ps.setString(5, estudiante.getPatronus());
             ps.executeUpdate();
-            logger.info("Inserción exitosa en Oracle (Ravenclaw) para ID: {}", estudiante.getId());
-            return true;
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    estudiante.setId(rs.getString(1)); // ID local de Oracle
+
+                    // 🔹 Sincronizar con MariaDB
+                    String idConPrefijo = casa.substring(0, 1).toUpperCase() + estudiante.getId();
+                    mariaDBDAO.sincronizarInsert(estudiante, casa, idConPrefijo);
+                    logger.info("Sincronización INSERT con MariaDB (ID {}).", idConPrefijo);
+
+                    logger.info("Inserción exitosa en Oracle (Ravenclaw) con ID local={} y central={}", estudiante.getId(), idConPrefijo);
+                    return true;
+                }
+            }
+            return false;
 
         } catch (SQLException e) {
-            logger.error("Error SÍNCRONO al añadir estudiante en Oracle.", e);
+            logger.error("Error SÍNCRONO al añadir estudiante en Oracle (Ravenclaw).", e);
             throw e;
         }
     }
@@ -103,14 +118,14 @@ public class OracleDAO {
         List<Modelo_Estudiante> estudiantes = new ArrayList<>();
         String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES";
 
-        try (Connection conn = ConexionBD.conectarCasa("RavenClaw");
+        try (Connection conn = ConexionBD.conectarCasa("Ravenclaw");
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 // ... (código para construir Modelo_Estudiante)
                 Modelo_Estudiante estudiante = new Modelo_Estudiante(
-                        rs.getInt("id"),
+                        rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
                         rs.getString("casa"),
@@ -142,8 +157,11 @@ public class OracleDAO {
             ps.setString(2, estudiante.getApellidos());
             ps.setInt(3, estudiante.getCurso());
             ps.setString(4, estudiante.getPatronus());
-            ps.setString(5, String.valueOf(estudiante.getId())); // Usamos el ID para WHERE
+            ps.setInt(5, Integer.parseInt(estudiante.getId())); // Usamos el ID para WHERE
             ps.executeUpdate();
+
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + estudiante.getId();
+            mariaDBDAO.sincronizarUpdate(estudiante, casa, idConPrefijo);
             logger.info("Edición exitosa en Oracle (Ravenclaw) para ID: {}", estudiante.getId());
             return true;
 
@@ -164,8 +182,10 @@ public class OracleDAO {
         try (Connection conn = ConexionBD.conectarCasa(casa);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id);
+            ps.setInt(1, Integer.parseInt(id));
             ps.executeUpdate();
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + id;
+            mariaDBDAO.sincronizarDelete(idConPrefijo, casa);
             logger.info("Borrado exitoso en Oracle (Ravenclaw) para ID: {}", id);
             return true;
 

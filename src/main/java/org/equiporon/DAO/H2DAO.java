@@ -1,3 +1,4 @@
+
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
@@ -22,6 +23,8 @@ public class H2DAO {
     private static final Logger logger = LoggerFactory.getLogger(H2DAO.class);
     private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1); // Pool dedicado
     private final String casa = "Hufflepuff"; //  CASA CAMBIADA A Hufflepuff (H2)
+    //Objeto instanciado de mariadb para la sinconizacion
+    private final  MariaDBDAO mariaDBDAO = new MariaDBDAO();
 
     // --- MÉTODOS ASÍNCRONOS (Public) ---
     public Future<Boolean> aniadirAsync(Modelo_Estudiante estudiante) {
@@ -55,7 +58,7 @@ public class H2DAO {
 
             while (rs.next()) {
                 Modelo_Estudiante e = new Modelo_Estudiante(
-                        rs.getInt("id"),
+                        rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
                         rs.getString("casa"),
@@ -84,11 +87,18 @@ public class H2DAO {
             pstmt.setInt(4, e.getCurso());
             pstmt.setString(5, e.getPatronus());
 
+
+
             if (pstmt.executeUpdate() > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        e.setId(rs.getInt(1)); // Establecer el ID generado
+                        e.setId(rs.getString(1)); // Establecer el ID generado
+
+                        String idConPrefijo = casa.substring(0, 1).toUpperCase() + e.getId();
+
                         logger.info("Inserción exitosa en Hufflepuff con ID: {}", e.getId());
+                        //Llama al metodo sincronizarInsert de mariadbdao para que se sincronicen.
+                        mariaDBDAO.sincronizarInsert(e, casa, idConPrefijo);
                         return true;
                     }
                     return false;
@@ -98,6 +108,7 @@ public class H2DAO {
             logger.error("ERROR SÍNCRONO al insertar ESTUDIANTE en Hufflepuff (H2).", ex);
             throw ex;
         }
+
         // CORRECCIÓN: Devolver false en lugar de null al final
         return false;
     }
@@ -107,16 +118,21 @@ public class H2DAO {
         try (Connection conn = ConexionBD.conectarCasa(casa);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id);
+            ps.setInt(1, Integer.parseInt(id));
             ps.executeUpdate();
             // CORRECCIÓN: Log de Hufflepuff
             logger.info("Borrado exitoso en Hufflepuff (H2) para ID: {}", id);
+            //Llama al metodo sincronizarDelete de mariadbdao para que se sincronicen.
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + id;
+            mariaDBDAO.sincronizarDelete(idConPrefijo,casa);
             return true;
 
         } catch (SQLException e) {
             logger.error("Error SÍNCRONO al borrar estudiante en Hufflepuff (H2).", e);
             throw e;
         }
+
+
     }
 
     /** [SÍNCRONO] Implementación interna para editar. */
@@ -129,9 +145,12 @@ public class H2DAO {
             ps.setString(2, estudiante.getApellidos());
             ps.setInt(3, estudiante.getCurso());
             ps.setString(4, estudiante.getPatronus());
-            ps.setString(5, String.valueOf(estudiante.getId()));
+            ps.setInt(5, Integer.parseInt(estudiante.getId()));
             ps.executeUpdate();
             logger.info("Edición exitosa en Hufflepuff (H2) para ID: {}", estudiante.getId());
+            //Llama al metodo sincronizarUpdate de mariadbdao para que se sincronicen.
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + estudiante.getId();
+            mariaDBDAO.sincronizarUpdate(estudiante,casa, idConPrefijo);
             return true;
 
         } catch (SQLException e) {
