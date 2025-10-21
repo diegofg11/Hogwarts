@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.ComboBox?>
 
 <AnchorPane prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.equiporon.Controlador.Controlador">
 
@@ -27,14 +28,10 @@
                         <MenuItem onAction="#clickOnFile" text="Close" />
                     </items>
                 </Menu>
-                <Menu fx:id="menuEdit" text="Edit">
-                    <items>
-                        <MenuItem onAction="#clickOnEdit" text="Delete" />
-                    </items>
-                </Menu>
                 <Menu fx:id="menuHelp" text="Help">
                     <items>
-                        <MenuItem onAction="#clickOnHelp" text="About" />
+                        <MenuItem onAction="#clickOnHelp" text="Help" />
+                        <MenuItem onAction="#clickOnAbout" text="About" />
                     </items>
                 </Menu>
             </menus>
@@ -106,6 +103,9 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
-          <ChoiceBox fx:id="choiceCasas" layoutX="228.0" layoutY="39.0" prefHeight="36.0" prefWidth="163.0" />
+        <!-- ComboBox para seleccionar la casa -->
+        <ComboBox fx:id="choiceCasas"
+                  layoutX="250.0" layoutY="40.0"
+                  prefWidth="200.0" prefHeight="30.0"/>
     </children>
 </AnchorPane>
