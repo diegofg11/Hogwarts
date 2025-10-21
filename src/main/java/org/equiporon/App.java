@@ -59,7 +59,7 @@ public class App extends Application {
      */
     static void setRoot(String fxml, String title) throws IOException {
         Scene scene = new Scene(loadFXML(fxml));
-        scene.getStylesheets().add(App.class.getResource("css/styles.css").toExternalForm());
+        scene.getStylesheets().add(App.class.getResource("/styles/Styles.css").toExternalForm());
         stage.setMinWidth(600);
         stage.setMinHeight(400);
         stage.setTitle("Hogwards");
