@@ -1,3 +1,4 @@
+
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
@@ -21,6 +22,8 @@ public class HSQLDBDAO {
     private static final Logger logger = LoggerFactory.getLogger(HSQLDBDAO.class);
     private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1); // Pool dedicado para Slytherin
     private final String casa = "Slytherin";
+    //Sé instancia un objeto de mariaDBDAO para llamar a los metodos de sincronizacion.
+    private final MariaDBDAO mariaDBDAO = new MariaDBDAO();
 
     // --- MÉTODOS ASÍNCRONOS (Public) ---
     public Future<Boolean> aniadirAsync(Modelo_Estudiante estudiante) {
@@ -54,7 +57,7 @@ public class HSQLDBDAO {
 
             while (rs.next()) {
                 Modelo_Estudiante e = new Modelo_Estudiante(
-                        rs.getInt("id"),
+                        rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
                         rs.getString("casa"),
@@ -84,11 +87,18 @@ public class HSQLDBDAO {
             pstmt.setInt(4, e.getCurso());
             pstmt.setString(5, e.getPatronus());
 
+
+
             if (pstmt.executeUpdate() > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        e.setId(rs.getInt(1));
+                        e.setId(rs.getString(1));
+
+                        String idConPrefijo = casa.substring(0, 1).toUpperCase() + e.getId();
+
                         logger.info("Inserción exitosa en Slytherin con ID: {}", e.getId());
+                        //Llama al metodo sincronizarInsert de mariadbdao para que se sincronicen.
+                        mariaDBDAO.sincronizarInsert(e,casa,idConPrefijo);
                         return true;
                     }
                 }
@@ -111,9 +121,13 @@ public class HSQLDBDAO {
             ps.setString(2, estudiante.getApellidos());
             ps.setInt(3, estudiante.getCurso());
             ps.setString(4, estudiante.getPatronus());
-            ps.setString(5, String.valueOf(estudiante.getId()));
+            ps.setInt(5, Integer.parseInt(estudiante.getId()));
             ps.executeUpdate();
+            //Llama al metodo sincronizarUpdate de mariadbdao para que se sincronicen.
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + estudiante.getId();
+            mariaDBDAO.sincronizarUpdate(estudiante,casa,idConPrefijo);
             logger.info("Edición exitosa en Slytherin (HSQLDB) para ID: {}", estudiante.getId());
+
             return true;
 
         } catch (SQLException e) {
@@ -129,9 +143,12 @@ public class HSQLDBDAO {
         try (Connection conn = ConexionBD.conectarCasa(casa);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id);
+            ps.setInt(1, Integer.parseInt(id));
             ps.executeUpdate();
             logger.info("Borrado exitoso en Slytherin (HSQLDB) para ID: {}", id);
+            //Llama al metodo sincronizarUpdate de mariadbdao para que se sincronicen.
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + id;
+            mariaDBDAO.sincronizarDelete(idConPrefijo,casa);
             return true;
 
         } catch (SQLException e) {

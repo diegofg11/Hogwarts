@@ -1,3 +1,4 @@
+
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
@@ -21,7 +22,8 @@ public class DerbyDAO {
     private static final Logger logger = LoggerFactory.getLogger(DerbyDAO.class);
     private static final ExecutorService dbExecutor = Executors.newFixedThreadPool(1); // Pool dedicado
     private final String casa = "Gryffindor"; // Casa Gryffindor para Derby
-
+    //Sé instancia un objeto de la clase MariaDBDAO para poder llamar a los metodos de sincronizacion.
+    private final MariaDBDAO mariaDBDAO = new MariaDBDAO();
     // --- MÉTODOS ASÍNCRONOS (Public) ---
     /**
      * Inserta un nuevo estudiante de forma asíncrona.
@@ -63,7 +65,7 @@ public class DerbyDAO {
     /** [SÍNCRONO] Implementación interna para añadir. */
     private Boolean aniadirSync(Modelo_Estudiante e) throws SQLException {
         // Usamos ESTUDIANTES y lógica RETURN_GENERATED_KEYS
-        String sql = "INSERT INTO ESTUDIANTES (NOMBRE, APELLIDOS, CASA, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO APP.ESTUDIANTES (NOMBRE, APELLIDOS, CASA, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.conectarCasa(casa);
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -74,12 +76,18 @@ public class DerbyDAO {
             pstmt.setInt(4, e.getCurso());
             pstmt.setString(5, e.getPatronus());
 
+
+
             if (pstmt.executeUpdate() > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        e.setId(rs.getInt(1)); // Establecer el ID generado
+                        e.setId(rs.getString(1)); // Establecer el ID generado
+                        String idConPrefijo = casa.substring(0, 1).toUpperCase() + e.getId();
                         // CORRECCIÓN: Log actualizado a Derby
                         logger.info("Inserción exitosa en Gryffindor (Derby) con ID: {}", e.getId());
+                        //Llama al metodo sincronizarInsert de mariadbdao para que se sincronicen.
+
+                        mariaDBDAO.sincronizarInsert(e,casa,idConPrefijo);
                         return true;
                     }
                 }
@@ -95,7 +103,7 @@ public class DerbyDAO {
 
     /** [SÍNCRONO] Implementación interna para editar. */
     private boolean editarSync(Modelo_Estudiante estudiante) throws SQLException {
-        String sql = "UPDATE ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ?, PATRONUS = ? WHERE ID = ?";
+        String sql = "UPDATE APP.ESTUDIANTES SET NOMBRE = ?, APELLIDOS = ?, CURSO = ?, PATRONUS = ? WHERE ID = ?";
         try (Connection conn = ConexionBD.conectarCasa(casa);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -103,10 +111,13 @@ public class DerbyDAO {
             ps.setString(2, estudiante.getApellidos());
             ps.setInt(3, estudiante.getCurso());
             ps.setString(4, estudiante.getPatronus());
-            ps.setString(5, String.valueOf(estudiante.getId()));
+            ps.setInt(5, Integer.parseInt(estudiante.getId()));
             ps.executeUpdate();
             // CORRECCIÓN: Log actualizado a Derby
             logger.info("Edición exitosa en Gryffindor (Derby) para ID: {}", estudiante.getId());
+            //Llama al metodo sincronizarUpdate de mariadbdao para que se sincronicen.
+            String idConPrefijo = "G" + estudiante.getId();
+            mariaDBDAO.sincronizarUpdate(estudiante,casa, idConPrefijo);
             return true;
 
         } catch (SQLException e) {
@@ -118,14 +129,17 @@ public class DerbyDAO {
 
     /** [SÍNCRONO] Implementación interna para borrar. */
     private boolean borrarSync(String id) throws SQLException {
-        String sql = "DELETE FROM ESTUDIANTES WHERE ID = ?";
+        String sql = "DELETE FROM APP.ESTUDIANTES WHERE ID = ?";
         try (Connection conn = ConexionBD.conectarCasa(casa);
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, id);
+            ps.setInt(1, Integer.parseInt(id));
             ps.executeUpdate();
             // CORRECCIÓN: Log actualizado a Derby
             logger.info("Borrado exitoso en Gryffindor (Derby) para ID: {}", id);
+            //Llama al metodo sincronizarDelete de mariadbdao para que se sincronicen.
+            String idConPrefijo = casa.substring(0, 1).toUpperCase() + id;
+            mariaDBDAO.sincronizarDelete(idConPrefijo,casa);
             return true;
 
         } catch (SQLException e) {
@@ -138,7 +152,7 @@ public class DerbyDAO {
     private List<Modelo_Estudiante> getAllSync() throws SQLException {
         List<Modelo_Estudiante> estudiantes = new ArrayList<>();
         // Usando ESTUDIANTES
-        final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES ORDER BY id";
+        final String SQL = "SELECT id, nombre, apellidos, casa, curso, patronus FROM APP.ESTUDIANTES ORDER BY id";
         logger.debug("Ejecutando consulta SÍNCRONA Gryffindor: {}", SQL);
 
         try (Connection conn = ConexionBD.conectarCasa("Gryffindor");
@@ -147,7 +161,7 @@ public class DerbyDAO {
 
             while (rs.next()) {
                 Modelo_Estudiante e = new Modelo_Estudiante(
-                        rs.getInt("id"),
+                        rs.getString("id"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
                         rs.getString("casa"),
