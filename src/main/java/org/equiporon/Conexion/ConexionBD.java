@@ -49,29 +49,7 @@ public class ConexionBD {
 // dentro de tu try tras crear la conn:
             System.out.println("[Derby] URL usada: " + url + " user=" + user);
 
-// Solo para Gryffindor/Derby:
-            if ("Gryffindor".equalsIgnoreCase(casa)) {
-                try (Statement st = conn.createStatement()) {
-                    try (ResultSet rs = st.executeQuery("VALUES CURRENT_USER")) {
-                        if (rs.next()) System.out.println("[Derby] CURRENT_USER=" + rs.getString(1));
-                    }
-                    try (ResultSet rs = st.executeQuery("VALUES CURRENT SCHEMA")) {
-                        if (rs.next()) System.out.println("[Derby] CURRENT_SCHEMA=" + rs.getString(1));
-                    }
-                    try (ResultSet rs = st.executeQuery(
-                            "SELECT TABLENAME FROM SYS.SYSTABLES WHERE TABLETYPE='T' AND UPPER(TABLENAME)='ESTUDIANTES'")) {
-                        boolean exists = rs.next();
-                        System.out.println("[Derby] ¿Existe tabla ESTUDIANTES en metadata? " + exists);
-                    }
-                    // Probar acceso real:
-                    try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM APP.ESTUDIANTES")) {
-                        if (rs.next()) System.out.println("[Derby] Filas en APP.ESTUDIANTES = " + rs.getInt(1));
-                    }
-                } catch (SQLException ex) {
-                    System.err.println("[Derby] Diagnóstico falló: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
-            }
+
 
 
             System.out.println("Conexión exitosa con " + casa);
