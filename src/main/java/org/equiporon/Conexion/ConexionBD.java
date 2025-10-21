@@ -1,8 +1,6 @@
 package org.equiporon.Conexion;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class ConexionBD {
 
@@ -43,9 +41,44 @@ public class ConexionBD {
 
         try {
             Connection conn = DriverManager.getConnection(url, user, password);
+
+            // 👇 Este bloque soluciona el error de Derby (APP.ESTUDIANTES no encontrado)
+            // imports:
+
+
+// dentro de tu try tras crear la conn:
+            System.out.println("[Derby] URL usada: " + url + " user=" + user);
+
+// Solo para Gryffindor/Derby:
+            if ("Gryffindor".equalsIgnoreCase(casa)) {
+                try (Statement st = conn.createStatement()) {
+                    try (ResultSet rs = st.executeQuery("VALUES CURRENT_USER")) {
+                        if (rs.next()) System.out.println("[Derby] CURRENT_USER=" + rs.getString(1));
+                    }
+                    try (ResultSet rs = st.executeQuery("VALUES CURRENT SCHEMA")) {
+                        if (rs.next()) System.out.println("[Derby] CURRENT_SCHEMA=" + rs.getString(1));
+                    }
+                    try (ResultSet rs = st.executeQuery(
+                            "SELECT TABLENAME FROM SYS.SYSTABLES WHERE TABLETYPE='T' AND UPPER(TABLENAME)='ESTUDIANTES'")) {
+                        boolean exists = rs.next();
+                        System.out.println("[Derby] ¿Existe tabla ESTUDIANTES en metadata? " + exists);
+                    }
+                    // Probar acceso real:
+                    try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM APP.ESTUDIANTES")) {
+                        if (rs.next()) System.out.println("[Derby] Filas en APP.ESTUDIANTES = " + rs.getInt(1));
+                    }
+                } catch (SQLException ex) {
+                    System.err.println("[Derby] Diagnóstico falló: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+
+
+            System.out.println("Conexión exitosa con " + casa);
             return conn;
+
         } catch (SQLException e) {
-            System.err.println("Error al conectar con la base de datos de " + casa + ": " + e.getMessage());
+            System.err.println("❌ Error al conectar con la base de datos de " + casa + ": " + e.getMessage());
             return null;
         }
     }
@@ -57,12 +90,14 @@ public class ConexionBD {
                     Config.getMariaDBUser(),
                     Config.getMariaDBPassword()
             );
+            System.out.println("Conexión exitosa con MariaDB (Hogwarts)");
             return conn;
         } catch (SQLException e) {
-            System.err.println("Error al conectar con MariaDB: " + e.getMessage());
+            System.err.println("❌ Error al conectar con MariaDB: " + e.getMessage());
             return null;
         }
     }
 }
+
 
 
