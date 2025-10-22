@@ -82,7 +82,7 @@
             <children>
                 <Button fx:id="botAdd" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onAction="#clickOnAdd" text="Añadir" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
                 <Button fx:id="botBorrar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onAction="#clickOnBorrar" text="Borrar" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
-                <Button fx:id="botEditar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onAction="#actualizarBD" text="Actualizar en BD" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
+                <Button fx:id="botEditar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"  onAction="#clickOnUndo" text="Deshacer" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
             </children>
         </GridPane>
 
