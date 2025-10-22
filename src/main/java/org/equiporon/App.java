@@ -32,8 +32,10 @@ public class App extends Application {
      * <p>
      * Se ejecuta automáticamente al lanzar la aplicación e inicializa la
      * escena principal definida en el archivo FXML "primary.fxml".
+     * Además, incorpora un icono a la aplicación.
      * </p>
      *
+     * @author Ruben, Diego
      * @param s instancia del {@link Stage} principal proporcionado por JavaFX.
      * @throws IOException si ocurre un error al cargar el archivo FXML inicial.
      */
