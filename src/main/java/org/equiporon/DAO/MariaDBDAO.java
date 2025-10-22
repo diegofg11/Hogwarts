@@ -137,7 +137,8 @@ public class MariaDBDAO extends BaseDAO {
             case "update" -> daoCasa.editarEstudiante(e, true);
             case "delete" -> daoCasa.borrarEstudiante(e.getId(), true);
         }
-
+        SQLiteDAO sqlite = new SQLiteDAO();
+        sqlite.sincronizarDesdeHogwarts(e, tipo);
         logger.info("🔄 Hogwarts → {} ({} ID {}).", casa, tipo, e.getId());
     }
 
