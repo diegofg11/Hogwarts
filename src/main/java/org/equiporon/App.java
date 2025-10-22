@@ -6,6 +6,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Clase principal de la aplicación JavaFX.
@@ -17,6 +20,8 @@ import java.io.IOException;
  * @author Unai
  */
 public class App extends Application {
+
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     /** Ventana principal de la aplicación (Stage). */
     private static Stage stage;
