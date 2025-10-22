@@ -14,8 +14,14 @@ import org.equiporon.Modelo.Modelo_Estudiante;
 import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class Controlador {
+
+    private static final Logger logger = LoggerFactory.getLogger(Controlador.class);
+
 
     // --- Elementos FXML (todos los fx:id usados por primary.fxml) ---
     @FXML private AnchorPane rootPane;
