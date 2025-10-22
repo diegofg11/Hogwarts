@@ -2,19 +2,19 @@
 /* Estilos base (fondo y texto) */
 /* ------------------------ */
 .root {
-    -fx-background-color: #f5f5f5; /* fondo común */
+    -fx-background-color: #f5f5f5;
     -fx-text-fill: #000000;
     -fx-font-family: "Georgia", serif;
 }
 
-/* Panel principal con borde redondeado */
+/* Panel principal con borde redondeado y borde predeterminado */
 #rootPane {
     -fx-background-radius: 15;
     -fx-border-radius: 15;
     -fx-border-width: 3;
-    -fx-padding: 15; /* separación interna del contenido */
-    -fx-border-color: transparent; /* se sobrescribe según la casa */
-    -fx-background-color: white; /* fondo base, se sobrescribe según la casa */
+    -fx-padding: 0; /* sin separación interna */
+    -fx-border-color: #333333;
+    -fx-background-color: white;
 }
 
 /* Botones base con tamaño uniforme */
@@ -25,9 +25,9 @@
     -fx-background-radius: 5px;
     -fx-padding: 8 15 8 15;
     -fx-text-fill: #ffffff;
-    -fx-background-color: #555555; /* color por defecto */
-    -fx-min-width: 100%; /* ocupar la totalidad del GridPane */
-    -fx-min-height: 30px; /* igual que tu GridPane row prefHeight */
+    -fx-background-color: #555555;
+    -fx-min-width: 100%;
+    -fx-min-height: 30px;
 }
 
 /* Labels destacados */
@@ -36,76 +36,50 @@
 }
 
 /* ------------------------ */
+/* Combobox dorado */
+.combo-box {
+    -fx-background-color: #FFD700; /* dorado */
+    -fx-border-color: #DAA520; /* borde más oscuro dorado */
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-text-fill: #000000;
+}
+
+/* ------------------------ */
 /* Gryffindor */
-#rootPane.gryffindor {
-    -fx-border-color: #7f0909;
-    -fx-background-color: #fdf2f2;
-}
-#rootPane.gryffindor .button {
-    -fx-background-color: #7f0909;
-}
-#rootPane.gryffindor .label {
-    -fx-text-fill: #7f0909;
-}
+#rootPane.gryffindor { -fx-border-color: #7f0909; -fx-background-color: #fdf2f2; }
+#rootPane.gryffindor .button { -fx-background-color: #7f0909; }
+#rootPane.gryffindor .label { -fx-text-fill: #7f0909; }
 
 /* ------------------------ */
 /* Ravenclaw */
-#rootPane.ravenclaw {
-    -fx-border-color: #0e1a40;
-    -fx-background-color: #e6e9f8;
-}
-#rootPane.ravenclaw .button {
-    -fx-background-color: #0e1a40;
-}
-#rootPane.ravenclaw .label {
-    -fx-text-fill: #0e1a40;
-}
+#rootPane.ravenclaw { -fx-border-color: #0e1a40; -fx-background-color: #e6e9f8; }
+#rootPane.ravenclaw .button { -fx-background-color: #0e1a40; }
+#rootPane.ravenclaw .label { -fx-text-fill: #0e1a40; }
 
 /* ------------------------ */
 /* Slytherin */
-#rootPane.slytherin {
-    -fx-border-color: #1a472a;
-    -fx-background-color: #e7f3ea;
-}
-#rootPane.slytherin .button {
-    -fx-background-color: #1a472a;
-}
-#rootPane.slytherin .label {
-    -fx-text-fill: #1a472a;
-}
+#rootPane.slytherin { -fx-border-color: #1a472a; -fx-background-color: #e7f3ea; }
+#rootPane.slytherin .button { -fx-background-color: #1a472a; }
+#rootPane.slytherin .label { -fx-text-fill: #1a472a; }
 
 /* ------------------------ */
 /* Hufflepuff */
-#rootPane.hufflepuff {
-    -fx-border-color: #ffdb00;
-    -fx-background-color: #fffbea;
-}
-#rootPane.hufflepuff .button {
-    -fx-background-color: #ffdb00;
-    -fx-text-fill: #000000;
-}
-#rootPane.hufflepuff .label {
-    -fx-text-fill: #ffdb00;
-}
+#rootPane.hufflepuff { -fx-border-color: #ffdb00; -fx-background-color: #fffbea; }
+#rootPane.hufflepuff .button { -fx-background-color: #ffdb00; -fx-text-fill: #000000; }
+#rootPane.hufflepuff .label { -fx-text-fill: #ffdb00; }
 
 /* ------------------------ */
 /* Hogwarts unificado */
-#rootPane.hogwarts {
-    -fx-border-color: #333333;
-    -fx-background-color: #f0f0f0;
-}
-#rootPane.hogwarts .button {
-    -fx-background-color: #333333;
-}
-#rootPane.hogwarts .label {
-    -fx-text-fill: #333333;
-}
+#rootPane.hogwarts { -fx-border-color: #333333; -fx-background-color: #f0f0f0; }
+#rootPane.hogwarts .button { -fx-background-color: #333333; }
+#rootPane.hogwarts .label { -fx-text-fill: #333333; }
 
 /* ------------------------ */
 /* MenuBar separado del borde */
 .menu-bar {
-    -fx-background-color: transparent; /* para que no se mezcle con el borde */
-    -fx-padding: 0 15 10 15; /* separarlo del borde y un poco de espacio inferior */
-    -fx-border-color: #cccccc; /* línea debajo del menú */
-    -fx-border-width: 0 0 2 0; /* solo borde inferior */
+    -fx-background-color: transparent;
+    -fx-padding: 0; /* eliminar desplazamiento */
+    -fx-border-color: #cccccc;
+    -fx-border-width: 0 0 2 0;
 }
