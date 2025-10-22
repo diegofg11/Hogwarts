@@ -105,13 +105,13 @@
             </image>
         </ImageView>
 
-        <ImageView fx:id="bannerIzquierdo" fitHeight="93.0" fitWidth="100.0" layoutX="17.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="24.0">
+        <ImageView fx:id="bannerIzquierdo" fitHeight="93.0" fitWidth="100.0" layoutX="17.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="22.0">
             <image>
                 <Image url="@../images/hogwarts_banner.png" />
             </image>
         </ImageView>
 
-        <ImageView fx:id="bannerDerecho" fitHeight="93.0" fitWidth="100.0" layoutX="490.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="24.0">
+        <ImageView fx:id="bannerDerecho" fitHeight="93.0" fitWidth="100.0" layoutX="490.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="22.0">
             <image>
                 <Image url="@../images/hogwarts_banner.png" />
             </image>
