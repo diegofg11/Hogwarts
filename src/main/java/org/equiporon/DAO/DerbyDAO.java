@@ -10,6 +10,8 @@ import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.equiporon.Utils.Alertas.mostrarError;
+
 /**
  * DAO Asíncrono para gestionar operaciones CRUD en Apache Derby (Gryffindor)
  * sobre la tabla ESTUDIANTES, utilizando Modelo_Estudiante.
@@ -65,39 +67,45 @@ public class DerbyDAO {
     /** [SÍNCRONO] Implementación interna para añadir. */
     private Boolean aniadirSync(Modelo_Estudiante e) throws SQLException {
         // Usamos ESTUDIANTES y lógica RETURN_GENERATED_KEYS
-        String sql = "INSERT INTO APP.ESTUDIANTES (NOMBRE, APELLIDOS, CASA, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
+        if (comprobarEstudiante(e)) {
 
-        try (Connection conn = ConexionBD.conectarCasa(casa);
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            String sql = "INSERT INTO APP.ESTUDIANTES (NOMBRE, APELLIDOS, CASA, CURSO, PATRONUS) VALUES (?, ?, ?, ?, ?)";
 
-            pstmt.setString(1, e.getNombre());
-            pstmt.setString(2, e.getApellidos());
-            pstmt.setString(3, e.getCasa());
-            pstmt.setInt(4, e.getCurso());
-            pstmt.setString(5, e.getPatronus());
+            try (Connection conn = ConexionBD.conectarCasa(casa);
+                 PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+                pstmt.setString(1, e.getNombre());
+                pstmt.setString(2, e.getApellidos());
+                pstmt.setString(3, e.getCasa());
+                pstmt.setInt(4, e.getCurso());
+                pstmt.setString(5, e.getPatronus());
 
 
 
-            if (pstmt.executeUpdate() > 0) {
-                try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        e.setId(rs.getString(1)); // Establecer el ID generado
-                        String idConPrefijo = casa.substring(0, 1).toUpperCase() + e.getId();
-                        // CORRECCIÓN: Log actualizado a Derby
-                        logger.info("Inserción exitosa en Gryffindor (Derby) con ID: {}", e.getId());
-                        //Llama al metodo sincronizarInsert de mariadbdao para que se sincronicen.
+                if (pstmt.executeUpdate() > 0) {
+                    try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            e.setId(rs.getString(1)); // Establecer el ID generado
+                            String idConPrefijo = casa.substring(0, 1).toUpperCase() + e.getId();
+                            // CORRECCIÓN: Log actualizado a Derby
+                            logger.info("Inserción exitosa en Gryffindor (Derby) con ID: {}", e.getId());
+                            //Llama al metodo sincronizarInsert de mariadbdao para que se sincronicen.
 
-                        mariaDBDAO.sincronizarInsert(e,casa,idConPrefijo);
-                        return true;
+                            mariaDBDAO.sincronizarInsert(e,casa,idConPrefijo);
+                            return true;
+                        }
                     }
                 }
-            }
-            return false;
+                return false;
 
-        } catch (SQLException ex) {
-            // CORRECCIÓN: Error Log actualizado a Derby
-            logger.error("Error SÍNCRONO al añadir estudiante en Gryffindor (Derby).", ex);
-            throw ex;
+            } catch (SQLException ex) {
+                // CORRECCIÓN: Error Log actualizado a Derby
+                logger.error("Error SÍNCRONO al añadir estudiante en Gryffindor (Derby).", ex);
+                throw ex;
+            }
+        }
+        else {
+            return false;
         }
     }
 
@@ -176,6 +184,19 @@ public class DerbyDAO {
             throw e;
         }
         return estudiantes;
+    }
+
+    public static boolean comprobarEstudiante(Modelo_Estudiante e) {
+
+        if (e.getId().isEmpty() || e.getApellidos().isEmpty() || e.getNombre().isEmpty() || e.getCurso() == null
+               || e.getPatronus().isEmpty()) {
+            logger.error("No dejes campos vacios");
+            mostrarError("Error campos vacios", "No dejes campos vacios");
+            return false;
+        }
+
+
+        return true;
     }
 
     /** Cierra el pool de hilos. */
