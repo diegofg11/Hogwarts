@@ -75,6 +75,11 @@
             <artifactId>ojdbc11</artifactId>
             <version>23.3.0.23.09</version>
         </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.45.3.0</version>
+        </dependency>
 
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -89,6 +94,7 @@
     </dependencies>
 
     <build>
+        <directory>../target</directory>
         <plugins>
 
             <plugin>
