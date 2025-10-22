@@ -330,11 +330,12 @@ public class Controlador {
             • Los cambios se sincronizan con la base central (MariaDB).
 
             📦 Bases de datos:
-            Gryffindor → Derby
-            Hufflepuff → H2
-            Slytherin  → HSQLDB
-            Ravenclaw  → Oracle
-            Hogwarts   → MariaDB
+            Gryffindor       → Derby
+            Hufflepuff       → H2
+            Slytherin        → HSQLDB
+            Ravenclaw        → Oracle
+            Hogwarts         → MariaDB
+            Hogwarts (local) → SQLite
             """);
         help.showAndWait();
     }
@@ -350,12 +351,14 @@ public class Controlador {
             • Rubén
             • Unai
             • Gaizka
+            • Xiker
+            • Igor
 
             ⚙️ Tecnologías:
             • JavaFX 23
             • JDBC
             • Maven
-            • MariaDB / Oracle / H2 / Derby / HSQLDB
+            • MariaDB / Oracle / H2 / Derby / HSQLDB / SQLite
             """);
         about.showAndWait();
     }
