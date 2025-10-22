@@ -12,20 +12,17 @@ import javafx.util.converter.IntegerStringConverter;
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.DAO.*;
 import org.equiporon.Modelo.Modelo_Estudiante;
-
-import java.sql.Connection;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.util.List;
 
 public class Controlador {
 
     private static final Logger logger = LoggerFactory.getLogger(Controlador.class);
 
-
-    // --- Elementos FXML (todos los fx:id usados por primary.fxml) ---
+    // --- Elementos FXML ---
     @FXML private AnchorPane rootPane;
     @FXML private Label lblCasaSeleccionada;
     @FXML private ComboBox<String> choiceCasas;
@@ -49,66 +46,35 @@ public class Controlador {
     @FXML private ImageView bannerIzquierdo;
     @FXML private ImageView bannerDerecho;
 
-    // estado
+    // Estado
     private String casaActual = null;
-    private Object daoActual = null;
+    private BaseDAO daoActual = null;
 
     // ----------------- Inicialización -----------------
     @FXML
     private void initialize() {
-
-        // 1. Habilitar la edición a nivel de TableView
         tablaEstudiantes.setEditable(true);
 
-        // 2. Configurar las Cell Factories para la edición
-        // Para columnas de tipo String (nombre, apellidos, patronus)
         tableNombre.setCellFactory(TextFieldTableCell.forTableColumn());
         tableApellidos.setCellFactory(TextFieldTableCell.forTableColumn());
         tablePatronus.setCellFactory(TextFieldTableCell.forTableColumn());
-
-        // Para columnas de tipo numérico (curso)
-        // 🚨 REQUIERE un StringConverter para convertir la entrada de texto a Integer.
-
         tableCurso.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
 
-        // --- Configuración de OnEditCommit para actualizar el modelo local ---
-        tableNombre.setOnEditCommit(event -> {
-            event.getRowValue().setNombre(event.getNewValue());
-        });
-
-        tableApellidos.setOnEditCommit(event -> {
-            event.getRowValue().setApellidos(event.getNewValue());
-        });
-
-        tablePatronus.setOnEditCommit(event -> {
-            event.getRowValue().setPatronus(event.getNewValue());
-        });
-
-            // tableCurso requiere validación
-        tableCurso.setOnEditCommit(event -> {
-            Modelo_Estudiante estudiante = event.getRowValue();
-            Integer nuevoCurso = event.getNewValue();
-
-            // Validación: debe ser un número positivo
-            if (nuevoCurso == null || nuevoCurso <= 0) {
-                mostrarError("El curso debe ser un número positivo válido.");
-                // Revertir el valor en la UI
-                estudiante.setCurso(event.getOldValue());
+        tableNombre.setOnEditCommit(e -> e.getRowValue().setNombre(e.getNewValue()));
+        tableApellidos.setOnEditCommit(e -> e.getRowValue().setApellidos(e.getNewValue()));
+        tablePatronus.setOnEditCommit(e -> e.getRowValue().setPatronus(e.getNewValue()));
+        tableCurso.setOnEditCommit(e -> {
+            if (e.getNewValue() != null && e.getNewValue() > 0)
+                e.getRowValue().setCurso(e.getNewValue());
+            else {
+                mostrarError("El curso debe ser un número positivo.");
                 tablaEstudiantes.refresh();
-                return;
             }
-
-            // Actualizar solo el modelo local
-            estudiante.setCurso(nuevoCurso);
         });
 
-
-
-        // Poblamos el ComboBox
         choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
         choiceCasas.setValue("Hogwarts");
 
-        // Setup tabla (factories)
         tableId.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getId()));
         tableNombre.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombre()));
         tableApellidos.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getApellidos()));
@@ -116,50 +82,177 @@ public class Controlador {
         tableCurso.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getCurso()).asObject());
         tablePatronus.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPatronus()));
 
-        // Listener al cambiar la casa
-        choiceCasas.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        seleccionarCasa(newValue);
-                        aplicarColorVentana(newValue);
-                        aplicarImagenesCasa(newValue);
-                    }
-                }
-        );
+        choiceCasas.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                seleccionarCasa(newVal);
+                aplicarColorVentana(newVal);
+                aplicarImagenesCasa(newVal);
+            }
+        });
 
-        // Colores y apariencia del ComboBox (estilo por casa)
         setupComboBoxColors();
-
-        // Selección por defecto: Hogwarts
-        choiceCasas.setValue("Hogwarts");
-        txtCasa.setText("Hogwarts");
-
-        // Aplicar estilo e imagenes iniciales
         aplicarColorVentana("Hogwarts");
         aplicarImagenesCasa("Hogwarts");
-
-        // Intentamos seleccionar la casa por defecto (conexión y carga de estudiantes)
         seleccionarCasa("Hogwarts");
     }
 
-    // ----------------- Lógica de imágenes y estilos -----------------
+    // ----------------- Selección de casa -----------------
+    private void seleccionarCasa(String casa) {
+        casaActual = casa;
+        txtCasa.setText(casa);
+
+        try (Connection conn = ConexionBD.conectarCasa(casa)) {
+            if (conn == null) {
+                mostrarError("No se pudo conectar con la base de datos de " + casa);
+                return;
+            }
+
+            switch (casa) {
+                case "Gryffindor" -> daoActual = new DerbyDAO();
+                case "Hufflepuff" -> daoActual = new H2DAO();
+                case "Slytherin" -> daoActual = new HSQLDBDAO();
+                case "Ravenclaw" -> daoActual = new OracleDAO();
+                case "Hogwarts" -> daoActual = new MariaDBDAO();
+            }
+
+            if ("Hogwarts".equalsIgnoreCase(casa)) {
+                txtCasa.setEditable(true);
+                txtCasa.setPromptText("Introduce la casa destino");
+            } else {
+                txtCasa.setEditable(false);
+            }
+
+            cargarEstudiantes();
+        } catch (Exception e) {
+            mostrarError("Error al conectar con " + casa + ": " + e.getMessage());
+        }
+    }
+
+    // ----------------- CRUD -----------------
+    @FXML
+    void clickOnAdd(ActionEvent event) {
+        if (daoActual == null) {
+            mostrarError("Selecciona una casa antes de añadir un estudiante.");
+            return;
+        }
+
+        try {
+            Modelo_Estudiante nuevo = new Modelo_Estudiante(
+                    null,
+                    txtNombre.getText(),
+                    txtApellidos.getText(),
+                    txtCasa.getText(),
+                    Integer.parseInt(txtCurso.getText()),
+                    txtPatronus.getText()
+            );
+
+            if (daoActual.insertarEstudiante(nuevo, false)) {
+                mostrarInfo("✅ Estudiante añadido correctamente a " + casaActual + ".");
+                limpiarCampos();
+                cargarEstudiantes();
+            } else mostrarError("No se pudo añadir el estudiante.");
+
+        } catch (Exception e) {
+            mostrarError("Error al añadir estudiante: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void actualizarBD(ActionEvent event) {
+        if (daoActual == null) {
+            mostrarError("Selecciona una casa antes de actualizar.");
+            return;
+        }
+
+        Modelo_Estudiante seleccionado = tablaEstudiantes.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarError("Selecciona un estudiante para actualizar.");
+            return;
+        }
+
+        if (daoActual.editarEstudiante(seleccionado, false))
+            mostrarInfo("✏️ Cambios guardados correctamente en " + casaActual + ".");
+        else mostrarError("No se pudo actualizar el estudiante.");
+    }
+
+    @FXML
+    void clickOnBorrar(ActionEvent event) {
+        if (daoActual == null) {
+            mostrarError("Selecciona una casa antes de borrar un estudiante.");
+            return;
+        }
+
+        Modelo_Estudiante seleccionado = tablaEstudiantes.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarError("Selecciona un estudiante de la tabla para borrar.");
+            return;
+        }
+
+        if (daoActual.borrarEstudiante(seleccionado.getId(), false)) {
+            mostrarInfo("🗑️ Estudiante eliminado correctamente de " + casaActual + ".");
+            cargarEstudiantes();
+        } else mostrarError("No se pudo eliminar el estudiante.");
+    }
+
+    // ----------------- Cargar estudiantes -----------------
+    private void cargarEstudiantes() {
+        if (daoActual == null) return;
+
+        try {
+            List<Modelo_Estudiante> estudiantes = daoActual.obtenerTodos();
+            tablaEstudiantes.getItems().setAll(estudiantes);
+        } catch (Exception e) {
+            mostrarError("Error al cargar estudiantes: " + e.getMessage());
+        }
+    }
+
+    // ----------------- Utilidades -----------------
+    private void limpiarCampos() {
+        txtNombre.clear();
+        txtApellidos.clear();
+        txtCurso.clear();
+        txtPatronus.clear();
+    }
+
+    private void mostrarError(String mensaje) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+        });
+    }
+
+    private void mostrarInfo(String mensaje) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Información");
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+        });
+    }
+
+    // ----------------- Imagen y estilo (igual que antes) -----------------
     private void aplicarImagenesCasa(String casa) {
         String basePath = "/images/";
         String nombre = casa.toLowerCase();
 
         try {
-            String escudoPath = basePath + nombre + "_escudo.png";
-            Image escudo = new Image(getClass().getResourceAsStream(escudoPath));
+            Image escudo = new Image(getClass().getResourceAsStream(basePath + nombre + "_escudo.png"));
+            Image banner = new Image(getClass().getResourceAsStream(basePath + nombre + "_banner.png"));
             escudoCasa.setImage(escudo);
-
-            String bannerPath = basePath + nombre + "_banner.png";
-            Image banner = new Image(getClass().getResourceAsStream(bannerPath));
             bannerIzquierdo.setImage(banner);
             bannerDerecho.setImage(banner);
-        } catch (Exception e) {
-            // Si no existe la imagen, no fallamos la app; dejamos imágenes previamente cargadas o vacías
-            System.err.println("No se encontraron imágenes para " + casa + ": " + e.getMessage());
-        }
+        } catch (Exception ignored) {}
+    }
+
+    private void aplicarColorVentana(String casa) {
+        if (rootPane == null) return;
+        rootPane.getStyleClass().removeAll("gryffindor", "slytherin", "ravenclaw", "hufflepuff", "hogwarts");
+        rootPane.getStyleClass().add(casa.toLowerCase());
     }
 
     private void setupComboBoxColors() {
@@ -198,235 +291,9 @@ public class Controlador {
             case "Slytherin" -> "-fx-background-color: #1A472A; -fx-text-fill: #AAAAAA;";
             case "Ravenclaw" -> "-fx-background-color: #0E1A40; -fx-text-fill: #e6e9f8;";
             case "Hufflepuff" -> "-fx-background-color: #EEE117; -fx-text-fill: #000000;";
-            case "Hogwarts" -> "-fx-background-color: #000000; -fx-text-fill: #FFD700;";
-            default -> "-fx-background-color: white; -fx-text-fill: black;";
+            default -> "-fx-background-color: #000000; -fx-text-fill: #FFD700;";
         };
     }
-
-    private void aplicarColorVentana(String casa) {
-        if (rootPane == null) return;
-        rootPane.getStyleClass().removeAll("gryffindor", "slytherin", "ravenclaw", "hufflepuff", "hogwarts");
-        switch (casa) {
-            case "Gryffindor" -> rootPane.getStyleClass().add("gryffindor");
-            case "Slytherin" -> rootPane.getStyleClass().add("slytherin");
-            case "Ravenclaw" -> rootPane.getStyleClass().add("ravenclaw");
-            case "Hufflepuff" -> rootPane.getStyleClass().add("hufflepuff");
-            default -> rootPane.getStyleClass().add("hogwarts");
-        }
-    }
-
-    // ----------------- Selección de casa y conexión/DAO -----------------
-    private void seleccionarCasa(String casa) {
-        casaActual = casa;
-        if (lblCasaSeleccionada != null) lblCasaSeleccionada.setText("Casa seleccionada: " + casa);
-        if (txtCasa != null) txtCasa.setText(casa);
-
-        try (Connection conn = ConexionBD.conectarCasa(casa)) {
-            if (conn != null) {
-                System.out.println("Conectado a " + casa);
-
-                // Elegir DAO dinámicamente según la casa
-                switch (casa) {
-                    case "Gryffindor" -> daoActual = new DerbyDAO();
-                    case "Hufflepuff" -> daoActual = new H2DAO();
-                    case "Slytherin" -> daoActual = new HSQLDBDAO();
-                    case "Ravenclaw" -> daoActual = new OracleDAO();
-                    case "Hogwarts" -> daoActual = new MariaDBDAO();
-                    default -> daoActual = null;
-                }
-
-                // Si es Hogwarts, permitimos edición del campo txtCasa para introducir destino
-                if ("Hogwarts".equalsIgnoreCase(casa)) {
-                    if (txtCasa != null) {
-                        txtCasa.setDisable(false);
-                        txtCasa.setEditable(true);
-                        txtCasa.clear();
-                        txtCasa.setPromptText("Introduce la casa destino");
-                    }
-                } else {
-                    if (txtCasa != null) {
-                        txtCasa.setDisable(true);
-                        txtCasa.setEditable(false);
-                        txtCasa.setText(casa);
-                    }
-                }
-
-                // Cargar los estudiantes en la tabla
-                cargarEstudiantes();
-
-            } else {
-                mostrarError("No se pudo conectar con la base de datos de " + casa);
-            }
-        } catch (Exception e) {
-            mostrarError("Error crítico al conectar con " + casa + ": " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // ----------------- CRUD (botones) -----------------
-    @FXML
-    void clickOnAdd(ActionEvent event) {
-        if (daoActual == null) {
-            mostrarError("Selecciona una casa antes de añadir un estudiante.");
-            return;
-        }
-
-        try {
-            Modelo_Estudiante nuevo = new Modelo_Estudiante(
-                    null,
-                    txtNombre.getText(),
-                    txtApellidos.getText(),
-                    txtCasa.getText(),
-                    Integer.parseInt(txtCurso.getText()),
-                    txtPatronus.getText()
-            );
-
-            boolean resultado = false;
-            if (daoActual instanceof DerbyDAO dao) resultado = dao.aniadirAsync(nuevo).get();
-            else if (daoActual instanceof H2DAO dao) resultado = dao.aniadirAsync(nuevo).get();
-            else if (daoActual instanceof HSQLDBDAO dao) resultado = dao.aniadirAsync(nuevo).get();
-            else if (daoActual instanceof OracleDAO dao) resultado = dao.aniadirAsync(nuevo).get();
-            else if (daoActual instanceof MariaDBDAO dao) resultado = dao.aniadirAsync(nuevo).get();
-
-            if (resultado) {
-                mostrarInfo("Estudiante añadido correctamente a " + casaActual + ".");
-                limpiarCampos();
-                cargarEstudiantes();
-            } else {
-                mostrarError("No se pudo añadir el estudiante.");
-            }
-
-        } catch (Exception e) {
-            mostrarError("Error al añadir estudiante: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    void clickOnBorrar(ActionEvent event) {
-        if (daoActual == null) {
-            mostrarError("Selecciona una casa antes de borrar un estudiante.");
-            return;
-        }
-
-        Modelo_Estudiante seleccionado = tablaEstudiantes.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            mostrarError("Selecciona un estudiante de la tabla para borrar.");
-            return;
-        }
-
-        try {
-            boolean resultado = false;
-            if (daoActual instanceof DerbyDAO dao) resultado = dao.borrarAsync(seleccionado.getId()).get();
-            else if (daoActual instanceof H2DAO dao) resultado = dao.borrarAsync(seleccionado.getId()).get();
-            else if (daoActual instanceof HSQLDBDAO dao) resultado = dao.borrarAsync(seleccionado.getId()).get();
-            else if (daoActual instanceof OracleDAO dao) resultado = dao.borrarAsync(seleccionado.getId()).get();
-            else if (daoActual instanceof MariaDBDAO dao) resultado = dao.borrarAsync(seleccionado.getId()).get();
-
-            if (resultado) {
-                mostrarInfo("Estudiante eliminado correctamente de " + casaActual + ".");
-                cargarEstudiantes();
-            } else {
-                mostrarError("No se pudo eliminar el estudiante.");
-            }
-
-        } catch (Exception e) {
-            mostrarError("Error al borrar estudiante: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-// 🟢 INSERTAR ESTE MÉTODO EN LUGAR DE clickOnEditar
-
-    @FXML
-    void actualizarBD(ActionEvent event) {
-        if (daoActual == null) {
-            mostrarError("Selecciona una casa antes de guardar los cambios.");
-            return;
-        }
-
-        Modelo_Estudiante seleccionado = tablaEstudiantes.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            mostrarError("Selecciona un estudiante de la tabla para actualizar la base de datos.");
-            return;
-        }
-
-        // La clave es que el objeto 'seleccionado' ya tiene los datos editados por los onEditCommit.
-        // No necesitamos leer ni validar los TextFields (txtNombre, txtCurso, etc.)
-
-        try {
-            boolean resultado = false;
-
-            // El problema del .get() persiste, pero se mantiene la estructura de tu código.
-            if (daoActual instanceof DerbyDAO dao) resultado = dao.editarAsync(seleccionado).get();
-            else if (daoActual instanceof H2DAO dao) resultado = dao.editarAsync(seleccionado).get();
-            else if (daoActual instanceof HSQLDBDAO dao) resultado = dao.editarAsync(seleccionado).get();
-            else if (daoActual instanceof OracleDAO dao) resultado = dao.editarAsync(seleccionado).get();
-            else if (daoActual instanceof MariaDBDAO dao) resultado = dao.editarAsync(seleccionado).get();
-
-            if (resultado) {
-                mostrarInfo("Cambios del estudiante guardados correctamente en " + casaActual + ".");
-                // No se llama a cargarEstudiantes() si el modelo local ya es correcto
-            } else {
-                mostrarError("No se pudo guardar la edición en la base de datos.");
-            }
-
-        } catch (Exception e) {
-            mostrarError("Error al guardar la edición: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // ----------------- Cargar estudiantes -----------------
-    private void cargarEstudiantes() {
-        if (daoActual == null) return;
-
-        try {
-            List<Modelo_Estudiante> estudiantes = null;
-            if (daoActual instanceof DerbyDAO dao) estudiantes = dao.getAllAsync().get();
-            else if (daoActual instanceof H2DAO dao) estudiantes = dao.getAllAsync().get();
-            else if (daoActual instanceof HSQLDBDAO dao) estudiantes = dao.getAllAsync().get();
-            else if (daoActual instanceof OracleDAO dao) estudiantes = dao.getAllAsync().get();
-            else if (daoActual instanceof MariaDBDAO dao) estudiantes = dao.getAllAsync().get();
-
-            if (estudiantes != null) {
-                tablaEstudiantes.getItems().setAll(estudiantes);
-            }
-
-        } catch (InterruptedException | ExecutionException e) {
-            mostrarError("Error al cargar estudiantes: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // ----------------- Utilidades -----------------
-    private void limpiarCampos() {
-        txtNombre.clear();
-        txtApellidos.clear();
-        txtCurso.clear();
-        txtPatronus.clear();
-    }
-
-    private void mostrarError(String mensaje) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText(mensaje);
-            alert.showAndWait();
-        });
-    }
-
-    private void mostrarInfo(String mensaje) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Información");
-            alert.setHeaderText(null);
-            alert.setContentText(mensaje);
-            alert.showAndWait();
-        });
-    }
-
     // ----------------- Menú superior -----------------
     @FXML
     void clickOnFile(ActionEvent event) {
@@ -441,22 +308,11 @@ public class Controlador {
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == btnSi) {
-                // Cierra los pools de hilos de todos los DAO (si implementan shutdown)
-                try {
-                    DerbyDAO.shutdown();
-                } catch (Throwable ignored) {}
-                try {
-                    H2DAO.shutdown();
-                } catch (Throwable ignored) {}
-                try {
-                    HSQLDBDAO.shutdown();
-                } catch (Throwable ignored) {}
-                try {
-                    OracleDAO.shutdown();
-                } catch (Throwable ignored) {}
-                try {
-                    MariaDBDAO.shutdown();
-                } catch (Throwable ignored) {}
+                try { DerbyDAO.shutdown(); } catch (Throwable ignored) {}
+                try { H2DAO.shutdown(); } catch (Throwable ignored) {}
+                try { HSQLDBDAO.shutdown(); } catch (Throwable ignored) {}
+                try { OracleDAO.shutdown(); } catch (Throwable ignored) {}
+                try { MariaDBDAO.shutdown(); } catch (Throwable ignored) {}
                 Platform.exit();
             }
         });
@@ -468,18 +324,18 @@ public class Controlador {
         help.setTitle("Ayuda de Hogwarts Manager");
         help.setHeaderText("¿Necesitas ayuda?");
         help.setContentText("""
-                🧙‍♂️ Guía rápida:
-                • Selecciona una casa en el menú desplegable.
-                • Añade, edita o elimina estudiantes.
-                • Los cambios se sincronizan con la base central (MariaDB).
-                
-                📦 Bases de datos:
-                Gryffindor → Derby
-                Hufflepuff → H2
-                Slytherin  → HSQLDB
-                Ravenclaw  → Oracle
-                Hogwarts   → MariaDB
-                """);
+            🧙‍♂️ Guía rápida:
+            • Selecciona una casa en el menú desplegable.
+            • Añade, edita o elimina estudiantes.
+            • Los cambios se sincronizan con la base central (MariaDB).
+
+            📦 Bases de datos:
+            Gryffindor → Derby
+            Hufflepuff → H2
+            Slytherin  → HSQLDB
+            Ravenclaw  → Oracle
+            Hogwarts   → MariaDB
+            """);
         help.showAndWait();
     }
 
@@ -489,28 +345,19 @@ public class Controlador {
         about.setTitle("Acerca de");
         about.setHeaderText("Hogwarts Database Manager");
         about.setContentText("""
-                🏰 Proyecto desarrollado por:
-                • Diego
-                • Rubén
-                • Unai
-                • Gaizka
+            🏰 Proyecto desarrollado por:
+            • Diego
+            • Rubén
+            • Unai
+            • Gaizka
 
-                ⚙️ Tecnologías:
-                • JavaFX 23
-                • JDBC
-                • Maven
-                • MariaDB / Oracle / H2 / Derby / HSQLDB
-                """);
+            ⚙️ Tecnologías:
+            • JavaFX 23
+            • JDBC
+            • Maven
+            • MariaDB / Oracle / H2 / Derby / HSQLDB
+            """);
         about.showAndWait();
     }
 
-    /**
-     * El menú "Edit" en tu FXML original usaba onAction="#clickOnEdit".
-     * Para compatibilidad, clickOnEdit delega en borrar el seleccionado (comportamiento esperado).
-     */
-    @FXML
-    void clickOnEdit(ActionEvent event) {
-        // Delegamos al borrado (el menú "Edit" tenía la opción "Delete" en tu FXML original).
-        clickOnBorrar(event);
-    }
 }
