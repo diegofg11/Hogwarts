@@ -10,7 +10,7 @@ package org.equiporon.Modelo;
 public class Modelo_Estudiante {
 
     /** Identificador único de la persona (clave primaria en la base de datos). */
-    private int id;
+    private String id;
 
     /** Nombre de la persona. */
     private String nombre;
@@ -40,7 +40,7 @@ public class Modelo_Estudiante {
      *
      * @author Rubén
      */
-    public Modelo_Estudiante(int id, String nombre, String apellidos, String casa, int curso, String patronus) {
+    public Modelo_Estudiante(String id, String nombre, String apellidos, String casa, int curso, String patronus) {
         this.id = id;
         this.nombre = nombre;
         this.apellidos = apellidos;
@@ -55,7 +55,7 @@ public class Modelo_Estudiante {
      * Establece o modifica el identificador único del objeto.
      * @param id El nuevo identificador numérico.
      */
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -105,7 +105,7 @@ public class Modelo_Estudiante {
      * Obtiene el identificador único.
      * @return El identificador del objeto.
      */
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
