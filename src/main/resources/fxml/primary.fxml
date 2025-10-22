@@ -9,12 +9,14 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.equiporon.Controlador.Controlador">
+<AnchorPane fx:id="rootPane" prefHeight="581.0" prefWidth="595.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.equiporon.Controlador.Controlador">
 
     <children>
 
@@ -34,12 +36,9 @@
             </menus>
         </MenuBar>
 
-        <ComboBox fx:id="choiceCasas"
-                  layoutX="250.0" layoutY="40.0"
-                  prefWidth="200.0" prefHeight="30.0"/>
+        <ComboBox fx:id="choiceCasas" layoutX="147.0" layoutY="75.0" prefHeight="30.0" prefWidth="200.0" />
 
-
-        <GridPane hgap="5.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="90.0">
+        <GridPane hgap="5.0" layoutX="56.0" layoutY="145.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="145.0">
             <columnConstraints>
                 <ColumnConstraints percentWidth="30.0" />
                 <ColumnConstraints percentWidth="70.0" />
@@ -70,7 +69,7 @@
             </children>
         </GridPane>
 
-        <GridPane layoutX="389.0" layoutY="95.0" prefHeight="180.0" prefWidth="161.0" vgap="10.0" AnchorPane.rightAnchor="50.0">
+        <GridPane layoutX="393.0" layoutY="145.0" prefHeight="180.0" prefWidth="161.0" vgap="10.0" AnchorPane.rightAnchor="50.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             </columnConstraints>
@@ -86,7 +85,7 @@
             </children>
         </GridPane>
 
-        <TableView fx:id="tablaEstudiantes" prefHeight="180.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="300.0">
+        <TableView fx:id="tablaEstudiantes" layoutX="56.0" layoutY="346.4" prefHeight="215.0" prefWidth="435.0" AnchorPane.bottomAnchor="23.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="54.0" AnchorPane.topAnchor="343.0">
             <columns>
                 <TableColumn fx:id="tableId" prefWidth="75.0" text="ID" />
                 <TableColumn fx:id="tableNombre" prefWidth="75.0" text="Nombre" />
@@ -99,6 +98,24 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
         </TableView>
+
+        <ImageView fx:id="escudoCasa" fitHeight="93.0" fitWidth="78.0" layoutX="371.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="371.0" AnchorPane.topAnchor="41.0">
+            <image>
+                <Image url="@../images/hogwarts_escudo.png" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="bannerIzquierdo" fitHeight="93.0" fitWidth="100.0" layoutX="17.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="22.0">
+            <image>
+                <Image url="@../images/hogwarts_banner.png" />
+            </image>
+        </ImageView>
+
+        <ImageView fx:id="bannerDerecho" fitHeight="93.0" fitWidth="100.0" layoutX="490.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="22.0">
+            <image>
+                <Image url="@../images/hogwarts_banner.png" />
+            </image>
+        </ImageView>
 
     </children>
 </AnchorPane>
