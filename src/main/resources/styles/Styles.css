@@ -67,7 +67,7 @@
 /* Hufflepuff */
 #rootPane.hufflepuff { -fx-border-color: #ffdb00; -fx-background-color: #fffbea; }
 #rootPane.hufflepuff .button { -fx-background-color: #ffdb00; -fx-text-fill: #000000; }
-#rootPane.hufflepuff .label { -fx-text-fill: #ffdb00; }
+#rootPane.hufflepuff .label { -fx-text-fill: #000000; }
 
 /* ------------------------ */
 /* Hogwarts unificado */
