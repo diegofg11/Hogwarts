@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -40,6 +41,10 @@ public class App extends Application {
     public void start(@SuppressWarnings("exports") Stage s) throws IOException {
         stage = s;
         setRoot("primary", "");
+        Image icon = new Image(
+                App.class.getResource("/images/hogwarts_escudo.png").toExternalForm()
+        );
+        s.getIcons().add(icon);
     }
 
     /**
