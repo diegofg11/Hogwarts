@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -20,23 +20,26 @@
 
         <MenuBar prefHeight="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <menus>
-                <Menu fx:id="menuFile" text="File">
+                <Menu text="File">
                     <items>
                         <MenuItem onAction="#clickOnFile" text="Close" />
                     </items>
                 </Menu>
-                <Menu fx:id="menuHelp" text="Help">
+                <Menu text="Edit">
                     <items>
-                        <MenuItem onAction="#clickOnHelp" text="Help" />
-                        <MenuItem onAction="#clickOnAbout" text="About" />
+                        <MenuItem onAction="#clickOnEdit" text="Delete" />
+                    </items>
+                </Menu>
+                <Menu text="Help">
+                    <items>
+                        <MenuItem onAction="#clickOnHelp" text="About" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
 
-        <ComboBox fx:id="choiceCasas"
-                  layoutX="250.0" layoutY="40.0"
-                  prefWidth="200.0" prefHeight="30.0"/>
+        <ChoiceBox fx:id="choiceCasas" layoutX="218.0" layoutY="40.0" prefHeight="36.0" prefWidth="163.0" />
+        <Label fx:id="lblCasaSeleccionada" layoutX="218.0" layoutY="85.0" prefWidth="163.0" text="Casa no seleccionada" />
 
 
         <GridPane hgap="5.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="90.0">
@@ -66,7 +69,7 @@
                 <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                 <Label fx:id="lblCasa" text="Casa:" GridPane.rowIndex="4" />
-                <TextField fx:id="txtCasa" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <TextField fx:id="txtCasa" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             </children>
         </GridPane>
 
