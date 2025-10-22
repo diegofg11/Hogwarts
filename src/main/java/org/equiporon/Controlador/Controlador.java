@@ -4,9 +4,11 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.converter.IntegerStringConverter;
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.DAO.*;
 import org.equiporon.Modelo.Modelo_Estudiante;
@@ -54,6 +56,54 @@ public class Controlador {
     // ----------------- Inicialización -----------------
     @FXML
     private void initialize() {
+
+        // 1. Habilitar la edición a nivel de TableView
+        tablaEstudiantes.setEditable(true);
+
+        // 2. Configurar las Cell Factories para la edición
+        // Para columnas de tipo String (nombre, apellidos, patronus)
+        tableNombre.setCellFactory(TextFieldTableCell.forTableColumn());
+        tableApellidos.setCellFactory(TextFieldTableCell.forTableColumn());
+        tablePatronus.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        // Para columnas de tipo numérico (curso)
+        // 🚨 REQUIERE un StringConverter para convertir la entrada de texto a Integer.
+
+        tableCurso.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+
+        // --- Configuración de OnEditCommit para actualizar el modelo local ---
+        tableNombre.setOnEditCommit(event -> {
+            event.getRowValue().setNombre(event.getNewValue());
+        });
+
+        tableApellidos.setOnEditCommit(event -> {
+            event.getRowValue().setApellidos(event.getNewValue());
+        });
+
+        tablePatronus.setOnEditCommit(event -> {
+            event.getRowValue().setPatronus(event.getNewValue());
+        });
+
+            // tableCurso requiere validación
+        tableCurso.setOnEditCommit(event -> {
+            Modelo_Estudiante estudiante = event.getRowValue();
+            Integer nuevoCurso = event.getNewValue();
+
+            // Validación: debe ser un número positivo
+            if (nuevoCurso == null || nuevoCurso <= 0) {
+                mostrarError("El curso debe ser un número positivo válido.");
+                // Revertir el valor en la UI
+                estudiante.setCurso(event.getOldValue());
+                tablaEstudiantes.refresh();
+                return;
+            }
+
+            // Actualizar solo el modelo local
+            estudiante.setCurso(nuevoCurso);
+        });
+
+
+
         // Poblamos el ComboBox
         choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
         choiceCasas.setValue("Hogwarts");
@@ -286,26 +336,28 @@ public class Controlador {
         }
     }
 
+// 🟢 INSERTAR ESTE MÉTODO EN LUGAR DE clickOnEditar
+
     @FXML
-    void clickOnEditar(ActionEvent event) {
+    void actualizarBD(ActionEvent event) {
         if (daoActual == null) {
-            mostrarError("Selecciona una casa antes de editar un estudiante.");
+            mostrarError("Selecciona una casa antes de guardar los cambios.");
             return;
         }
 
         Modelo_Estudiante seleccionado = tablaEstudiantes.getSelectionModel().getSelectedItem();
         if (seleccionado == null) {
-            mostrarError("Selecciona un estudiante de la tabla para editar.");
+            mostrarError("Selecciona un estudiante de la tabla para actualizar la base de datos.");
             return;
         }
 
-        try {
-            seleccionado.setNombre(txtNombre.getText());
-            seleccionado.setApellidos(txtApellidos.getText());
-            seleccionado.setCurso(Integer.parseInt(txtCurso.getText()));
-            seleccionado.setPatronus(txtPatronus.getText());
+        // La clave es que el objeto 'seleccionado' ya tiene los datos editados por los onEditCommit.
+        // No necesitamos leer ni validar los TextFields (txtNombre, txtCurso, etc.)
 
+        try {
             boolean resultado = false;
+
+            // El problema del .get() persiste, pero se mantiene la estructura de tu código.
             if (daoActual instanceof DerbyDAO dao) resultado = dao.editarAsync(seleccionado).get();
             else if (daoActual instanceof H2DAO dao) resultado = dao.editarAsync(seleccionado).get();
             else if (daoActual instanceof HSQLDBDAO dao) resultado = dao.editarAsync(seleccionado).get();
@@ -313,14 +365,14 @@ public class Controlador {
             else if (daoActual instanceof MariaDBDAO dao) resultado = dao.editarAsync(seleccionado).get();
 
             if (resultado) {
-                mostrarInfo("Estudiante editado correctamente en " + casaActual + ".");
-                cargarEstudiantes();
+                mostrarInfo("Cambios del estudiante guardados correctamente en " + casaActual + ".");
+                // No se llama a cargarEstudiantes() si el modelo local ya es correcto
             } else {
-                mostrarError("No se pudo editar el estudiante.");
+                mostrarError("No se pudo guardar la edición en la base de datos.");
             }
 
         } catch (Exception e) {
-            mostrarError("Error al editar estudiante: " + e.getMessage());
+            mostrarError("Error al guardar la edición: " + e.getMessage());
             e.printStackTrace();
         }
     }
