@@ -1,15 +1,24 @@
 module org.equiporon {
+
     requires javafx.controls;
     requires javafx.fxml;
-    requires javafx.media;
     requires java.sql;
+
+    // Drivers de bases de datos que estás usando
+    requires org.mariadb.jdbc;
+    requires com.h2database;
+    requires org.apache.derby.client;
+    requires com.oracle.database.jdbc;
+
+    // Librerías adicionales
     requires org.slf4j;
+    requires com.github.benmanes.caffeine;
 
-    // 👇 HABILITA REFLEXIÓN para JavaFX
+    // 👇 Esta línea es la CLAVE para tu error:
     opens org.equiporon.Controlador to javafx.fxml;
-    opens org.equiporon to javafx.fxml;
 
-    // 👇 EXPORTA LOS PAQUETES si necesitas usar las clases fuera del módulo
+    // Si tienes más controladores en otros paquetes, añádelos igual:
+    // opens org.equiporon.Conexion to javafx.fxml;
+
     exports org.equiporon;
-    exports org.equiporon.Controlador;
 }

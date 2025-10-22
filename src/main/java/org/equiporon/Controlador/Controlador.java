@@ -1,10 +1,12 @@
-
 package org.equiporon.Controlador;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.DAO.*;
 import org.equiporon.Modelo.Modelo_Estudiante;
@@ -13,21 +15,16 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-/**
- * Controlador principal del proyecto Hogwarts.
- * Permite seleccionar una casa desde el menú y conectarse
- * a la base de datos correspondiente, con operaciones CRUD.
- *
- * @author
- * Diego, Rubén, Unai, Gaizka
- */
 public class Controlador {
 
-    // --- Elementos FXML ---
+    // --- Elementos FXML (todos los fx:id usados por primary.fxml) ---
+    @FXML private AnchorPane rootPane;
+    @FXML private Label lblCasaSeleccionada;
     @FXML private ComboBox<String> choiceCasas;
     @FXML private Button botAdd;
     @FXML private Button botBorrar;
     @FXML private Button botEditar;
+    @FXML private Label lblCasa;
     @FXML private TableView<Modelo_Estudiante> tablaEstudiantes;
     @FXML private TableColumn<Modelo_Estudiante, String> tableId;
     @FXML private TableColumn<Modelo_Estudiante, String> tableNombre;
@@ -35,23 +32,27 @@ public class Controlador {
     @FXML private TableColumn<Modelo_Estudiante, String> tableCasa;
     @FXML private TableColumn<Modelo_Estudiante, Integer> tableCurso;
     @FXML private TableColumn<Modelo_Estudiante, String> tablePatronus;
-    @FXML private TextField txtNombre;
     @FXML private TextField txtApellidos;
     @FXML private TextField txtCasa;
     @FXML private TextField txtCurso;
+    @FXML private TextField txtNombre;
     @FXML private TextField txtPatronus;
+    @FXML private ImageView escudoCasa;
+    @FXML private ImageView bannerIzquierdo;
+    @FXML private ImageView bannerDerecho;
 
+    // estado
     private String casaActual = null;
     private Object daoActual = null;
 
-    // ==========================================================
-    //                METODO DE INICIALIZACIÓN
-    // ==========================================================
+    // ----------------- Inicialización -----------------
     @FXML
     private void initialize() {
+        // Poblamos el ComboBox
         choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
         choiceCasas.setValue("Hogwarts");
-        txtCasa.setText("Hogwarts");
+
+        // Setup tabla (factories)
         tableId.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getId()));
         tableNombre.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombre()));
         tableApellidos.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getApellidos()));
@@ -64,23 +65,111 @@ public class Controlador {
                 (observable, oldValue, newValue) -> {
                     if (newValue != null) {
                         seleccionarCasa(newValue);
+                        aplicarColorVentana(newValue);
+                        aplicarImagenesCasa(newValue);
                     }
                 }
         );
+
+        // Colores y apariencia del ComboBox (estilo por casa)
+        setupComboBoxColors();
+
+        // Selección por defecto: Hogwarts
+        choiceCasas.setValue("Hogwarts");
+        txtCasa.setText("Hogwarts");
+
+        // Aplicar estilo e imagenes iniciales
+        aplicarColorVentana("Hogwarts");
+        aplicarImagenesCasa("Hogwarts");
+
+        // Intentamos seleccionar la casa por defecto (conexión y carga de estudiantes)
+        seleccionarCasa("Hogwarts");
     }
 
-    // ==========================================================
-    //              CONEXIÓN Y SELECCIÓN DE CASA
-    // ==========================================================
+    // ----------------- Lógica de imágenes y estilos -----------------
+    private void aplicarImagenesCasa(String casa) {
+        String basePath = "/images/";
+        String nombre = casa.toLowerCase();
+
+        try {
+            String escudoPath = basePath + nombre + "_escudo.png";
+            Image escudo = new Image(getClass().getResourceAsStream(escudoPath));
+            escudoCasa.setImage(escudo);
+
+            String bannerPath = basePath + nombre + "_banner.png";
+            Image banner = new Image(getClass().getResourceAsStream(bannerPath));
+            bannerIzquierdo.setImage(banner);
+            bannerDerecho.setImage(banner);
+        } catch (Exception e) {
+            // Si no existe la imagen, no fallamos la app; dejamos imágenes previamente cargadas o vacías
+            System.err.println("No se encontraron imágenes para " + casa + ": " + e.getMessage());
+        }
+    }
+
+    private void setupComboBoxColors() {
+        choiceCasas.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
+                    setStyle(getCasaColorStyle(item));
+                }
+            }
+        });
+
+        choiceCasas.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
+                    setStyle(getCasaColorStyle(item));
+                }
+            }
+        });
+    }
+
+    private String getCasaColorStyle(String casa) {
+        return switch (casa) {
+            case "Gryffindor" -> "-fx-background-color: #7F0909; -fx-text-fill: #FFC500;";
+            case "Slytherin" -> "-fx-background-color: #1A472A; -fx-text-fill: #AAAAAA;";
+            case "Ravenclaw" -> "-fx-background-color: #0E1A40; -fx-text-fill: #e6e9f8;";
+            case "Hufflepuff" -> "-fx-background-color: #EEE117; -fx-text-fill: #000000;";
+            case "Hogwarts" -> "-fx-background-color: #000000; -fx-text-fill: #FFD700;";
+            default -> "-fx-background-color: white; -fx-text-fill: black;";
+        };
+    }
+
+    private void aplicarColorVentana(String casa) {
+        if (rootPane == null) return;
+        rootPane.getStyleClass().removeAll("gryffindor", "slytherin", "ravenclaw", "hufflepuff", "hogwarts");
+        switch (casa) {
+            case "Gryffindor" -> rootPane.getStyleClass().add("gryffindor");
+            case "Slytherin" -> rootPane.getStyleClass().add("slytherin");
+            case "Ravenclaw" -> rootPane.getStyleClass().add("ravenclaw");
+            case "Hufflepuff" -> rootPane.getStyleClass().add("hufflepuff");
+            default -> rootPane.getStyleClass().add("hogwarts");
+        }
+    }
+
+    // ----------------- Selección de casa y conexión/DAO -----------------
     private void seleccionarCasa(String casa) {
         casaActual = casa;
-        txtCasa.setText(casa);
+        if (lblCasaSeleccionada != null) lblCasaSeleccionada.setText("Casa seleccionada: " + casa);
+        if (txtCasa != null) txtCasa.setText(casa);
 
         try (Connection conn = ConexionBD.conectarCasa(casa)) {
             if (conn != null) {
                 System.out.println("Conectado a " + casa);
 
-                // DAO dinámico según la casa
+                // Elegir DAO dinámicamente según la casa
                 switch (casa) {
                     case "Gryffindor" -> daoActual = new DerbyDAO();
                     case "Hufflepuff" -> daoActual = new H2DAO();
@@ -89,17 +178,24 @@ public class Controlador {
                     case "Hogwarts" -> daoActual = new MariaDBDAO();
                     default -> daoActual = null;
                 }
+
+                // Si es Hogwarts, permitimos edición del campo txtCasa para introducir destino
                 if ("Hogwarts".equalsIgnoreCase(casa)) {
-                    txtCasa.setDisable(false); // Activar el campo
-                    txtCasa.setEditable(true);
-                    txtCasa.clear();
-                    txtCasa.setPromptText("Introduce la casa destino");
+                    if (txtCasa != null) {
+                        txtCasa.setDisable(false);
+                        txtCasa.setEditable(true);
+                        txtCasa.clear();
+                        txtCasa.setPromptText("Introduce la casa destino");
+                    }
                 } else {
-                    txtCasa.setDisable(true);
-                    txtCasa.setEditable(false);
-                    txtCasa.setText(casa);
+                    if (txtCasa != null) {
+                        txtCasa.setDisable(true);
+                        txtCasa.setEditable(false);
+                        txtCasa.setText(casa);
+                    }
                 }
-                // Cargar estudiantes automáticamente
+
+                // Cargar los estudiantes en la tabla
                 cargarEstudiantes();
 
             } else {
@@ -111,9 +207,7 @@ public class Controlador {
         }
     }
 
-    // ==========================================================
-    //                     BOTÓN: AÑADIR
-    // ==========================================================
+    // ----------------- CRUD (botones) -----------------
     @FXML
     void clickOnAdd(ActionEvent event) {
         if (daoActual == null) {
@@ -152,9 +246,6 @@ public class Controlador {
         }
     }
 
-    // ==========================================================
-    //                     BOTÓN: BORRAR
-    // ==========================================================
     @FXML
     void clickOnBorrar(ActionEvent event) {
         if (daoActual == null) {
@@ -189,9 +280,6 @@ public class Controlador {
         }
     }
 
-    // ==========================================================
-    //                     BOTÓN: EDITAR
-    // ==========================================================
     @FXML
     void clickOnEditar(ActionEvent event) {
         if (daoActual == null) {
@@ -231,9 +319,7 @@ public class Controlador {
         }
     }
 
-    // ==========================================================
-    //                CARGAR ESTUDIANTES EN TABLA
-    // ==========================================================
+    // ----------------- Cargar estudiantes -----------------
     private void cargarEstudiantes() {
         if (daoActual == null) return;
 
@@ -255,9 +341,7 @@ public class Controlador {
         }
     }
 
-    // ==========================================================
-    //                  MÉTODOS DE UTILIDAD
-    // ==========================================================
+    // ----------------- Utilidades -----------------
     private void limpiarCampos() {
         txtNombre.clear();
         txtApellidos.clear();
@@ -284,13 +368,8 @@ public class Controlador {
             alert.showAndWait();
         });
     }
-    // ==========================================================
-//                  MENÚ SUPERIOR (File / Edit / Help)
-// ==========================================================
 
-    /**
-     * Opción del menú "File" → Cierra la aplicación.
-     */
+    // ----------------- Menú superior -----------------
     @FXML
     void clickOnFile(ActionEvent event) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -304,63 +383,76 @@ public class Controlador {
 
         confirm.showAndWait().ifPresent(response -> {
             if (response == btnSi) {
-                // Cierra los pools de hilos de todos los DAO
-                DerbyDAO.shutdown();
-                H2DAO.shutdown();
-                HSQLDBDAO.shutdown();
-                OracleDAO.shutdown();
-                // Finaliza la aplicación
+                // Cierra los pools de hilos de todos los DAO (si implementan shutdown)
+                try {
+                    DerbyDAO.shutdown();
+                } catch (Throwable ignored) {}
+                try {
+                    H2DAO.shutdown();
+                } catch (Throwable ignored) {}
+                try {
+                    HSQLDBDAO.shutdown();
+                } catch (Throwable ignored) {}
+                try {
+                    OracleDAO.shutdown();
+                } catch (Throwable ignored) {}
+                try {
+                    MariaDBDAO.shutdown();
+                } catch (Throwable ignored) {}
                 Platform.exit();
             }
         });
     }
-    /**
-     * Opción del menú "Help" → Muestra información del programa.
-     */
+
     @FXML
     void clickOnHelp(ActionEvent event) {
         Alert help = new Alert(Alert.AlertType.INFORMATION);
         help.setTitle("Ayuda de Hogwarts Manager");
         help.setHeaderText("¿Necesitas ayuda?");
         help.setContentText("""
-        🧙‍♂️ Guía rápida:
-        • Selecciona una casa en el menú desplegable.
-        • Añade, edita o elimina estudiantes.
-        • Los cambios se sincronizan con la base central (MariaDB).
-        
-        📦 Bases de datos:
-        Gryffindor → Derby
-        Hufflepuff → H2
-        Slytherin  → HSQLDB
-        Ravenclaw  → Oracle
-        Hogwarts   → MariaDB
-        """);
+                🧙‍♂️ Guía rápida:
+                • Selecciona una casa en el menú desplegable.
+                • Añade, edita o elimina estudiantes.
+                • Los cambios se sincronizan con la base central (MariaDB).
+                
+                📦 Bases de datos:
+                Gryffindor → Derby
+                Hufflepuff → H2
+                Slytherin  → HSQLDB
+                Ravenclaw  → Oracle
+                Hogwarts   → MariaDB
+                """);
         help.showAndWait();
     }
 
-    /**
-     * Opción del menú "About" → Muestra créditos del proyecto.
-     */
     @FXML
     void clickOnAbout(ActionEvent event) {
         Alert about = new Alert(Alert.AlertType.INFORMATION);
         about.setTitle("Acerca de");
         about.setHeaderText("Hogwarts Database Manager");
         about.setContentText("""
-        🏰 Proyecto desarrollado por:
-        • Diego
-        • Rubén
-        • Unai
-        • Gaizka
+                🏰 Proyecto desarrollado por:
+                • Diego
+                • Rubén
+                • Unai
+                • Gaizka
 
-        ⚙️ Tecnologías:
-        • JavaFX 23
-        • JDBC
-        • Maven
-        • MariaDB / Oracle / H2 / Derby / HSQLDB
-        """);
+                ⚙️ Tecnologías:
+                • JavaFX 23
+                • JDBC
+                • Maven
+                • MariaDB / Oracle / H2 / Derby / HSQLDB
+                """);
         about.showAndWait();
     }
 
+    /**
+     * El menú "Edit" en tu FXML original usaba onAction="#clickOnEdit".
+     * Para compatibilidad, clickOnEdit delega en borrar el seleccionado (comportamiento esperado).
+     */
+    @FXML
+    void clickOnEdit(ActionEvent event) {
+        // Delegamos al borrado (el menú "Edit" tenía la opción "Delete" en tu FXML original).
+        clickOnBorrar(event);
+    }
 }
-
