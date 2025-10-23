@@ -314,6 +314,7 @@ public abstract class BaseDAO {
         // CORRECCIÓN IMPORTANTE: aquí deben usarse &&
         if (!(e.getCasa().equalsIgnoreCase("Gryffindor") ||
                 e.getCasa().equalsIgnoreCase("Slytherin") ||
+                e.getCasa().equalsIgnoreCase("Hogwarts") ||
                 e.getCasa().equalsIgnoreCase("Hufflepuff") ||
                 e.getCasa().equalsIgnoreCase("Ravenclaw"))) {
 
