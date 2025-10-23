@@ -37,20 +37,20 @@ public abstract class BaseDAO {
     // === MÉTODOS ASÍNCRONOS COMUNES =============================
     // ============================================================
 
-    public Future<Boolean> insertarAsync(Modelo_Estudiante e) {
-        return dbExecutor.submit(() -> insertarEstudiante(e,false));
+    public CompletableFuture<Boolean> insertarAsync(Modelo_Estudiante e) {
+        return CompletableFuture.supplyAsync(() -> insertarEstudiante(e, false), dbExecutor);
     }
 
-    public Future<Boolean> editarAsync(Modelo_Estudiante e) {
-        return dbExecutor.submit(() -> editarEstudiante(e, false));
+    public CompletableFuture<Boolean> editarAsync(Modelo_Estudiante e) {
+        return CompletableFuture.supplyAsync(() -> editarEstudiante(e, false), dbExecutor);
     }
 
-    public Future<Boolean> borrarAsync(String id) {
-        return dbExecutor.submit(() -> borrarEstudiante(id, false));
+    public CompletableFuture<Boolean> borrarAsync(String id) {
+        return CompletableFuture.supplyAsync(() -> borrarEstudiante(id, false), dbExecutor);
     }
 
-    public Future<List<Modelo_Estudiante>> obtenerTodosAsync() {
-        return dbExecutor.submit(this::obtenerTodos);
+    public CompletableFuture<List<Modelo_Estudiante>> obtenerTodosAsync() {
+        return CompletableFuture.supplyAsync(this::obtenerTodos, dbExecutor);
     }
 
     // ============================================================
