@@ -1,3 +1,4 @@
+
 package org.equiporon.Controlador;
 
 import javafx.application.Platform;
@@ -173,6 +174,7 @@ public class Controlador {
     // ----------------- CRUD -----------------
     @FXML
     void clickOnAdd(ActionEvent event) {
+        new SQLiteDAO().hacerBackupInstantaneo();
         if (daoActual == null) {
             mostrarError("Selecciona una casa antes de añadir un estudiante.");
             return;
@@ -188,12 +190,7 @@ public class Controlador {
                     txtPatronus.getText()
             );
 
-            contadorOperaciones++;
-            if (contadorOperaciones % 2 == 0) { // cada 2 movimientos
-                SQLiteDAO sqlite = new SQLiteDAO();
-                sqlite.hacerBackupCompleto();
-                System.out.println("💾 Copia de seguridad en SQLite actualizada tras " + contadorOperaciones + " movimientos.");
-            }
+            new SQLiteDAO().hacerBackupInstantaneo();
 
             if (daoActual.insertarEstudiante(nuevo, false)) {
                 mostrarInfo("✅ Estudiante añadido correctamente a " + casaActual + ".");
@@ -216,6 +213,7 @@ public class Controlador {
     private void actualizarEnBD(Modelo_Estudiante est) {
         if (daoActual == null) return;
 
+        new SQLiteDAO().hacerBackupInstantaneo();
         try {
             boolean resultado = false;
 
@@ -273,17 +271,12 @@ public class Controlador {
             mostrarError("Selecciona un estudiante de la tabla para borrar.");
             return;
         }
+        new SQLiteDAO().hacerBackupInstantaneo();
 
         if (daoActual.borrarEstudiante(seleccionado.getId(), false)) {
             mostrarInfo("🗑️ Estudiante eliminado correctamente de " + casaActual + ".");
             cargarEstudiantes();
 
-            contadorOperaciones++;
-            if (contadorOperaciones % 2 == 0) { // cada 2 movimientos
-                SQLiteDAO sqlite = new SQLiteDAO();
-                sqlite.hacerBackupCompleto();
-                System.out.println("💾 Copia de seguridad en SQLite actualizada tras " + contadorOperaciones + " movimientos.");
-            }
         } else mostrarError("No se pudo eliminar el estudiante.");
 
 

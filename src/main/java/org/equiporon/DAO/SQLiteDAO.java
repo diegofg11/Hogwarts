@@ -126,23 +126,68 @@ public class SQLiteDAO extends BaseDAO {
         }
     }
     public void restaurarBackupEnHogwarts() {
+        try (Connection connSqlite = getConnection()) {
+
+            if (connSqlite == null) {
+                logger.error("❌ No hay conexión a SQLite.");
+                return;
+            }
+
+            // Recuperamos todos los estudiantes del backup
+            String select = "SELECT * FROM ESTUDIANTES";
+            try (PreparedStatement ps = connSqlite.prepareStatement(select);
+                 ResultSet rs = ps.executeQuery()) {
+
+                // Guardamos en memoria
+                java.util.List<Modelo_Estudiante> lista = new java.util.ArrayList<>();
+                while (rs.next()) {
+                    Modelo_Estudiante e = new Modelo_Estudiante(
+                            rs.getString("id"),
+                            rs.getString("nombre"),
+                            rs.getString("apellidos"),
+                            rs.getString("casa"),
+                            rs.getInt("curso"),
+                            rs.getString("patronus")
+                    );
+                    lista.add(e);
+                }
+
+                // Restauramos en todas las casas
+                restaurarCasa("MariaDB", ConexionBD.getConnection(), lista);
+                restaurarCasa("H2", ConexionBD.conectarCasa("Hufflepuff"), lista);
+                restaurarCasa("Derby", ConexionBD.conectarCasa("Gryffindor"), lista);
+                restaurarCasa("HSQLDB", ConexionBD.conectarCasa("Slytherin"), lista);
+                restaurarCasa("Oracle", ConexionBD.conectarCasa("Ravenclaw"), lista);
+
+                logger.info("♻️ Restauración completa en todas las casas desde SQLite.");
+
+            }
+        } catch (Exception e) {
+            logger.error("⚠️ Error restaurando desde SQLite en todas las casas.", e);
+        }
+    }
+    /**
+     * 💾 Realiza un backup instantáneo del estado actual de Hogwarts (MariaDB)
+     * justo antes de una operación, para poder deshacer siempre.
+     */
+    public void hacerBackupInstantaneo() {
         try (Connection connSqlite = getConnection();
              Connection connMaria = ConexionBD.getConnection()) {
 
             if (connSqlite == null || connMaria == null) return;
 
-            // 1️⃣ Borrar Hogwarts
-            try (PreparedStatement del = connMaria.prepareStatement("DELETE FROM ESTUDIANTES")) {
+            // 1️⃣ Vaciar SQLite
+            try (PreparedStatement del = connSqlite.prepareStatement("DELETE FROM ESTUDIANTES")) {
                 del.executeUpdate();
             }
 
-            // 2️⃣ Copiar desde SQLite
+            // 2️⃣ Copiar todos los registros actuales desde MariaDB a SQLite
             String select = "SELECT * FROM ESTUDIANTES";
-            try (PreparedStatement ps = connSqlite.prepareStatement(select);
+            try (PreparedStatement ps = connMaria.prepareStatement(select);
                  ResultSet rs = ps.executeQuery()) {
 
                 String insert = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement ins = connMaria.prepareStatement(insert)) {
+                try (PreparedStatement ins = connSqlite.prepareStatement(insert)) {
                     while (rs.next()) {
                         ins.setString(1, rs.getString("id"));
                         ins.setString(2, rs.getString("nombre"));
@@ -151,16 +196,66 @@ public class SQLiteDAO extends BaseDAO {
                         ins.setInt(5, rs.getInt("curso"));
                         ins.setString(6, rs.getString("patronus"));
                         ins.addBatch();
-
                     }
                     ins.executeBatch();
                 }
             }
-            logger.info("♻️ Hogwarts restaurado desde SQLite.");
+
+            logger.info("💾 Backup instantáneo hecho antes de la operación.");
         } catch (Exception e) {
-            logger.error("⚠️ Error restaurando Hogwarts desde backup SQLite.", e);
+            logger.error("⚠️ Error haciendo backup instantáneo.", e);
         }
     }
+
+
+    /**
+     * Restaura una casa específica desde la lista de estudiantes del backup.
+     */
+    private void restaurarCasa(String nombreCasa, Connection conn, java.util.List<Modelo_Estudiante> lista) {
+        if (conn == null) {
+            logger.warn("⚠️ No hay conexión para {}", nombreCasa);
+            return;
+        }
+
+        try (conn) {
+            // 🔸 1. Vaciar tabla
+            try (PreparedStatement del = conn.prepareStatement("DELETE FROM ESTUDIANTES")) {
+                del.executeUpdate();
+            }
+
+            // 🔸 2. Insertar restaurando IDs según destino
+            String insert = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement ins = conn.prepareStatement(insert)) {
+
+                for (Modelo_Estudiante e : lista) {
+                    String id = e.getId();
+
+                    // 🧩 Si NO es MariaDB → quitar prefijo (GR, HF, RV, SL)
+                    if (!nombreCasa.equalsIgnoreCase("MariaDB")) {
+                        id = id.replaceAll("^(GR|HF|RV|SL)", ""); // quita el prefijo
+                    }
+
+                    ins.setString(1, id);
+                    ins.setString(2, e.getNombre());
+                    ins.setString(3, e.getApellidos());
+                    ins.setString(4, e.getCasa());
+                    ins.setInt(5, e.getCurso());
+                    ins.setString(6, e.getPatronus());
+                    ins.addBatch();
+                }
+
+                ins.executeBatch();
+            }
+
+            logger.info("✅ Restaurada la casa {} desde SQLite ({} estudiantes)", nombreCasa, lista.size());
+
+        } catch (Exception ex) {
+            logger.error("❌ Error restaurando casa {} desde SQLite", nombreCasa, ex);
+        }
+    }
+
+
+
 
 
 }

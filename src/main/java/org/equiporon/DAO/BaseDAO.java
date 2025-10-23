@@ -85,8 +85,8 @@ public abstract class BaseDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             // ⚙️ Solo generar número (sin prefijo)
-            int nuevoId = generarNuevoIdNumerico(conn);
-            e.setId(String.valueOf(nuevoId));
+            String nuevoId = generarNuevoIdNumerico(conn);
+            e.setId(nuevoId);
 
             ps.setString(1, e.getId());
             ps.setString(2, e.getNombre());
@@ -252,17 +252,37 @@ public abstract class BaseDAO {
     /**
      * Genera un nuevo ID numérico local (sin prefijo) para las casas.
      */
-    protected int generarNuevoIdNumerico(Connection conn) throws SQLException {
-        String sql = "SELECT MAX(CAST(id AS INT)) AS maximo FROM ESTUDIANTES";
+    /**
+     * Genera un nuevo ID numérico (como texto) para la tabla ESTUDIANTES.
+     * Compatible con bases que usan IDs tipo String.
+     */
+    protected String generarNuevoIdNumerico(Connection conn) throws SQLException {
+        String sql = "SELECT id FROM ESTUDIANTES";
+        int maximo = 0;
+
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int ultimo = rs.getInt("maximo");
-                return rs.wasNull() ? 1 : ultimo + 1;
+
+            while (rs.next()) {
+                String id = rs.getString("id");
+                if (id == null) continue;
+
+                // Extrae solo los dígitos del ID (ignora prefijos como GR, HF, etc.)
+                String numeros = id.replaceAll("\\D+", ""); // elimina todo lo que no sea número
+
+                if (!numeros.isEmpty()) {
+                    try {
+                        int valor = Integer.parseInt(numeros);
+                        if (valor > maximo) maximo = valor;
+                    } catch (NumberFormatException ignored) {}
+                }
             }
         }
-        return 1;
+
+        // Devuelve el siguiente número (como texto)
+        return String.valueOf(maximo + 1);
     }
+
 
 
     /**
