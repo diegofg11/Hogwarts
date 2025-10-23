@@ -60,7 +60,7 @@ public class Controlador {
     @FXML private MenuItem menuItemClose;
     @FXML private MenuItem menuItemHelp;
     @FXML private MenuItem menuItemAbout;
-    @FXML private MenuItem menuEspañol;
+    @FXML private MenuItem menuEspanol;
     @FXML private MenuItem menuIngles;
     @FXML private MenuItem menuParsel;
     @FXML private Label lblNombre;
@@ -528,7 +528,7 @@ public class Controlador {
         menuItemClose.setText(bundle.getString("menuitem.close"));
         menuItemHelp.setText(bundle.getString("menuitem.help"));
         menuItemAbout.setText(bundle.getString("menuitem.about"));
-        menuEspañol.setText(bundle.getString("menuitem.espanol"));
+        menuEspanol.setText(bundle.getString("menuitem.espanol"));
         menuIngles.setText(bundle.getString("menuitem.english"));
         menuParsel.setText(bundle.getString("menuitem.parsel"));
     }
