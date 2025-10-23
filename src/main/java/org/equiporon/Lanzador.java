@@ -2,7 +2,7 @@ package org.equiporon;
 /**
  * Lanzador de la App.java usando su main
  *
- * @author Diego, Ruben
+ * @author Diego, Ruben, Unai
  */
 public class Lanzador {
     public static void main(String[] args) {

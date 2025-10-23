@@ -17,7 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.util.List;
-
+/**
+ * Controlador principal del proyecto Hogwarts.
+ * Permite seleccionar una casa desde el menú y conectarse
+ * a la base de datos correspondiente.
+ *
+ * @author Diego, Ruben, Unai, Gaizka, Xiker
+ */
 public class Controlador {
 
     private static final Logger logger = LoggerFactory.getLogger(Controlador.class);

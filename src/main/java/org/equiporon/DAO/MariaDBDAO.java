@@ -9,7 +9,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+/**
+ * DAO de la base de datos de Hogwarts en MariaDB
+ *
+ * Clase MariaDBDAO encargada de manejar la conexión y operaciones
+ * con la base de datos MariaDB.
+ *
+ * Contiene métodos para insertar, obtener, actualizar y eliminar registros
+ * de estudiantes.
+ *
+ * @author Diego,Unai, Gaizka
+ */
 public class MariaDBDAO extends BaseDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(MariaDBDAO.class);

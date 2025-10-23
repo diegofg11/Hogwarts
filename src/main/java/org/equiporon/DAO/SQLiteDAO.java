@@ -8,7 +8,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-
+/**
+ *
+ * DAO de la base de datos de Hogwarts en local con SQLite
+ *
+ * Clase SQLiteDAO encargada de manejar la conexión y operaciones
+ * con la base de datos SQLite.
+ *
+ * Incluye métodos para crear la tabla, insertar, obtener,
+ * actualizar y eliminar registros de estudiantes.
+ *
+ * @author Diego, Unai, Gaizka
+ */
 public class SQLiteDAO extends BaseDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(SQLiteDAO.class);

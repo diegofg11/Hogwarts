@@ -16,6 +16,7 @@ import static org.equiporon.Utils.Alertas.mostrarError;
  * Clase base genérica para los DAOs de Hogwarts y las Casas.
  * Gestiona operaciones CRUD básicas, sincronización bidireccional
  * y ejecución asíncrona.
+ * @author Gaizka
  */
 public abstract class BaseDAO {
 
