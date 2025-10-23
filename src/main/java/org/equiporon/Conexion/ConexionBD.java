@@ -74,14 +74,6 @@ public class ConexionBD {
 
         try {
             Connection conn = DriverManager.getConnection(url, user, password);
-
-            // 👇 Este bloque soluciona el error de Derby (APP.ESTUDIANTES no encontrado)
-            // imports:
-
-
-// dentro de tu try tras crear la conn:
-            logger.info("[Derby] URL usada: " + url + " user=" + user);
-            logger.info("Conexión exitosa con " + casa);
             return conn;
 
         } catch (SQLException e) {
