@@ -1,11 +1,9 @@
-
 package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.Modelo.Modelo_Estudiante;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.concurrent.CompletableFuture;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -35,49 +33,47 @@ public abstract class BaseDAO {
     /** Devuelve la conexión a la base correspondiente. */
     protected abstract Connection getConnection() throws SQLException;
 
-// ============================================================
-// === MÉTODOS ASÍNCRONOS COMUNES =============================
-// ============================================================
+    // ============================================================
+    // === MÉTODOS ASÍNCRONOS COMUNES =============================
+    // ============================================================
 
-    public CompletableFuture<Boolean> insertarAsync(Modelo_Estudiante e) {
-        return CompletableFuture.supplyAsync(() -> insertarEstudiante(e, false), dbExecutor);
+    public Future<Boolean> insertarAsync(Modelo_Estudiante e) {
+        return dbExecutor.submit(() -> insertarEstudiante(e,false));
     }
 
-    public CompletableFuture<Boolean> editarAsync(Modelo_Estudiante e) {
-        return CompletableFuture.supplyAsync(() -> editarEstudiante(e, false), dbExecutor);
+    public Future<Boolean> editarAsync(Modelo_Estudiante e) {
+        return dbExecutor.submit(() -> editarEstudiante(e, false));
     }
 
-    public CompletableFuture<Boolean> borrarAsync(String id) {
-        return CompletableFuture.supplyAsync(() -> borrarEstudiante(id, false), dbExecutor);
+    public Future<Boolean> borrarAsync(String id) {
+        return dbExecutor.submit(() -> borrarEstudiante(id, false));
     }
 
-    public CompletableFuture<List<Modelo_Estudiante>> obtenerTodosAsync() {
-        return CompletableFuture.supplyAsync(this::obtenerTodos, dbExecutor);
+    public Future<List<Modelo_Estudiante>> obtenerTodosAsync() {
+        return dbExecutor.submit(this::obtenerTodos);
     }
 
     // ============================================================
     // === MÉTODOS SÍNCRONOS BASE =================================
     // ============================================================
-    /**
-     * Inserta un nuevo estudiante en la base de datos local y sincroniza la operación con Hogwarts.
-     * <p>
-     * Este metodo crea un nuevo registro en la tabla <b>ESTUDIANTES</b> con los datos del objeto
-     * {@link Modelo_Estudiante}. Si la casa actual no es <b>Hogwarts</b> y la operación no forma parte
-     * de una sincronización, el nuevo registro se replica automáticamente en la base de datos de Hogwarts,
-     * agregando un prefijo identificativo según la casa correspondiente.
-     * </p>
-     *
-     * @param e Objeto {@link Modelo_Estudiante} que contiene la información del nuevo estudiante a insertar.
-     * @param esSincronizacion Indica si la operación actual pertenece a un proceso de sincronización
-     *                         (si es {@code true}, no se ejecutará una sincronización recursiva).
-     * @return {@code true} si la inserción fue exitosa; {@code false} si la validación del estudiante falla
-     *         o si ocurre un error durante la operación SQL.
-     *
-     * @author Gaizka
-     * @see MariaDBDAO#insertarEstudiante(Modelo_Estudiante, boolean)
-     * @see #comprobarEstudiante(Modelo_Estudiante)
-     * @see #generarNuevoIdNumerico(Connection)
-     */    public boolean insertarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
+
+    /** Genera el siguiente ID local según el motor (Oracle usa NUMBER). */
+    protected int generarNuevoIdLocal(Connection conn) throws SQLException {
+        String tipo = getCasa().equalsIgnoreCase("Ravenclaw") ? "NUMBER" : "INTEGER";
+        String sql = "SELECT MAX(CAST(id AS " + tipo + ")) AS maximo FROM ESTUDIANTES";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                int ultimo = rs.getInt("maximo");
+                return rs.wasNull() ? 1 : ultimo + 1;
+            }
+        }
+        return 1;
+    }
+
+    /** Inserta estudiante local + sincronización Hogwarts */
+    public boolean insertarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
 
         if (!comprobarEstudiante(e)) {
             return false;
@@ -135,25 +131,7 @@ public abstract class BaseDAO {
     }
 
 
-    /**
-     * Edita los datos de un estudiante en la base de datos local y sincroniza los cambios con Hogwarts.
-     * <p>
-     * Este metodo actualiza la información del estudiante especificado mediante una sentencia SQL
-     * <code>UPDATE</code>. Si la operación no forma parte de una sincronización y la casa actual no es
-     * <b>Hogwarts</b>, los cambios se replican en la base de datos de Hogwarts para mantener la coherencia
-     * entre ambas fuentes de datos.
-     * </p>
-     *
-     * @param e Objeto {@link Modelo_Estudiante} que contiene los nuevos datos del estudiante a actualizar.
-     * @param esSincronizacion Indica si la operación actual es parte de una sincronización (si es {@code true},
-     *                         no se ejecutará una sincronización recursiva).
-     * @return {@code true} si la actualización se realizó correctamente; {@code false} si la validación falló
-     *         o si ocurrió un error durante la operación SQL.
-     *
-     * @author Gaizka
-     * @see MariaDBDAO#editarEstudiante(Modelo_Estudiante, boolean)
-     * @see #comprobarEstudiante(Modelo_Estudiante)
-     */
+    /** Editar + sincronizar con Hogwarts */
     public boolean editarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
 
         if (!comprobarEstudiante(e)) {
@@ -195,24 +173,7 @@ public abstract class BaseDAO {
     }
 
 
-
-    /**
-     * Borra un estudiante de la base de datos local y realiza, si corresponde, la sincronización con Hogwarts.
-     * <p>
-     * Este metodo elimina el registro del estudiante cuyo identificador coincide con el parámetro {@code id}.
-     * Si la eliminación no se está ejecutando como parte de una sincronización y la casa actual no es
-     * <b>Hogwarts</b>, también se eliminará el mismo estudiante en la base de datos de Hogwarts para mantener
-     * la consistencia entre ambas fuentes de datos.
-     * </p>
-     *
-     * @param id Identificador único del estudiante que se desea eliminar.
-     * @param esSincronizacion Indica si la operación forma parte de un proceso de sincronización
-     *                         (en cuyo caso no se realizará una llamada recursiva de borrado).
-     * @return {@code true} si el estudiante fue eliminado correctamente; {@code false} si no se encontró el ID
-     *         o si ocurrió un error durante el proceso.
-     *
-     * @see MariaDBDAO#borrarEstudiante(String, boolean)
-     */
+    /** Borra estudiante local + sincronización Hogwarts */
     public boolean borrarEstudiante(String id, boolean esSincronizacion) {
         final String sql = "DELETE FROM ESTUDIANTES WHERE id=?";
 
@@ -246,19 +207,8 @@ public abstract class BaseDAO {
         }
     }
 
-    /**
-     * Obtiene una lista con todos los registros de estudiantes almacenados en la base de datos.
-     * <p>
-     * Este metodo ejecuta una consulta SQL sobre la tabla <b>ESTUDIANTES</b> y crea una lista
-     * de objetos {@link Modelo_Estudiante} con los datos obtenidos.
-     * </p>
-     *
-     * @return Una lista de objetos {@code Modelo_Estudiante} que representan los estudiantes
-     *         registrados en la base de datos. Si ocurre un error durante la consulta, se devuelve
-     *         una lista vacía.
-     *
-     * @see Modelo_Estudiante
-     */
+
+    /** SELECT */
     public List<Modelo_Estudiante> obtenerTodos() {
         List<Modelo_Estudiante> lista = new ArrayList<>();
         final String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES";
@@ -283,7 +233,6 @@ public abstract class BaseDAO {
         }
         return lista;
     }
-
     protected String getPrefijoCasa() {
         return switch (getCasa().toLowerCase()) {
             case "gryffindor" -> "GR";
@@ -305,7 +254,7 @@ public abstract class BaseDAO {
      */
     /**
      * Genera un nuevo ID numérico (como texto) para la tabla ESTUDIANTES.
-     * Compatible con bases que usan ID tipo String.
+     * Compatible con bases que usan IDs tipo String.
      */
     protected String generarNuevoIdNumerico(Connection conn) throws SQLException {
         String sql = "SELECT id FROM ESTUDIANTES";
@@ -347,7 +296,7 @@ public abstract class BaseDAO {
      *
      * Si se detecta un error, se muestra un mensaje de error y se registra en el log.
      *
-     * @author Unai Zugaza, Ruben, Gaizka
+     * @author Unai Zugaza, Ruben
      * @param e Objeto {@link Modelo_Estudiante} a comprobar.
      * @return {@code true} si el estudiante es válido, {@code false} en caso contrario.
      */
