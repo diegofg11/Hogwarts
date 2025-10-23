@@ -1,6 +1,7 @@
 package org.equiporon.Utils;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -10,22 +11,27 @@ import java.util.ResourceBundle;
  * desde los archivos de propiedades (messages_xx.properties).
  * </p>
  *
- * Autores:
- *  - Unai
- *  - Xiker (modificador)
+ * Autor: Xiker
  */
 public class I18n {
+
     private static Locale locale = Locale.getDefault();
     private static ResourceBundle bundle = ResourceBundle.getBundle("i18n/messages", locale);
 
     /**
      * Obtiene el texto correspondiente a la clave en el idioma actual.
+     * <p>
+     * Si no se encuentra la clave, devuelve la propia clave entre corchetes.
      *
      * @param key la clave del texto en el archivo de propiedades.
-     * @return el texto traducido.
+     * @return el texto traducido o la clave entre corchetes si no se encuentra.
      */
     public static String t(String key) {
-        return bundle.getString(key);
+        try {
+            return bundle.getString(key);
+        } catch (MissingResourceException e) {
+            return "[" + key + "]";
+        }
     }
 
     /**
@@ -45,5 +51,14 @@ public class I18n {
      */
     public static ResourceBundle getBundle() {
         return bundle;
+    }
+
+    /**
+     * Obtiene el Locale actual.
+     *
+     * @return el {@link Locale} actual.
+     */
+    public static Locale getLocale() {
+        return locale;
     }
 }
