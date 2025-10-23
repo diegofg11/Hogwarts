@@ -18,7 +18,7 @@ import java.sql.ResultSet;
  * Incluye métodos para crear la tabla, insertar, obtener,
  * actualizar y eliminar registros de estudiantes.
  *
- * @author Diego, Unai, Gaizka
+ * @author Diego, Unai, Gaizka, Igor
  */
 public class SQLiteDAO extends BaseDAO {
 

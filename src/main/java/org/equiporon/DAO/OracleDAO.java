@@ -7,7 +7,7 @@ import java.sql.SQLException;
  * DAO Asíncrono para gestionar operaciones CRUD en Oracle (Ravenclaw)
  * sobre la tabla ESTUDIANTES, utilizando Modelo_Estudiante.
  *
- * @author Xiker, Unai, Gaizka
+ * @author Xiker, Unai, Gaizka, Igor
  * @version 2.0
  */
 public class OracleDAO extends BaseDAO {

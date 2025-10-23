@@ -18,7 +18,7 @@ import java.sql.SQLException;
  * Contiene métodos para insertar, obtener, actualizar y eliminar registros
  * de estudiantes.
  *
- * @author Diego,Unai, Gaizka
+ * @author Diego,Unai, Gaizka, Igor
  */
 public class MariaDBDAO extends BaseDAO {
 
