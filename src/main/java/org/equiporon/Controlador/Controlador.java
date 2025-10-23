@@ -22,7 +22,7 @@ import java.util.List;
  * Permite seleccionar una casa desde el menú y conectarse
  * a la base de datos correspondiente.
  *
- * @author Diego, Ruben, Unai, Gaizka, Xiker
+ * @author Diego, Ruben, Unai, Gaizka, Xiker, Igor
  */
 public class Controlador {
 
