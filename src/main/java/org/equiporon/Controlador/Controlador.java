@@ -24,11 +24,10 @@ public class Controlador {
 
     // --- Elementos FXML ---
     @FXML private AnchorPane rootPane;
-    @FXML private Label lblCasaSeleccionada;
     @FXML private ComboBox<String> choiceCasas;
     @FXML private Button botAdd;
     @FXML private Button botBorrar;
-    @FXML private Button botEditar;
+    @FXML private Button botDeshacer;
     @FXML private Label lblCasa;
     @FXML private TableView<Modelo_Estudiante> tablaEstudiantes;
     @FXML private TableColumn<Modelo_Estudiante, String> tableId;

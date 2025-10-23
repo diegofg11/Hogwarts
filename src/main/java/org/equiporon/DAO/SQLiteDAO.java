@@ -140,6 +140,7 @@ public class SQLiteDAO extends BaseDAO {
                         ins.setInt(5, rs.getInt("curso"));
                         ins.setString(6, rs.getString("patronus"));
                         ins.addBatch();
+
                     }
                     ins.executeBatch();
                 }
