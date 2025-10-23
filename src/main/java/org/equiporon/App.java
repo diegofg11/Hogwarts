@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -31,8 +32,10 @@ public class App extends Application {
      * <p>
      * Se ejecuta automáticamente al lanzar la aplicación e inicializa la
      * escena principal definida en el archivo FXML "primary.fxml".
+     * Además, incorpora un icono a la aplicación.
      * </p>
      *
+     * @author Ruben, Diego
      * @param s instancia del {@link Stage} principal proporcionado por JavaFX.
      * @throws IOException si ocurre un error al cargar el archivo FXML inicial.
      */
@@ -40,6 +43,10 @@ public class App extends Application {
     public void start(@SuppressWarnings("exports") Stage s) throws IOException {
         stage = s;
         setRoot("primary", "");
+        Image icon = new Image(
+                App.class.getResource("/images/hogwarts_escudo.png").toExternalForm()
+        );
+        s.getIcons().add(icon);
     }
 
     /**
