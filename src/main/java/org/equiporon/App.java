@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * permite cambiar entre diferentes escenas dentro de la aplicación.
  * </p>
  *
- * @author Unai
+ * @author Unai, Ruben, Diego
  */
 public class App extends Application {
 
