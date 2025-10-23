@@ -16,6 +16,8 @@ import org.equiporon.Modelo.Modelo_Estudiante;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+
 import java.sql.Connection;
 import java.util.List;
 /**
@@ -168,7 +170,7 @@ public class Controlador {
                 txtCasa.setEditable(false);
             }
 
-            cargarEstudiantes();
+            cargarEstudiantesAsync();
         } catch (Exception e) {
             mostrarError("Error al conectar con " + casa + ": " + e.getMessage());
         }
@@ -177,7 +179,6 @@ public class Controlador {
     // ----------------- CRUD -----------------
     @FXML
     void clickOnAdd(ActionEvent event) {
-        new SQLiteDAO().hacerBackupInstantaneo();
         if (daoActual == null) {
             mostrarError("Selecciona una casa antes de añadir un estudiante.");
             return;
@@ -195,19 +196,31 @@ public class Controlador {
 
             new SQLiteDAO().hacerBackupInstantaneo();
 
-            if (daoActual.insertarEstudiante(nuevo, false)) {
-                mostrarInfo("✅ Estudiante añadido correctamente a " + casaActual + ".");
-                limpiarCampos();
-                cargarEstudiantes();
-            } else mostrarError("No se pudo añadir el estudiante.");
+            // 🔄 Ejecutar asincrónicamente aunque devuelva Future
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return daoActual.insertarAsync(nuevo).get(); // Espera el resultado del Future en segundo plano
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return false;
+                }
+            }).thenAccept(ok -> Platform.runLater(() -> {
+                if (ok) {
+                    mostrarInfo("✅ Estudiante añadido correctamente a " + casaActual + ".");
+                    limpiarCampos();
+                    cargarEstudiantesAsync();
+                } else {
+                    mostrarError("❌ No se pudo añadir el estudiante.");
+                }
+            }));
 
         } catch (Exception e) {
             mostrarError("Error al añadir estudiante: " + e.getMessage());
             e.printStackTrace();
         }
-
-
     }
+
+
 
     /**
      * Actualiza automáticamente un estudiante editado en la tabla
@@ -217,27 +230,22 @@ public class Controlador {
         if (daoActual == null) return;
 
         new SQLiteDAO().hacerBackupInstantaneo();
-        try {
-            boolean resultado = false;
 
-            if (daoActual instanceof DerbyDAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof H2DAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof HSQLDBDAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof OracleDAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof MariaDBDAO dao) resultado = dao.editarEstudiante(est, false);
-
-            if (resultado) {
-                logger.info("✅ Cambios guardados automáticamente en {}", casaActual);
-            } else {
-                mostrarError("❌ No se pudieron guardar los cambios.");
-            }
-
-
-        } catch (Exception e) {
-            mostrarError("Error al actualizar estudiante: " + e.getMessage());
-            e.printStackTrace();
-        }
+        daoActual.editarAsync(est)
+                .thenAccept(ok -> Platform.runLater(() -> {
+                    if (ok) {
+                        logger.info("✅ Cambios guardados automáticamente en {}", casaActual);
+                    } else {
+                        mostrarError("❌ No se pudieron guardar los cambios.");
+                    }
+                }))
+                .exceptionally(ex -> {
+                    mostrarError("Error al actualizar estudiante: " + ex.getMessage());
+                    ex.printStackTrace();
+                    return null;
+                });
     }
+
     @FXML
     void clickOnUndo(ActionEvent event) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Deseas restaurar Hogwarts desde el último backup?");
@@ -246,7 +254,7 @@ public class Controlador {
                 SQLiteDAO sqlite = new SQLiteDAO();
                 sqlite.restaurarBackupEnHogwarts(casaActual);
                 mostrarInfo("Hogwarts restaurado desde la copia SQLite.");
-                cargarEstudiantes();
+                cargarEstudiantesAsync();
             }
         });
     }
@@ -265,16 +273,25 @@ public class Controlador {
             mostrarError("Selecciona un estudiante de la tabla para borrar.");
             return;
         }
+
         new SQLiteDAO().hacerBackupInstantaneo();
 
-        if (daoActual.borrarEstudiante(seleccionado.getId(), false)) {
-            mostrarInfo("🗑️ Estudiante eliminado correctamente de " + casaActual + ".");
-            cargarEstudiantes();
-
-        } else mostrarError("No se pudo eliminar el estudiante.");
-
-
+        daoActual.borrarAsync(seleccionado.getId())
+                .thenAccept(ok -> Platform.runLater(() -> {
+                    if (ok) {
+                        mostrarInfo("🗑️ Estudiante eliminado correctamente de " + casaActual + ".");
+                        cargarEstudiantesAsync();
+                    } else {
+                        mostrarError("❌ No se pudo eliminar el estudiante.");
+                    }
+                }))
+                .exceptionally(ex -> {
+                    mostrarError("Error al borrar estudiante: " + ex.getMessage());
+                    ex.printStackTrace();
+                    return null;
+                });
     }
+
 
     // ----------------- Cargar estudiantes -----------------
     private void cargarEstudiantes() {
@@ -287,6 +304,21 @@ public class Controlador {
             mostrarError("Error al cargar estudiantes: " + e.getMessage());
         }
     }
+
+    private void cargarEstudiantesAsync() {
+        if (daoActual == null) return;
+
+        daoActual.obtenerTodosAsync()
+                .thenAccept(lista ->
+                        Platform.runLater(() -> tablaEstudiantes.getItems().setAll(lista))
+                )
+                .exceptionally(ex -> {
+                    ex.printStackTrace();
+                    mostrarError("Error al cargar estudiantes: " + ex.getMessage());
+                    return null;
+                });
+    }
+
 
     // ----------------- Utilidades -----------------
     private void limpiarCampos() {
