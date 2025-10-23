@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static org.equiporon.Utils.Alertas.mostrarError;
+
 /**
  * Clase base genérica para los DAOs de Hogwarts y las Casas.
  * Gestiona operaciones CRUD básicas, sincronización bidireccional
@@ -17,7 +19,7 @@ import java.util.concurrent.*;
  */
 public abstract class BaseDAO {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final static Logger logger = LoggerFactory.getLogger(BaseDAO.class);
 
     /** Pool de hilos para ejecución asíncrona */
     protected static final ExecutorService dbExecutor =
@@ -70,6 +72,11 @@ public abstract class BaseDAO {
 
     /** Inserta estudiante local + sincronización Hogwarts */
     public boolean insertarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
+
+        if (!comprobarEstudiante(e)) {
+            return false;
+        }
+
         final String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
@@ -124,6 +131,11 @@ public abstract class BaseDAO {
 
     /** Editar + sincronizar con Hogwarts */
     public boolean editarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
+
+        if (!comprobarEstudiante(e)) {
+            return false;
+        }
+
         final String sql = "UPDATE ESTUDIANTES SET nombre=?, apellidos=?, casa=?, curso=?, patronus=? WHERE id=?";
 
         try (Connection conn = getConnection();
@@ -249,6 +261,99 @@ public abstract class BaseDAO {
         }
         return 1;
     }
+
+
+    /**
+     * Metodo para comprobar si los estudiantes son válidos, teniendo en cuenta diferentes factores:
+     * <ul>
+     *   <li>Que no haya campos vacíos.</li>
+     *   <li>Que el curso esté entre 1 y 7.</li>
+     *   <li>Que los campos de texto (nombre, apellidos y patronus) contengan solo letras y espacios.</li>
+     *   <li>Que la casa sea una de las cuatro válidas (Gryffindor, Slytherin, Hufflepuff o Ravenclaw).</li>
+     * </ul>
+     *
+     * Si se detecta un error, se muestra un mensaje de error y se registra en el log.
+     *
+     * @author Unai Zugaza, Ruben
+     * @param e Objeto {@link Modelo_Estudiante} a comprobar.
+     * @return {@code true} si el estudiante es válido, {@code false} en caso contrario.
+     */
+    public static boolean comprobarEstudiante(Modelo_Estudiante e) {
+
+        if (e.getId().isEmpty() || e.getApellidos().isEmpty() || e.getNombre().isEmpty()
+                || e.getCurso() == null || e.getPatronus().isEmpty()) {
+            logger.error("No dejes campos vacíos");
+            mostrarError("Error campos vacíos", "No dejes campos vacíos");
+            return false;
+        }
+
+        if (e.getCurso() <= 0 || e.getCurso() > 7) {
+            logger.error("Curso no válido");
+            mostrarError("Error curso inválido", "Los cursos válidos son del 1 al 7");
+            return false;
+        }
+
+        if (!comprobarStrings(e.getPatronus())) {
+            logger.error("Patronus no válido");
+            mostrarError("Error patronus inválido", "Los patronus válidos contienen solo letras y espacios");
+            return false;
+        }
+
+        if (!comprobarStrings(e.getNombre())) {
+            logger.error("Nombre no válido");
+            mostrarError("Error nombre inválido", "Los nombres válidos contienen solo letras y espacios");
+            return false;
+        }
+
+        if (!comprobarStrings(e.getApellidos())) {
+            logger.error("Apellidos no válidos");
+            mostrarError("Error apellidos inválidos", "Los apellidos válidos contienen solo letras y espacios");
+            return false;
+        }
+
+        // CORRECCIÓN IMPORTANTE: aquí deben usarse &&
+        if (!(e.getCasa().equalsIgnoreCase("Gryffindor") ||
+                e.getCasa().equalsIgnoreCase("Slytherin") ||
+                e.getCasa().equalsIgnoreCase("Hufflepuff") ||
+                e.getCasa().equalsIgnoreCase("Ravenclaw"))) {
+
+            logger.error("Casa no válida");
+            mostrarError("Error casa inválida", "No has introducido la casa correctamente");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Metodo auxiliar para comprobar si una cadena contiene solo letras y espacios.
+     *
+     * @author Unai Zugaza, Ruben
+     * @param str Cadena a comprobar.
+     * @return {@code true} si la cadena contiene únicamente letras y al menos una de ellas,
+     *         {@code false} si contiene números, caracteres especiales o está vacía.
+     */
+    private static boolean comprobarStrings(String str) {
+        boolean valido = true;
+        int letras = 0;
+
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+
+            // Contar letras válidas
+            if (Character.isLetter(c)) {
+                letras++;
+            }
+
+            // Si no es letra ni espacio, no es válido
+            if (!Character.isLetter(c) && c != ' ') {
+                valido = false;
+            }
+        }
+
+        return valido && letras > 0;
+    }
+
 
     // ============================================================
     // === SHUTDOWN ===============================================
