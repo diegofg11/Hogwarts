@@ -3,6 +3,9 @@ package org.equiporon.Controlador;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
@@ -15,6 +18,7 @@ import org.equiporon.Modelo.Modelo_Estudiante;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +38,7 @@ public class Controlador {
     @FXML private ComboBox<String> choiceCasas;
     @FXML private Button botAdd;
     @FXML private Button botBorrar;
-    @FXML private Button botEditar;
+    @FXML private Button botDeshacer;
     @FXML private Label lblCasa;
     @FXML private Label lblId;
     @FXML private TableView<Modelo_Estudiante> tablaEstudiantes;
@@ -60,7 +64,7 @@ public class Controlador {
     @FXML private MenuItem menuItemClose;
     @FXML private MenuItem menuItemHelp;
     @FXML private MenuItem menuItemAbout;
-    @FXML private MenuItem menuEspañol;
+    @FXML private MenuItem menuEspanol;
     @FXML private MenuItem menuIngles;
     @FXML private MenuItem menuParsel;
     @FXML private Label lblNombre;
@@ -127,12 +131,14 @@ public class Controlador {
         choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
         choiceCasas.setValue("Hogwarts");
 
-        tableId.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getId()));
-        tableNombre.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombre()));
-        tableApellidos.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getApellidos()));
-        tableCasa.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getCasa()));
-        tableCurso.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getCurso()).asObject());
-        tablePatronus.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPatronus()));
+// Actualizar los encabezados de la tabla
+        tableId.setText(bundle.getString("label.id"));
+        tableNombre.setText(bundle.getString("label.nombre"));
+        tableApellidos.setText(bundle.getString("label.apellidos"));
+        tableCasa.setText(bundle.getString("label.casa"));
+        tableCurso.setText(bundle.getString("label.curso"));
+        tablePatronus.setText(bundle.getString("label.patronus"));
+
 
         choiceCasas.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
@@ -499,18 +505,33 @@ public class Controlador {
         Locale locale;
 
         switch (source.getId()) {
-            case "menuEspañol" -> locale = new Locale("es", "ES");
+            case "menuEspanol" -> locale = new Locale("es", "ES");
             case "menuIngles" -> locale = new Locale("en", "US");
             case "menuParsel" -> locale = new Locale("la");
             default -> locale = Locale.getDefault();
         }
 
-        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", locale);
-        actualizarTextos(bundle);
+        Locale.setDefault(locale);
+
+        try {
+            ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", locale);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/primary.fxml"), bundle);
+
+            Parent newRoot = loader.load();
+
+            Scene scene = rootPane.getScene();
+            scene.setRoot(newRoot);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
 
     /** Actualiza todos los textos de la interfaz con el ResourceBundle proporcionado. */
     private void actualizarTextos(ResourceBundle bundle) {
+        // --- Labels principales ---
         lblNombre.setText(bundle.getString("label.nombre"));
         lblApellidos.setText(bundle.getString("label.apellidos"));
         lblCurso.setText(bundle.getString("label.curso"));
@@ -518,19 +539,31 @@ public class Controlador {
         lblCasa.setText(bundle.getString("label.casa"));
         lblId.setText(bundle.getString("label.id"));
 
+        // --- Botones ---
         botAdd.setText(bundle.getString("button.add"));
         botBorrar.setText(bundle.getString("button.delete"));
-        botEditar.setText(bundle.getString("button.undo"));
+        botDeshacer.setText(bundle.getString("button.undo"));
 
+        // --- Menús ---
         menuFile.setText(bundle.getString("menu.file"));
         menuHelp.setText(bundle.getString("menu.help"));
         menuLanguage.setText(bundle.getString("menu.language"));
+
         menuItemClose.setText(bundle.getString("menuitem.close"));
         menuItemHelp.setText(bundle.getString("menuitem.help"));
         menuItemAbout.setText(bundle.getString("menuitem.about"));
-        menuEspañol.setText(bundle.getString("menuitem.espanol"));
+        menuEspanol.setText(bundle.getString("menuitem.espanol"));
         menuIngles.setText(bundle.getString("menuitem.english"));
         menuParsel.setText(bundle.getString("menuitem.parsel"));
+
+        // --- Encabezados de la tabla ---
+        tableId.setText(bundle.getString("label.id"));
+        tableNombre.setText(bundle.getString("label.nombre"));
+        tableApellidos.setText(bundle.getString("label.apellidos"));
+        tableCasa.setText(bundle.getString("label.casa"));
+        tableCurso.setText(bundle.getString("label.curso"));
+        tablePatronus.setText(bundle.getString("label.patronus"));
     }
+
 
 }
