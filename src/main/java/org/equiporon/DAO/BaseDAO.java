@@ -281,7 +281,7 @@ public abstract class BaseDAO {
      */
     public static boolean comprobarEstudiante(Modelo_Estudiante e) {
 
-        if (e.getId().isEmpty() || e.getApellidos().isEmpty() || e.getNombre().isEmpty()
+        if (e.getCasa().isEmpty() || e.getCasa() == null || e.getApellidos().isEmpty() || e.getNombre().isEmpty()
                 || e.getCurso() == null || e.getPatronus().isEmpty()) {
             logger.error("No dejes campos vacíos");
             mostrarError("Error campos vacíos", "No dejes campos vacíos");
@@ -312,7 +312,7 @@ public abstract class BaseDAO {
             return false;
         }
 
-        // CORRECCIÓN IMPORTANTE: aquí deben usarse &&
+
         if (!(e.getCasa().equalsIgnoreCase("Gryffindor") ||
                 e.getCasa().equalsIgnoreCase("Slytherin") ||
                 e.getCasa().equalsIgnoreCase("Hogwarts") ||
