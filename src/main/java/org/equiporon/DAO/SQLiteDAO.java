@@ -2,142 +2,153 @@ package org.equiporon.DAO;
 
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.Modelo.Modelo_Estudiante;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+public class SQLiteDAO extends BaseDAO {
 
-/**
- * Clase SQLiteDAO encargada de manejar la conexión y operaciones
- * con la base de datos SQLite.
- *
- * Incluye métodos para crear la tabla, insertar, obtener,
- * actualizar y eliminar registros de estudiantes.
- *
- * @author Diego
- */
-public class SQLiteDAO {
+    private static final Logger logger = LoggerFactory.getLogger(SQLiteDAO.class);
 
-    /**
-     * Crea la tabla de estudiantes si no existe.
-     */
-    public void crearTabla() {
-        String sql = "CREATE TABLE IF NOT EXISTS estudiantes (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "nombre TEXT," +
-                "apellidos TEXT," +
-                "casa TEXT," +
-                "curso INTEGER," +
-                "patronus TEXT)";
-        try (Connection conn = ConexionBD.getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            System.out.println("Error al crear tabla: " + e.getMessage());
-        }
+    @Override
+    protected String getCasa() {
+        return "Backup";
     }
 
-    /**
-     * Inserta un nuevo estudiante en la base de datos.
-     *
-     * @param estudiante Objeto Modelo_Estudiante con los datos a guardar.
-     * @return true si la inserción fue exitosa, false en caso contrario.
-     */
-    public boolean insertarEstudiante(Modelo_Estudiante estudiante) {
-        String sql = "INSERT INTO estudiantes (nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, estudiante.getNombre());
-            stmt.setString(2, estudiante.getApellidos());
-            stmt.setString(3, estudiante.getCasa());
-            stmt.setInt(4, estudiante.getCurso());
-            stmt.setString(5, estudiante.getPatronus());
-            stmt.executeUpdate();
-            return true;
-
-        } catch (SQLException e) {
-            System.out.println("Error al insertar estudiante: " + e.getMessage());
-            return false;
-        }
+    @Override
+    protected Connection getConnection() throws SQLException {
+        return ConexionBD.getSQLiteConnection();
     }
 
-    /**
-     * Obtiene todos los estudiantes de la base de datos.
-     *
-     * @return Lista con todos los estudiantes encontrados.
-     */
-    public List<Modelo_Estudiante> obtenerTodos() {
-        List<Modelo_Estudiante> lista = new ArrayList<>();
-        String sql = "SELECT * FROM estudiantes";
-        try (Connection conn = ConexionBD.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                lista.add(new Modelo_Estudiante(
-                        rs.getString("id"),
-                        rs.getString("nombre"),
-                        rs.getString("apellidos"),
-                        rs.getString("casa"),
-                        rs.getInt("curso"),
-                        rs.getString("patronus")
-                ));
+    /** 🔁 Sincroniza los datos de Hogwarts a SQLite */
+    public boolean sincronizarDesdeHogwarts(Modelo_Estudiante e, String tipo) {
+        try (Connection conn = getConnection()) {
+            if (conn == null) {
+                logger.error("❌ No hay conexión a SQLite.");
+                return false;
             }
 
-
-        } catch (SQLException e) {
-            System.out.println("Error al obtener estudiantes: " + e.getMessage());
-        }
-        return lista;
-    }
-
-    /**
-     * Actualiza los datos de un estudiante existente.
-     *
-     * @param estudiante Objeto con los nuevos datos del estudiante.
-     * @return true si la actualización fue exitosa, false si ocurrió un error.
-     */
-    public boolean actualizarEstudiante(Modelo_Estudiante estudiante) {
-        String sql = "UPDATE estudiantes SET nombre = ?, apellidos = ?, casa = ?, curso = ?, patronus = ? WHERE id = ?";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, estudiante.getNombre());
-            stmt.setString(2, estudiante.getApellidos());
-            stmt.setString(3, estudiante.getCasa());
-            stmt.setInt(4, estudiante.getCurso());
-            stmt.setString(5, estudiante.getPatronus());
-            stmt.setString(6, estudiante.getId());
-            stmt.executeUpdate();
+            switch (tipo.toLowerCase()) {
+                case "insert" -> insertarBackup(conn, e);
+                case "update" -> editarBackup(conn, e);
+                case "delete" -> borrarBackup(conn, e.getId());
+            }
             return true;
-
-        } catch (SQLException e) {
-            System.out.println("Error al actualizar estudiante: " + e.getMessage());
+        } catch (Exception ex) {
+            logger.error("⚠️ Error sincronizando con SQLite.", ex);
             return false;
         }
     }
 
-    /**
-     * Elimina un estudiante de la base de datos por su ID.
-     *
-     * @param id Identificador del estudiante a eliminar.
-     * @return true si el estudiante fue eliminado correctamente, false en caso contrario.
-     */
-    public boolean eliminarEstudiante(int id) {
-        String sql = "DELETE FROM estudiantes WHERE id = ?";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    private void insertarBackup(Connection conn, Modelo_Estudiante e) throws SQLException {
+        String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, e.getId());
+            ps.setString(2, e.getNombre());
+            ps.setString(3, e.getApellidos());
+            ps.setString(4, e.getCasa());
+            ps.setInt(5, e.getCurso());
+            ps.setString(6, e.getPatronus());
+            ps.executeUpdate();
+        }
+        logger.info("💾 Copiado a SQLite (ID {}).", e.getId());
+    }
 
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-            return true;
+    private void editarBackup(Connection conn, Modelo_Estudiante e) throws SQLException {
+        String sql = "UPDATE ESTUDIANTES SET nombre=?, apellidos=?, casa=?, curso=?, patronus=? WHERE id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, e.getNombre());
+            ps.setString(2, e.getApellidos());
+            ps.setString(3, e.getCasa());
+            ps.setInt(4, e.getCurso());
+            ps.setString(5, e.getPatronus());
+            ps.setString(6, e.getId());
+            ps.executeUpdate();
+        }
+        logger.info("✏️ Actualizado en SQLite (ID {}).", e.getId());
+    }
 
-        } catch (SQLException e) {
-            System.out.println("Error al eliminar estudiante: " + e.getMessage());
-            return false;
+    private void borrarBackup(Connection conn, String id) throws SQLException {
+        String sql = "DELETE FROM ESTUDIANTES WHERE id=?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id);
+            ps.executeUpdate();
+        }
+        logger.info("🗑️ Borrado de SQLite (ID {}).", id);
+    }
+    public void hacerBackupCompleto() {
+        try (Connection connSqlite = getConnection();
+             Connection connMaria = ConexionBD.getConnection()) {
+
+            if (connSqlite == null || connMaria == null) return;
+
+            // 1️⃣ Vaciar SQLite
+            try (PreparedStatement del = connSqlite.prepareStatement("DELETE FROM ESTUDIANTES")) {
+                del.executeUpdate();
+            }
+
+            // 2️⃣ Copiar todos los registros desde MariaDB a SQLite
+            String select = "SELECT * FROM ESTUDIANTES";
+            try (PreparedStatement ps = connMaria.prepareStatement(select);
+                 ResultSet rs = ps.executeQuery()) {
+
+                String insert = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement ins = connSqlite.prepareStatement(insert)) {
+                    while (rs.next()) {
+                        ins.setString(1, rs.getString("id"));
+                        ins.setString(2, rs.getString("nombre"));
+                        ins.setString(3, rs.getString("apellidos"));
+                        ins.setString(4, rs.getString("casa"));
+                        ins.setInt(5, rs.getInt("curso"));
+                        ins.setString(6, rs.getString("patronus"));
+                        ins.addBatch();
+                    }
+                    ins.executeBatch();
+                }
+            }
+            logger.info("💾 Backup completo realizado en SQLite.");
+        } catch (Exception e) {
+            logger.error("⚠️ Error haciendo backup en SQLite.", e);
         }
     }
+    public void restaurarBackupEnHogwarts() {
+        try (Connection connSqlite = getConnection();
+             Connection connMaria = ConexionBD.getConnection()) {
+
+            if (connSqlite == null || connMaria == null) return;
+
+            // 1️⃣ Borrar Hogwarts
+            try (PreparedStatement del = connMaria.prepareStatement("DELETE FROM ESTUDIANTES")) {
+                del.executeUpdate();
+            }
+
+            // 2️⃣ Copiar desde SQLite
+            String select = "SELECT * FROM ESTUDIANTES";
+            try (PreparedStatement ps = connSqlite.prepareStatement(select);
+                 ResultSet rs = ps.executeQuery()) {
+
+                String insert = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement ins = connMaria.prepareStatement(insert)) {
+                    while (rs.next()) {
+                        ins.setString(1, rs.getString("id"));
+                        ins.setString(2, rs.getString("nombre"));
+                        ins.setString(3, rs.getString("apellidos"));
+                        ins.setString(4, rs.getString("casa"));
+                        ins.setInt(5, rs.getInt("curso"));
+                        ins.setString(6, rs.getString("patronus"));
+                        ins.addBatch();
+                    }
+                    ins.executeBatch();
+                }
+            }
+            logger.info("♻️ Hogwarts restaurado desde SQLite.");
+        } catch (Exception e) {
+            logger.error("⚠️ Error restaurando Hogwarts desde backup SQLite.", e);
+        }
+    }
+
+
 }
-
-

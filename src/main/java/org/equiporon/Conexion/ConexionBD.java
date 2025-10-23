@@ -54,32 +54,6 @@ public class ConexionBD {
 
 // dentro de tu try tras crear la conn:
             logger.info("[Derby] URL usada: " + url + " user=" + user);
-
-// Solo para Gryffindor/Derby:
-            if ("Gryffindor".equalsIgnoreCase(casa)) {
-                try (Statement st = conn.createStatement()) {
-                    try (ResultSet rs = st.executeQuery("VALUES CURRENT_USER")) {
-                        if (rs.next()) logger.info("[Derby] CURRENT_USER=" + rs.getString(1));
-                    }
-                    try (ResultSet rs = st.executeQuery("VALUES CURRENT SCHEMA")) {
-                        if (rs.next()) logger.info("[Derby] CURRENT_SCHEMA=" + rs.getString(1));
-                    }
-                    try (ResultSet rs = st.executeQuery(
-                            "SELECT TABLENAME FROM SYS.SYSTABLES WHERE TABLETYPE='T' AND UPPER(TABLENAME)='ESTUDIANTES'")) {
-                        boolean exists = rs.next();
-                        logger.info("[Derby] ¿Existe tabla ESTUDIANTES en metadata? " + exists);
-                    }
-                    // Probar acceso real:
-                    try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM APP.ESTUDIANTES")) {
-                        if (rs.next()) logger.info("[Derby] Filas en APP.ESTUDIANTES = " + rs.getInt(1));
-                    }
-                } catch (SQLException ex) {
-                    logger.error("[Derby] Diagnóstico falló: " + ex.getMessage());
-                    ex.printStackTrace();
-                }
-            }
-
-
             logger.info("Conexión exitosa con " + casa);
             return conn;
 
@@ -103,6 +77,39 @@ public class ConexionBD {
             return null;
         }
     }
+    public static Connection getSQLiteConnection() {
+        try {
+            // 1️⃣ Cargar el driver de SQLite
+            Class.forName("org.sqlite.JDBC");
+
+            // 2️⃣ Ruta del archivo local (en carpeta data/)
+            String url = "jdbc:sqlite:../data/hogwarts_backup.db";
+            Connection conn = DriverManager.getConnection(url);
+
+            // 3️⃣ Crear la tabla si no existe
+            try (Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS ESTUDIANTES (
+                    id TEXT PRIMARY KEY,
+                    nombre TEXT,
+                    apellidos TEXT,
+                    casa TEXT,
+                    curso INTEGER,
+                    patronus TEXT
+                )
+            """);
+            }
+
+            System.out.println("✅ Conectado a SQLite (backup local de Hogwarts)");
+            return conn;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error conectando a SQLite: " + e.getMessage());
+            return null;
+        }
+    }
+
+
 }
 
 
