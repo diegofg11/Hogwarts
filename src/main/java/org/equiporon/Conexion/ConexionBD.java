@@ -1,6 +1,10 @@
 package org.equiporon.Conexion;
 
+import java.io.File;
 import java.sql.*;
+
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,14 +125,28 @@ public class ConexionBD {
      */
     public static Connection getSQLiteConnection() {
         try {
-            // 1️⃣ Cargar el driver de SQLite
             Class.forName("org.sqlite.JDBC");
 
-            // 2️⃣ Ruta del archivo local (en carpeta data/)
-            String url = "jdbc:sqlite:../data/hogwarts_backup.db";
+
+
+            // 📍 Ruta real del .jar ejecutado (aunque esté dentro de /internal/)
+            File jarDir = new File(ConexionBD.class
+                    .getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .toURI())
+                    .getParentFile();
+
+            // 🧩 Subimos desde /internal/app/target → /internal/
+            File internalDir = jarDir.getParentFile().getParentFile();
+
+            // 📁 Carpeta data dentro de /internal/
+            File dbFile = new File(internalDir, "data/backup.sqlite");
+            String dbPath = dbFile.getAbsolutePath();
+
+            String url = "jdbc:sqlite:" + dbPath;
             Connection conn = DriverManager.getConnection(url);
 
-            // 3️⃣ Crear la tabla si no existe
             try (Statement stmt = conn.createStatement()) {
                 stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS ESTUDIANTES (
@@ -142,7 +160,7 @@ public class ConexionBD {
             """);
             }
 
-            System.out.println("✅ Conectado a SQLite (backup local de Hogwarts)");
+            System.out.println("✅ SQLite conectado en: " + dbPath);
             return conn;
 
         } catch (Exception e) {
@@ -150,4 +168,7 @@ public class ConexionBD {
             return null;
         }
     }
+
+
+
 }

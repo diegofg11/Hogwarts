@@ -276,11 +276,4 @@ public class SQLiteDAO extends BaseDAO {
             logger.error("❌ Error restaurando casa {} desde SQLite", nombreCasa, ex);
         }
     }
-
-
-
-
-
-
-
 }
