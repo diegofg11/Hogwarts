@@ -39,6 +39,12 @@ public class MariaDBDAO extends BaseDAO {
     // --------------------------
     @Override
     public boolean insertarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
+
+        // 1. AÑADIR LA VALIDACIÓN QUE ESTABA EN BaseDAO
+        if (!comprobarEstudiante(e)) {
+            return false;
+        }
+
         final String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
