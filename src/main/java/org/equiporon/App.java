@@ -73,7 +73,7 @@ public class App extends Application {
         Scene scene = new Scene(loadFXML(fxml));
         //scene.getStylesheets().add(App.class.getResource("/styles/Styles.css").toExternalForm());
         stage.setMinWidth(600);
-        stage.setMinHeight(400);
+        stage.setMinHeight(600);
         stage.setTitle("Hogwarts");
         stage.setScene(scene);
         stage.show();
