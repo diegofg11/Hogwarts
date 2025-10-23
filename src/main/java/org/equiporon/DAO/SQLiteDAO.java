@@ -125,9 +125,8 @@ public class SQLiteDAO extends BaseDAO {
             logger.error("⚠️ Error haciendo backup en SQLite.", e);
         }
     }
-    public void restaurarBackupEnHogwarts() {
+    public void restaurarBackupEnHogwarts(String casaARevertir) {
         try (Connection connSqlite = getConnection()) {
-
             if (connSqlite == null) {
                 logger.error("❌ No hay conexión a SQLite.");
                 return;
@@ -138,7 +137,6 @@ public class SQLiteDAO extends BaseDAO {
             try (PreparedStatement ps = connSqlite.prepareStatement(select);
                  ResultSet rs = ps.executeQuery()) {
 
-                // Guardamos en memoria
                 java.util.List<Modelo_Estudiante> lista = new java.util.ArrayList<>();
                 while (rs.next()) {
                     Modelo_Estudiante e = new Modelo_Estudiante(
@@ -152,20 +150,34 @@ public class SQLiteDAO extends BaseDAO {
                     lista.add(e);
                 }
 
-                // Restauramos en todas las casas
-                restaurarCasa("MariaDB", ConexionBD.getConnection(), lista);
-                restaurarCasa("H2", ConexionBD.conectarCasa("Hufflepuff"), lista);
-                restaurarCasa("Derby", ConexionBD.conectarCasa("Gryffindor"), lista);
-                restaurarCasa("HSQLDB", ConexionBD.conectarCasa("Slytherin"), lista);
-                restaurarCasa("Oracle", ConexionBD.conectarCasa("Ravenclaw"), lista);
+                // 🧩 Restaurar Hogwarts siempre
+                restaurarCasa("Hogwarts", ConexionBD.getConnection(), lista);
 
-                logger.info("♻️ Restauración completa en todas las casas desde SQLite.");
+                // 🧩 Si se restauró desde Hogwarts → sincronizar TODAS las casas
+                if (casaARevertir.equalsIgnoreCase("Hogwarts")) {
+                    restaurarCasa("Gryffindor", ConexionBD.conectarCasa("Gryffindor"), lista);
+                    restaurarCasa("Hufflepuff", ConexionBD.conectarCasa("Hufflepuff"), lista);
+                    restaurarCasa("Slytherin", ConexionBD.conectarCasa("Slytherin"), lista);
+                    restaurarCasa("Ravenclaw", ConexionBD.conectarCasa("Ravenclaw"), lista);
+                    logger.info("♻️ Restauración completa (Hogwarts + todas las casas) desde SQLite.");
+                } else {
+                    // 🧩 Si se restauró desde una casa → solo esa
+                    switch (casaARevertir.toLowerCase()) {
+                        case "gryffindor" -> restaurarCasa("Gryffindor", ConexionBD.conectarCasa("Gryffindor"), lista);
+                        case "hufflepuff" -> restaurarCasa("Hufflepuff", ConexionBD.conectarCasa("Hufflepuff"), lista);
+                        case "slytherin" -> restaurarCasa("Slytherin", ConexionBD.conectarCasa("Slytherin"), lista);
+                        case "ravenclaw" -> restaurarCasa("Ravenclaw", ConexionBD.conectarCasa("Ravenclaw"), lista);
+                    }
+                    logger.info("♻️ Restauración parcial ({}) desde SQLite.", casaARevertir);
+                }
 
             }
         } catch (Exception e) {
-            logger.error("⚠️ Error restaurando desde SQLite en todas las casas.", e);
+            logger.error("⚠️ Error restaurando desde SQLite.", e);
         }
     }
+
+
     /**
      * 💾 Realiza un backup instantáneo del estado actual de Hogwarts (MariaDB)
      * justo antes de una operación, para poder deshacer siempre.
@@ -211,29 +223,40 @@ public class SQLiteDAO extends BaseDAO {
     /**
      * Restaura una casa específica desde la lista de estudiantes del backup.
      */
+    /**
+     * Restaura una casa específica desde la lista de estudiantes del backup,
+     * insertando solo los que pertenecen a esa casa.
+     */
     private void restaurarCasa(String nombreCasa, Connection conn, java.util.List<Modelo_Estudiante> lista) {
         if (conn == null) {
             logger.warn("⚠️ No hay conexión para {}", nombreCasa);
             return;
         }
 
-        try (conn) {
+        try {
             // 🔸 1. Vaciar tabla
             try (PreparedStatement del = conn.prepareStatement("DELETE FROM ESTUDIANTES")) {
                 del.executeUpdate();
             }
 
-            // 🔸 2. Insertar restaurando IDs según destino
+            // 🔸 2. Insertar solo los estudiantes de esa casa
             String insert = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ins = conn.prepareStatement(insert)) {
 
                 for (Modelo_Estudiante e : lista) {
-                    String id = e.getId();
+                    boolean esMariaDB = nombreCasa.equalsIgnoreCase("Hogwarts");
+                    boolean coincideCasa =
+                            esMariaDB ||
+                                    (nombreCasa.equalsIgnoreCase("Gryffindor") && e.getCasa().equalsIgnoreCase("Gryffindor")) ||
+                                    (nombreCasa.equalsIgnoreCase("Hufflepuff") && e.getCasa().equalsIgnoreCase("Hufflepuff")) ||
+                                    (nombreCasa.equalsIgnoreCase("Slytherin") && e.getCasa().equalsIgnoreCase("Slytherin")) ||
+                                    (nombreCasa.equalsIgnoreCase("Ravenclaw") && e.getCasa().equalsIgnoreCase("Ravenclaw"));
 
-                    // 🧩 Si NO es MariaDB → quitar prefijo (GR, HF, RV, SL)
-                    if (!nombreCasa.equalsIgnoreCase("MariaDB")) {
-                        id = id.replaceAll("^(GR|HF|RV|SL)", ""); // quita el prefijo
-                    }
+                    if (!coincideCasa) continue;
+
+                    // 🧩 Ajustar ID solo si no es Hogwarts
+                    String id = e.getId();
+                    if (!esMariaDB) id = id.replaceAll("^(GR|HF|RV|SL)", "");
 
                     ins.setString(1, id);
                     ins.setString(2, e.getNombre());
@@ -247,12 +270,14 @@ public class SQLiteDAO extends BaseDAO {
                 ins.executeBatch();
             }
 
-            logger.info("✅ Restaurada la casa {} desde SQLite ({} estudiantes)", nombreCasa, lista.size());
+            logger.info("✅ Restaurada la casa {} desde SQLite.", nombreCasa);
 
         } catch (Exception ex) {
             logger.error("❌ Error restaurando casa {} desde SQLite", nombreCasa, ex);
         }
     }
+
+
 
 
 

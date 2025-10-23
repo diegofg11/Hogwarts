@@ -130,13 +130,16 @@ public class Controlador {
         aplicarColorVentana("Hogwarts");
         aplicarImagenesCasa("Hogwarts");
         seleccionarCasa("Hogwarts");
-        try {
-            SQLiteDAO sqlite = new SQLiteDAO();
-            sqlite.hacerBackupCompleto();
-            System.out.println("✅ Copia inicial en SQLite creada correctamente.");
-        } catch (Exception ex) {
-            System.err.println("⚠️ No se pudo crear la copia inicial: " + ex.getMessage());
-        }
+        // 🕒 Esperar a que la interfaz termine de cargarse y luego hacer backup
+        Platform.runLater(() -> {
+            try {
+                SQLiteDAO sqlite = new SQLiteDAO();
+                sqlite.hacerBackupInstantaneo();
+                System.out.println("💾 Backup inicial creado correctamente tras cargar Hogwarts.");
+            } catch (Exception ex) {
+                System.err.println("⚠️ No se pudo crear la copia inicial: " + ex.getMessage());
+            }
+        });
     }
 
     // ----------------- Selección de casa -----------------
@@ -224,15 +227,6 @@ public class Controlador {
             else if (daoActual instanceof MariaDBDAO dao) resultado = dao.editarEstudiante(est, false);
 
             if (resultado) {
-                // 🔹 Incrementar el contador global de operaciones
-                contadorOperaciones++;
-
-                // 🔹 Cada 2 operaciones, crear copia en SQLite
-                if (contadorOperaciones % 2 == 0) {
-                    SQLiteDAO sqlite = new SQLiteDAO();
-                    sqlite.hacerBackupCompleto();
-                    logger.info("💾 Copia SQLite actualizada tras {} operaciones.", contadorOperaciones);
-                }
                 logger.info("✅ Cambios guardados automáticamente en {}", casaActual);
             } else {
                 mostrarError("❌ No se pudieron guardar los cambios.");
@@ -250,7 +244,7 @@ public class Controlador {
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
                 SQLiteDAO sqlite = new SQLiteDAO();
-                sqlite.restaurarBackupEnHogwarts();
+                sqlite.restaurarBackupEnHogwarts(casaActual);
                 mostrarInfo("Hogwarts restaurado desde la copia SQLite.");
                 cargarEstudiantes();
             }

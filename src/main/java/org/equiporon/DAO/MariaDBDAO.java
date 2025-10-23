@@ -162,9 +162,6 @@ public class MariaDBDAO extends BaseDAO {
             case "delete" -> daoCasa.borrarEstudiante(copia.getId(), true);
         }
 
-        // 💾 Mantener el ID completo en SQLite (con prefijo)
-        new SQLiteDAO().sincronizarDesdeHogwarts(e, tipo);
-
         logger.info("🔄 Hogwarts → {} ({} ID {}).", e.getCasa(), tipo, e.getId());
     }
 
