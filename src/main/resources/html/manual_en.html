@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hogwarts School · User Manual</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/1/1e/Hogwartscrest.png" type="image/png">
+
+    <!-- Fonts -->
+    <link href="https://fonts.cdnfonts.com/css/harry-p" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+<div class="app">
+    <main id="content">
+
+        <h1>User Manual · Hogwarts</h1>
+        <p class="lead"><strong>Welcome!</strong> This manual guides you step by step to use <strong>Hogwarts Manager</strong>
+            without technical jargon. It's designed so anyone can follow it easily, even if they haven't used
+            computer magic before. We hope you enjoy it!</p>
+
+        <!-- BOX 1: Basic usage -->
+        <section class="card">
+            <h2>Basic system usage</h2>
+            <h3>What can you do here?</h3>
+            <br>
+            <ul>
+                <li><strong>View students</strong> of a house or all of Hogwarts.</li>
+                <li><strong>Add</strong> a new student (make sure to warn them if a troll is in the bathroom).</li>
+                <li><strong>Edit</strong> data directly in the table.</li>
+                <li><strong>Delete</strong> a student if you made a mistake… or if they wandered into the Forbidden Forest. Aragog might have a feast.</li>
+                <li><strong>Undo</strong> the last changes.</li>
+            </ul>
+
+            <h3>Getting started (2 minutes)</h3>
+            <br>
+            <ol class="steps">
+                <li>Open the application. (This step is easier than seeing Snape smile, don’t complain.)</li>
+                <li>Choose <strong>Hogwarts</strong> to see everything, or a specific house to work only with it.</li>
+                <li>Explore the <strong>student table</strong>: you can sort it or edit cells.</li>
+            </ol>
+            <br>
+
+            <div class="callout"><strong>Tip:</strong> If any word seems strange, don't worry. Follow the icons and steps. And take off your goggles, there are no mandrakes here.
+            </div>
+        </section>
+
+        <!-- BOX 2: Help and troubleshooting -->
+        <section class="card">
+            <h2>Help and troubleshooting</h2>
+
+            <h3>Quick overview of the application</h3>
+            <br>
+            <table>
+                <tbody>
+                <tr><td><strong>House selector</strong></td><td>Dropdown at the top: Hogwarts, Gryffindor, Hufflepuff, Ravenclaw, Slytherin.</td></tr>
+                <tr><td><strong>Form</strong></td><td>Fields: First Name, Last Name, Year, Patronus. (House fills automatically.)</td></tr>
+                <tr><td><strong>Buttons</strong></td><td><em>Add</em>, <em>Delete</em>, <em>Undo</em>.</td></tr>
+                <tr><td><strong>Table</strong></td><td>Student list: ID, First Name, Last Name, House, Year, Patronus. Edit by double-clicking.</td></tr>
+                <tr><td><strong>Menu</strong></td><td>At the top: <em>File</em>, <em>Help</em> and <em>Languages</em>.</td></tr>
+                </tbody>
+            </table>
+            <br>
+
+            <h3>Frequently asked questions</h3>
+            <br>
+            <ul>
+                <li><strong>I don’t see my house</strong> → make sure it’s selected in the dropdown.</li>
+                <li><strong>Can’t add a student</strong> → check all fields are filled and Year is a number.</li>
+                <li><strong>Edited a cell but it doesn’t change</strong> → press <strong>Enter</strong> after typing. Error messages will appear if something goes wrong.</li>
+            </ul>
+
+        </section>
+
+        <!-- BOX 3: Credits -->
+        <section class="creditos">
+            <h2>Credits</h2>
+            <p>Authors: <strong>Team Ron</strong> (Gaizka, Igor, Rubén, Unai, and Diego).</p>
+            <p>Application: <strong>Hogwarts Manager</strong> (JavaFX)</p>
+            <p>Manual design inspired by <em>Hogwarts School of Witchcraft and Wizardry</em> documents.</p>
+        </section>
+
+    </main>
+
+    <footer>
+        © <span id="year"></span> · Hogwarts User Manual.
+    </footer>
+</div>
+
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

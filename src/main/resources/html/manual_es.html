@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Colegio Hogwarts · Manual de Usuario</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/1/1e/Hogwartscrest.png" type="image/png">
+
+  <!-- Fuentes -->
+  <link href="https://fonts.cdnfonts.com/css/harry-p" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="app">
+    <main id="content">
+
+      <h1>Manual de Usuario · Hogwarts</h1>
+      <p class="lead"><strong>¡Bienvenido!</strong> Este manual te guía paso a paso para usar <strong>Hogwarts Manager</strong> 
+        sin tecnicismos. Está diseñado para que cualquiera pueda seguirlo sin perderse, incluso si no ha usado 
+        magia informática antes. ¡Esperamos que te guste!</p>
+
+      <!-- RECUADRO 1: Uso básico -->
+      <section class="card">
+        <h2>Uso básico del sistema</h2>
+        <h3>¿Qué puedes hacer aquí?</h3>
+        <br>
+        <ul>
+          <li><strong>Ver estudiantes</strong> de una casa o de todo Hogwarts.</li>
+          <li><strong>Añadir</strong> un estudiante nuevo (antes de que llegue, avísale de que hay un trol en el baño).</li>
+          <li><strong>Editar</strong> datos directamente en la tabla.</li>
+          <li><strong>Borrar</strong> un estudiante si te has equivocado… o si ha entrado en el bosque prohibido sin querer. Diría que Aragog
+          se va a dar un festín.</li>
+          <li><strong>Deshacer</strong> los últimos cambios.</li>
+        </ul>
+
+        <h3>Primeros pasos (2 minutos)</h3>
+        <br>
+        <ol class="steps">
+          <li>Abre la aplicación. (Este paso es más sencillo que ver sonreir a Snape, no te quejes).</li>
+          <li>Elige <strong>Hogwarts</strong> para ver todo, o una casa concreta para trabajar solo con ella.</li>
+          <li>Explora la <strong>tabla</strong> de estudiantes: puedes ordenarla o editar celdas.</li>
+        </ol>
+        <br>
+
+        <div class="callout"><strong>Consejo:</strong> si alguna palabra te suena rara, no pasa nada. Guíate por los iconos y sigue los pasos. Ah, y quítate
+          las orejeras, no hay mandrágoras por aquí.
+        </div>
+      </section>
+
+      <!-- RECUADRO 2: Ayuda y resolución -->
+      <section class="card">
+        <h2>Ayuda y resolución de problemas</h2>
+
+        <h3>Vista rápida de la aplicación</h3>
+        <br>
+        <table>
+          <tbody>
+            <tr><td><strong>Selector de casa</strong></td><td>Cuadro desplegable arriba: Hogwarts, Gryffindor, Hufflepuff, Ravenclaw, Slytherin.</td></tr>
+            <tr><td><strong>Formulario</strong></td><td>Campos: Nombre, Apellidos, Curso, Patronus. (La Casa se rellena sola.)</td></tr>
+            <tr><td><strong>Botones</strong></td><td><em>Añadir</em>, <em>Borrar</em>, <em>Deshacer</em>.</td></tr>
+            <tr><td><strong>Tabla</strong></td><td>Lista de estudiantes: ID, Nombre, Apellidos, Casa, Curso, Patronus. Se puede editar con doble clic.</td></tr>
+            <tr><td><strong>Menú</strong></td><td>En la parte superior: <em>Archivo</em>,   <em>Ayuda</em> e <em>Idiomas</em>.</td></tr>
+          </tbody>
+        </table>
+        <br>
+
+        <h3>Preguntas frecuentes</h3>
+        <br>
+        <ul>
+          <li><strong>No veo mi casa</strong> → asegúrate de haberla seleccionado en el desplegable.</li>
+          <li><strong>No me deja añadir</strong> → revisa que todos los campos estén completos y que el curso sea un número.</li>
+          <li><strong>He editado una celda y no cambia</strong> → pulsa <strong>Enter</strong> tras escribir. Si algo falla, aparecerá un mensaje explicativo.</li>
+        </ul>
+
+      </section>
+
+      <!-- RECUADRO 3: Créditos -->
+      <section class="creditos">
+        <h2>Créditos</h2>
+        <p>Autores: <strong>Equipo Ron</strong> (Gaizka, Igor, Rubén, Unai y Diego).</p>
+        <p>Aplicación: <strong>Hogwarts Manager</strong> (JavaFX)</p>
+        <p>Diseño del manual inspirado en documentos del <em>Colegio Hogwarts de Magia y Hechicería</em>.</p>
+      </section>
+
+    </main>
+
+    <footer>
+      © <span id="year"></span> · Manual de Usuario del Colegio Hogwarts.
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

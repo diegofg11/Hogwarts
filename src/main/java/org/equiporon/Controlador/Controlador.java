@@ -602,4 +602,28 @@ public class Controlador {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void clickOnManual(ActionEvent event) {
+        // Cargar el bundle según el idioma actual
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+
+
+        try {
+            // Obtenemos la ruta del HTML desde el properties
+            String manualPath = bundle.getString("manual.link");
+            var manualUrl = getClass().getResource(manualPath);
+
+
+            if (manualUrl != null) {
+                java.awt.Desktop.getDesktop().browse(manualUrl.toURI());
+            } else {
+                mostrarError(bundle.getString("manual.error.not_found"));
+            }
+        } catch (Exception e) {
+            mostrarError(bundle.getString("manual.error.open_failed") + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="la">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hogwartsss School · Manuassss</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/1/1e/Hogwartscrest.png" type="image/png">
+
+    <!-- Fonts -->
+    <link href="https://fonts.cdnfonts.com/css/harry-p" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+<div class="app">
+    <main id="content">
+
+        <h1>Manuassss · Hogwartsss</h1>
+        <p class="lead"><strong>Welcomesss!</strong> This manuassss guidesss you step by step to usesss <strong>Hogwartsss Manager</strong>
+            without technicallissss jargon. Anyone can follow hissss, even if no sssstudent has usssed computermagics before. Enjoy hissss!</p>
+
+        <!-- BOX 1: Basic usage -->
+        <section class="card">
+            <h2>Basic ssssystem usesss</h2>
+            <h3>What can hissss do here?</h3>
+            <br>
+            <ul>
+                <li><strong>View sssstudents</strong> of a houssss or all Hogwartsss.</li>
+                <li><strong>Add</strong> new sssstudent (warn hissss if a troll is in bathroom hissss).</li>
+                <li><strong>Edit</strong> data in table hissss.</li>
+                <li><strong>Delete</strong> sssstudent if mistake… or wandered into Forbidden Forest hissss. Aragog feast hissss.</li>
+                <li><strong>Undo</strong> last changesss hissss.</li>
+            </ul>
+
+            <h3>Getting startsss (2 minutesss)</h3>
+            <br>
+            <ol class="steps">
+                <li>Open applicatissss. (Easier than seeing Snape smile hissss.)</li>
+                <li>Choose <strong>Hogwartsss</strong> to see all, or a houssss to work only hissss.</li>
+                <li>Explorressss <strong>table</strong>: sort or edit cellss hissss.</li>
+            </ol>
+            <br>
+
+            <div class="callout"><strong>Tipsss:</strong> If word seemsss strange, no worry hissss. Follow iconsss and stepsss. Gogglesss off, no mandrakes hissss.
+            </div>
+        </section>
+
+        <!-- BOX 2: Help and troubleshooting -->
+        <section class="card">
+            <h2>Helpsss and problem resolvesss</h2>
+
+            <h3>Quick view of applicatissss</h3>
+            <br>
+            <table>
+                <tbody>
+                <tr><td><strong>Houssss selector</strong></td><td>Dropdown top: Hogwartsss, Gryffindor, Hufflepuff, Ravenclaw, Slytherin.</td></tr>
+                <tr><td><strong>Form</strong></td><td>Fields: Firstname, Lastname, Year, Patronus. (House fills hissss.)</td></tr>
+                <tr><td><strong>Buttonsss</strong></td><td><em>Add</em>, <em>Delete</em>, <em>Undo</em>.</td></tr>
+                <tr><td><strong>Table</strong></td><td>Student list: ID, Name, Lastname, House, Year, Patronus. Edit double-click hissss.</td></tr>
+                <tr><td><strong>Menu</strong></td><td>Top: <em>File</em>, <em>Helpsss</em>, <em>Language</em>.</td></tr>
+                </tbody>
+            </table>
+            <br>
+
+            <h3>FAQs</h3>
+            <br>
+            <ul>
+                <li><strong>Don’t see houssss</strong> → select hissss in dropdown.</li>
+                <li><strong>Cannot add</strong> → check all fields filled, Year number hissss.</li>
+                <li><strong>Edited cell no change</strong> → press <strong>Enter</strong>. Error message appear hissss.</li>
+            </ul>
+
+        </section>
+
+        <!-- BOX 3: Credits -->
+        <section class="creditos">
+            <h2>Creditsss</h2>
+            <p>Authors: <strong>Team Ron</strong> (Gaizka, Igor, Rubén, Unai, Diego).</p>
+            <p>Applicatissss: <strong>Hogwartsss Manager</strong> (JavaFX)</p>
+            <p>Manual inspirressss by <em>Hogwartsss School of Witchcraft and Wizardry</em> documents hissss.</p>
+        </section>
+
+    </main>
+
+    <footer>
+        © <span id="year"></span> · Hogwartsss User Manuassss.
+    </footer>
+</div>
+
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
