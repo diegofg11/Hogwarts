@@ -11,6 +11,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.util.converter.IntegerStringConverter;
 import org.equiporon.Conexion.ConexionBD;
 import org.equiporon.DAO.*;
@@ -520,6 +521,8 @@ public class Controlador {
         confirm.setHeaderText(bundle.getString("file.header"));
         confirm.setContentText(bundle.getString("file.content"));
 
+        setIconoAlerta(confirm);
+
         ButtonType btnSi = new ButtonType(bundle.getString("file.yes"), ButtonBar.ButtonData.OK_DONE);
         ButtonType btnNo = new ButtonType(bundle.getString("file.no"), ButtonBar.ButtonData.CANCEL_CLOSE);
         confirm.getButtonTypes().setAll(btnSi, btnNo);
@@ -534,6 +537,30 @@ public class Controlador {
                 Platform.exit();
             }
         });
+
+    }
+// Dentro de la clase Controlador
+// ...
+    /**
+     * Establece el icono 'hogwarts_escudo.png' en la Stage de la alerta.
+     * Asume que la imagen está en resources/images/hogwarts_escudo.png.
+     * @param alert La alerta de JavaFX.
+     */
+    private void setIconoAlerta(Alert alert) {
+        try {
+            // 1. Cargar la imagen usando la misma lógica que aplicarImagenesCasa
+            Image appIcon = new Image(getClass().getResourceAsStream("/images/hogwarts_escudo.png"));
+
+            // 2. Obtener la Stage (ventana) de la alerta
+            // Se requiere la importación de javafx.stage.Stage
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+
+            // 3. Agregar el icono a la ventana
+            stage.getIcons().add(appIcon);
+        } catch (Exception e) {
+            // Manejo de errores (solo se registra, la aplicación continúa)
+            logger.warn("No se pudo establecer el icono de la alerta: {}", e.getMessage());
+        }
     }
 
     @FXML
@@ -550,6 +577,7 @@ public class Controlador {
         help.setTitle(bundle.getString("help.title"));
         help.setHeaderText(bundle.getString("help.header"));
         help.setContentText(bundle.getString("help.content"));
+        setIconoAlerta(help);
         help.showAndWait();
     }
     /**
@@ -565,6 +593,7 @@ public class Controlador {
         about.setTitle(bundle.getString("about.title"));
         about.setHeaderText(bundle.getString("about.header"));
         about.setContentText(bundle.getString("about.content"));
+        setIconoAlerta(about);
         about.showAndWait();
     }
 
