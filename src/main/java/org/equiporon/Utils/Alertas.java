@@ -13,7 +13,6 @@ import java.util.Optional;
  * Ejemplo de uso:
  *   Alertas.mostrarInfo("Conexión exitosa", "Conectado correctamente a Gryffindor.");
  *   Alertas.mostrarError("Error de conexión", "No se pudo conectar a la base de datos.");
- *   @author Gaizka
  */
 public class Alertas {
 
@@ -54,4 +53,3 @@ public class Alertas {
         return resultado.isPresent() && resultado.get() == ButtonType.OK;
     }
 }
-

@@ -4,21 +4,25 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
 import java.io.IOException;
+
+import org.equiporon.Utils.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Clase principal de la aplicación JavaFX.
  * <p>
  * Esta clase inicializa la interfaz gráfica, carga los archivos FXML y
  * permite cambiar entre diferentes escenas dentro de la aplicación.
+ * Además, soporta internacionalización mediante ResourceBundles.
  * </p>
  *
- * @author Unai, Ruben, Diego
+ * Autores:
+ *  - Unai
+ *  - Xiker (modificador)
  */
 public class App extends Application {
 
@@ -32,21 +36,20 @@ public class App extends Application {
      * <p>
      * Se ejecuta automáticamente al lanzar la aplicación e inicializa la
      * escena principal definida en el archivo FXML "primary.fxml".
-     * Además, incorpora un icono a la aplicación.
+     * Se carga el ResourceBundle por defecto (español).
      * </p>
      *
-     * @author Ruben, Diego
      * @param s instancia del {@link Stage} principal proporcionado por JavaFX.
      * @throws IOException si ocurre un error al cargar el archivo FXML inicial.
      */
     @Override
     public void start(@SuppressWarnings("exports") Stage s) throws IOException {
         stage = s;
+
+        // Configurar idioma por defecto (español)
+        I18n.setLocale(java.util.Locale.forLanguageTag("es"));
+
         setRoot("primary", "");
-        Image icon = new Image(
-                App.class.getResource("/images/hogwarts_escudo.png").toExternalForm()
-        );
-        s.getIcons().add(icon);
     }
 
     /**
@@ -65,7 +68,7 @@ public class App extends Application {
     /**
      * Cambia la escena principal de la aplicación con un nuevo archivo FXML y título.
      *
-     * @param fxml nombre del archivo FXML (sin extensión) que se desea cargar.
+     * @param fxml  nombre del archivo FXML (sin extensión) que se desea cargar.
      * @param title título de la ventana que se mostrará tras el cambio.
      * @throws IOException si ocurre un error al cargar el archivo FXML.
      */
@@ -73,7 +76,7 @@ public class App extends Application {
         Scene scene = new Scene(loadFXML(fxml));
         //scene.getStylesheets().add(App.class.getResource("/styles/Styles.css").toExternalForm());
         stage.setMinWidth(600);
-        stage.setMinHeight(600);
+        stage.setMinHeight(400);
         stage.setTitle("Hogwarts");
         stage.setScene(scene);
         stage.show();
@@ -81,13 +84,16 @@ public class App extends Application {
 
     /**
      * Carga un archivo FXML desde el directorio de recursos y devuelve su contenido.
+     * <p>
+     * Se usa el ResourceBundle configurado por {@link I18n} para la internacionalización.
+     * </p>
      *
      * @param fxml nombre del archivo FXML (sin extensión) que se desea cargar.
      * @return el nodo raíz ({@link Parent}) del archivo FXML cargado.
      * @throws IOException si no se puede encontrar o cargar el archivo FXML.
      */
     private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/fxml/" + fxml + ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/fxml/" + fxml + ".fxml"), I18n.getBundle());
         return fxmlLoader.load();
     }
 
