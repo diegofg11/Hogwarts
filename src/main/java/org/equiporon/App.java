@@ -74,6 +74,7 @@ public class App extends Application {
         //scene.getStylesheets().add(App.class.getResource("/styles/Styles.css").toExternalForm());
         stage.setMinWidth(600);
         stage.setMinHeight(600);
+        stage.setMaxWidth(600);
         stage.setTitle("Hogwarts");
         stage.setScene(scene);
         stage.show();
