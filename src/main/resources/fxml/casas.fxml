@@ -34,6 +34,7 @@
                 <Menu fx:id="menuHelp" text="%menu.help">
                     <items>
                         <MenuItem fx:id="menuItemHelp" onAction="#clickOnHelp" text="%menuitem.help" />
+                        <MenuItem fx:id="menuItemManual" onAction="#clickOnManual" text="%menuitem.manual" />
                         <MenuItem fx:id="menuItemAbout" onAction="#clickOnAbout" text="%menuitem.about" />
                     </items>
                 </Menu>

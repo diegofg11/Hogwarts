@@ -1,0 +1,208 @@
+/* Manual Hogwarts – versión simplificada y unificada */
+
+/* Fuentes */
+@import url('https://fonts.cdnfonts.com/css/harry-p');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap');
+
+/* Fondo general tipo pergamino */
+body {
+  font-family: 'IM Fell English', serif;
+  background:
+    radial-gradient(circle at center,
+      rgba(255, 248, 230, 0.95) 0%,
+      rgba(245, 230, 190, 0.9) 45%,
+      rgba(180, 140, 90, 0.7) 85%,
+      rgba(80, 50, 20, 0.8) 100%
+    ),
+    url('../img/pergamino.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+  color: #3a2b1d;
+  line-height: 1.8;
+  letter-spacing: 0.4px;
+  word-spacing: 1.5px;
+  font-size: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estructura principal */
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+main {
+  width: 100%;
+  padding: 0px 80px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  max-width: none;
+}
+
+/* Textura del pergamino */
+main::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Título principal */
+h1 {
+  font-family: 'Harry P', serif;
+  font-size: 115px;
+  text-align: center;
+  color: #5e1b15;
+  margin-bottom: 28px;
+  text-shadow: 4px 4px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* Títulos secundarios */
+h2, h3 {
+  font-family: 'IM Fell English', serif;
+  color: #5e1b15;
+  text-align: center;
+  line-height: 1.25;
+  letter-spacing: 0.6px;
+  text-shadow:
+    3px 3px 2px rgba(0, 0, 0, 0.25),
+    0 0 4px rgba(181, 142, 57, 0.3);
+}
+
+h2 {
+  font-size: 33px;
+  margin: 40px 0 20px;
+  border-bottom: 2px solid #5e1b15;
+  padding-bottom: 6px;
+  text-transform: uppercase;         /* mayúsculas */
+  letter-spacing: 1px;               /* separa un poco las letras */
+  width: 100vw;                      /* ocupa todo el ancho de la ventana */
+  margin-left: calc(-50vw + 50%);    /* centra la línea en pantalla */
+  box-sizing: border-box;
+}
+h3 {
+  font-size: 24px;
+  margin: 26px 0 16px;
+  text-transform: uppercase;         /* mayúsculas */
+  border-bottom: 2px solid #5e1b15;  /* línea también */
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding-bottom: 4px;
+  box-sizing: border-box;
+}
+
+/* Texto general */
+p, ul, ol, table, li {
+  margin: 0 34px 14px;
+  color: #4a3922;
+}
+.lead {
+  color: #3a2b1d;
+  font-size: 24px;              /* tamaño mayor */
+  line-height: 1.9;             /* un poco más de aire */
+  text-align: center;
+  margin: 10px 60px 36px;       /* margen más amplio para resaltar */
+  text-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.1); /* sutil relieve */
+}
+
+/* Recuadros */
+.card {
+  position: relative;
+  background-blend-mode: lighten;
+  background-size: cover;
+  padding: 20px 18px;
+  margin: 12px 0;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.card h2, .card h3 {
+  border-bottom: 2px solid #5e1b15;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+}
+
+.creditos {
+  position: relative;
+  background-blend-mode: lighten;
+  background-size: cover;
+  padding: 20px 18px;
+  margin: 12px 0;
+  text-align: center;
+}
+
+/* Consejos destacados */
+.callout {
+  border: 1px solid #d9c48a;
+  border-left: 5px solid #5e1b15;
+  background: rgba(245, 230, 190, 0.9);
+  padding: 14px 16px;
+  font-style: italic;
+  margin: 12px 34px;
+  color: #4a3922;
+}
+
+/* Tablas */
+table {
+  width: calc(100% - 68px);
+  border-collapse: collapse;
+  font-size: 16px;
+  margin: 0 34px 20px;
+  background: rgba(245, 230, 190, 0.9);
+  border: 1px solid #5e1b15;
+}
+th, td {
+  padding: 8px 10px;
+  border-bottom: 1px dashed rgba(94, 27, 21, 0.3);
+  vertical-align: top;
+}
+th {
+  color: #5e1b15;
+  text-align: left;
+}
+
+/* Footer */
+footer {
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  color: #4a3a22;
+  margin-top: 60px;
+  padding: 40px 0 60px;
+  border-top: 1.5px solid rgba(94, 27, 21, 0.4);
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

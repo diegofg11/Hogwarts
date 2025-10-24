@@ -13,6 +13,7 @@ module org.equiporon {
     // Librerías adicionales
     requires org.slf4j;
     requires com.github.benmanes.caffeine;
+    requires java.desktop;
 
     // 👇 Esta línea es la CLAVE para tu error:
     opens org.equiporon.Controlador to javafx.fxml;

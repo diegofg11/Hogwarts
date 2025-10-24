@@ -19,10 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
+
 
 public class Controlador {
 
@@ -567,6 +567,28 @@ public class Controlador {
         about.setContentText(bundle.getString("about.content"));
         about.showAndWait();
     }
+
+    @FXML
+    private void clickOnManual(ActionEvent event) {
+        // Cargar el bundle según el idioma actual
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+
+        try {
+            // Obtenemos la ruta del HTML desde el properties
+            String manualPath = bundle.getString("manual.link");
+            var manualUrl = getClass().getResource(manualPath);
+
+            if (manualUrl != null) {
+                java.awt.Desktop.getDesktop().browse(manualUrl.toURI());
+            } else {
+                mostrarError(bundle.getString("manual.error.not_found"));
+            }
+        } catch (Exception e) {
+            mostrarError(bundle.getString("manual.error.open_failed") + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 
     // ----------------- Cambiar idioma -----------------
     /**

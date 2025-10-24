@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 public class I18n {
 
     private static Locale locale = Locale.getDefault();
-    private static ResourceBundle bundle = ResourceBundle.getBundle("i18n/messages", locale);
+    public static ResourceBundle bundle = ResourceBundle.getBundle("i18n/messages", locale);
 
     /**
      * Obtiene el texto correspondiente a la clave en el idioma actual.
