@@ -170,10 +170,9 @@ public class Controlador {
     }
 
     // ----------------- CRUD (ASÍNCRONO) -----------------
+
     @FXML
     void clickOnAdd(ActionEvent event) {
-        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
-        if (daoActual == null) { mostrarError(bundle.getString("alert.error.no_house_selected")); return; }
 
         try {
             Modelo_Estudiante nuevo = new Modelo_Estudiante(
@@ -185,27 +184,35 @@ public class Controlador {
                     txtPatronus.getText()
             );
 
-            new SQLiteDAO().hacerBackupInstantaneo();
+                // 🔄 Ejecutar asincrónicamente aunque devuelva Future
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return daoActual.insertarAsync(nuevo).get(); // Espera el resultado del Future en segundo plano
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        return false;
+                    }
+                }).thenAccept(ok -> Platform.runLater(() -> {
+                    if (ok) {
+                        mostrarInfo("✅ Estudiante añadido correctamente a " + casaActual + ".");
+                        limpiarCampos();
+                        cargarEstudiantesAsync();
+                    } else {
+                        mostrarError("❌ No se pudo añadir el estudiante.");
+                    }
+                }));
 
-            daoActual.insertarAsync(nuevo)
-                    .thenAccept(ok -> Platform.runLater(() -> {
-                        if (ok) {
-                            mostrarInfo(bundle.getString("alert.info.student_added") + casaActual);
-                            limpiarCampos();
-                            cargarEstudiantesAsync();
-                        } else {
-                            mostrarError(bundle.getString("alert.error.add_student"));
-                        }
-                    }))
-                    .exceptionally(ex -> {
-                        Platform.runLater(() -> mostrarError(bundle.getString("alert.error.add_student") + ex.getMessage()));
-                        return null;
-                    });
+        } catch (NumberFormatException e) {
+            mostrarError("Error al añadir estudiante: " + "Curso vacío o incorrecto, debe ser un numero del 1 al 7");
+            e.printStackTrace();
+        }
 
-        } catch (Exception e) {
-            mostrarError(bundle.getString("alert.error.add_student") + e.getMessage());
+        catch (Exception e) {
+            mostrarError("Error al añadir estudiante: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 
     private void actualizarEnBDAsync(Modelo_Estudiante est) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
