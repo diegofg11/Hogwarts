@@ -37,18 +37,75 @@ public abstract class BaseDAO {
     // === MÉTODOS ASÍNCRONOS COMUNES =============================
     // ============================================================
 
+    /**
+     * Ejecuta la inserción de un nuevo estudiante de forma asíncrona.
+     *
+     * <p>
+     * Envía la tarea de insertar el estudiante a un ejecutor ({@code dbExecutor})
+     * utilizando el metodo {@code insertarEstudiante(e, false)}. La operación se realiza
+     * en un hilo separado, y la sincronización bidireccional (si aplica) se activa.
+     *
+     * @param e El objeto {@link Modelo_Estudiante} a insertar.
+     * @return Un objeto {@link Future} que representa el resultado pendiente de la inserción.
+     * El resultado será {@code true} si la inserción fue exitosa, {@code false} en caso contrario.
+     * @see #insertarEstudiante(Modelo_Estudiante, boolean)
+     *
+     * @author Gaizka
+     */
     public CompletableFuture<Boolean> insertarAsync(Modelo_Estudiante e) {
         return CompletableFuture.supplyAsync(() -> insertarEstudiante(e, false), dbExecutor);
     }
 
+    /**
+     * Ejecuta la edición de un estudiante existente de forma asíncrona.
+     *
+     * <p>
+     * Envía la tarea de editar el estudiante a un ejecutor ({@code dbExecutor})
+     * utilizando el metodo {@code editarEstudiante(e, false)}. La operación se realiza
+     * en un hilo separado, y la sincronización bidireccional (si aplica) se activa.
+     *
+     * @param e El objeto {@link Modelo_Estudiante} con los datos actualizados.
+     * @return Un objeto {@link Future} que representa el resultado pendiente de la edición.
+     * El resultado será {@code true} si la edición fue exitosa, {@code false} en caso contrario.
+     * @see #editarEstudiante(Modelo_Estudiante, boolean)
+     *
+     * @author Gaizka
+     */
     public CompletableFuture<Boolean> editarAsync(Modelo_Estudiante e) {
         return CompletableFuture.supplyAsync(() -> editarEstudiante(e, false), dbExecutor);
     }
 
+    /**
+     * Ejecuta la eliminación de un estudiante por ID de forma asíncrona.
+     *
+     * <p>
+     * Envía la tarea de borrar el estudiante a un ejecutor ({@code dbExecutor})
+     * utilizando el metodo {@code borrarEstudiante(id, false)}. La operación se realiza
+     * en un hilo separado, y la sincronización bidireccional (si aplica) se activa.
+     *
+     * @param id El ID del estudiante a eliminar.
+     * @return Un objeto {@link Future} que representa el resultado pendiente de la eliminación.
+     * El resultado será {@code true} si la eliminación fue exitosa, {@code false} en caso contrario.
+     * @see #borrarEstudiante(String, boolean)
+     *
+     * @author Gaizka
+     */
     public CompletableFuture<Boolean> borrarAsync(String id) {
         return CompletableFuture.supplyAsync(() -> borrarEstudiante(id, false), dbExecutor);
     }
-
+    /**
+     * Ejecuta la recuperación de todos los estudiantes de forma asíncrona.
+     *
+     * <p>
+     * Envía la tarea de obtener todos los estudiantes a un ejecutor ({@code dbExecutor})
+     * utilizando el metodo {@code obtenerTodos()}. La operación se realiza en un hilo separado.
+     *
+     * @return Un objeto {@link Future} que representa el resultado pendiente de la consulta.
+     * El resultado será una {@code List} de {@link Modelo_Estudiante}.
+     * @see #obtenerTodos()
+     *
+     * @author Gaizka
+     */
     public CompletableFuture<List<Modelo_Estudiante>> obtenerTodosAsync() {
         return CompletableFuture.supplyAsync(this::obtenerTodos, dbExecutor);
     }
@@ -57,7 +114,23 @@ public abstract class BaseDAO {
     // === MÉTODOS SÍNCRONOS BASE =================================
     // ============================================================
 
-    /** Genera el siguiente ID local según el motor (Oracle usa NUMBER). */
+    /**
+     * Genera el siguiente ID numérico consecutivo disponible para la base de datos local
+     * consultando el valor máximo actual de la columna {@code id} en la tabla {@code ESTUDIANTES}.
+     *
+     * <p>
+     * El tipo de dato para la conversión del ID se ajusta dinámicamente:
+     * <ul>
+     * <li>Usa {@code NUMBER} para la casa "Ravenclaw" (asumiendo que usa Oracle).</li>
+     * <li>Usa {@code INTEGER} para las demás casas (asumiendo bases de datos como MySQL/MariaDB).</li>
+     * </ul>
+     *
+     * @param conn La conexión a la base de datos que se utilizará.
+     * @return El siguiente ID numérico disponible. Retorna {@code 1} si la tabla está vacía.
+     * @throws SQLException Si ocurre un error durante la ejecución de la consulta SQL.
+     *
+     * @author Gaizka
+     */
     protected int generarNuevoIdLocal(Connection conn) throws SQLException {
         String tipo = getCasa().equalsIgnoreCase("Ravenclaw") ? "NUMBER" : "INTEGER";
         String sql = "SELECT MAX(CAST(id AS " + tipo + ")) AS maximo FROM ESTUDIANTES";
@@ -72,7 +145,31 @@ public abstract class BaseDAO {
         return 1;
     }
 
-    /** Inserta estudiante local + sincronización Hogwarts */
+    /**
+     * Inserta un nuevo estudiante en la base de datos local
+     * y, opcionalmente, sincroniza la inserción con la base de datos central de Hogwarts.
+     *
+     * <p>
+     * **Proceso:**
+     * <ol>
+     * <li>Verifica la validez del objeto {@code Modelo_Estudiante} usando {@code comprobarEstudiante(e)}.</li>
+     * <li>Genera un nuevo ID numérico local (sin prefijo de casa) usando {@code generarNuevoIdNumerico(conn)} y lo asigna al estudiante.</li>
+     * <li>Ejecuta la consulta SQL: {@code INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)}.</li>
+     * <li>Si la llamada no es de sincronización ({@code esSincronizacion = false}) y no estamos en la casa 'Hogwarts',
+     * se realiza una **sincronización bidireccional** insertando el estudiante en la base de datos de Hogwarts
+     * con un ID que incluye el prefijo de la casa (ej. "GR" + ID numérico).</li>
+     * </ol>
+     *
+     * @param e El objeto {@link Modelo_Estudiante} conteniendo los datos del nuevo estudiante.
+     * El campo {@code id} será sobrescrito con el nuevo ID generado.
+     * @param esSincronizacion Booleano que indica si la llamada proviene de una sincronización externa
+     * (ej. desde Hogwarts). Si es {@code true}, se omite la sincronización bidireccional para prevenir bucles.
+     * @return {@code true} si el estudiante fue insertado y sincronizado exitosamente, {@code false}
+     * si la comprobación inicial falla o si ocurre un error de {@code SQLException}.
+     * @throws SQLException Si ocurre un error al acceder a la base de datos (manejado internamente con log).
+     *
+     * @author Gaizka
+     */
     public boolean insertarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
 
         if (!comprobarEstudiante(e)) {
@@ -131,7 +228,30 @@ public abstract class BaseDAO {
     }
 
 
-    /** Editar + sincronizar con Hogwarts */
+
+    /**
+     * Edita los detalles de un estudiante existente en la base de datos local
+     * y, opcionalmente, sincroniza la actualización con la base de datos central de Hogwarts.
+     *
+     * <p>
+     * **Pasos:**
+     * <ol>
+     * <li>Verifica la validez del objeto {@code Modelo_Estudiante} usando {@code comprobarEstudiante(e)}.</li>
+     * <li>Ejecuta la consulta SQL: {@code UPDATE ESTUDIANTES SET nombre=?, apellidos=?, casa=?, curso=?, patronus=? WHERE id=?}.</li>
+     * <li>Si la llamada no es de sincronización ({@code esSincronizacion = false}) y no estamos en la casa 'Hogwarts',
+     * se realiza una **sincronización bidireccional** llamando a {@code editarEstudiante} en el DAO de Hogwarts,
+     * utilizando un ID con prefijo de casa.</li>
+     * </ol>
+     *
+     * @param e El objeto {@link Modelo_Estudiante} con los datos actualizados. El campo {@code id} debe coincidir con un estudiante existente.
+     * @param esSincronizacion Booleano que indica si la llamada proviene de una sincronización externa
+     * (ej. desde Hogwarts). Si es {@code true}, se omite la sincronización bidireccional para prevenir bucles.
+     * @return {@code true} si el estudiante fue editado y sincronizado exitosamente, {@code false}
+     * si la comprobación inicial falla o si ocurre un error de {@code SQLException}.
+     * @throws SQLException Si ocurre un error al acceder a la base de datos (manejado internamente con log).
+     *
+     * @author Gaizka
+     */
     public boolean editarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
 
         if (!comprobarEstudiante(e)) {
@@ -173,7 +293,24 @@ public abstract class BaseDAO {
     }
 
 
-    /** Borra estudiante local + sincronización Hogwarts */
+    /**
+     * Elimina un estudiante de la tabla de la base de datos local utilizando su ID
+     * y, opcionalmente, sincroniza la eliminación con la base de datos central de Hogwarts.
+     * <p>
+     * La operación ejecuta la siguiente consulta SQL: {@code DELETE FROM ESTUDIANTES WHERE id=?}.
+     *
+     * @param id El ID del estudiante a eliminar. Este debe ser el ID local (sin prefijo de casa).
+     * @param esSincronizacion Booleano que indica si la llamada proviene de una sincronización externa
+     * (ej. desde Hogwarts).
+     * Si es {@code true}, se omite la sincronización bidireccional para prevenir bucles.
+     * @return {@code true} si se eliminó el estudiante exitosamente (incluyendo 0 filas afectadas
+     * si la llamada fue de sincronización, pero {@code false} si fue llamada local y no existía),
+     * {@code false} si ocurrió un error en la base de datos o si el estudiante no fue encontrado
+     * en una llamada no sincronizada.
+     * @throws SQLException Si ocurre un error al acceder a la base de datos (manejado internamente con log).
+     *
+     * @author Gaizka
+     */
     public boolean borrarEstudiante(String id, boolean esSincronizacion) {
         final String sql = "DELETE FROM ESTUDIANTES WHERE id=?";
 
@@ -208,7 +345,18 @@ public abstract class BaseDAO {
     }
 
 
-    /** SELECT */
+    /**
+     * Recupera una lista de todos los estudiantes de la base de datos.
+     * <p>
+     * Ejecuta una consulta SQL: {@code SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES}
+     * y mapea cada fila a un objeto {@code Modelo_Estudiante}.
+     *
+     * @return Una {@code List} de {@code Modelo_Estudiante} conteniendo todos los estudiantes.
+     * Retorna una lista vacía si no hay estudiantes o si ocurre un error.
+     * @throws SQLException Si ocurre un error al acceder a la base de datos (manejado internamente con log).
+     *
+     * @author Gaizka
+     */
     public List<Modelo_Estudiante> obtenerTodos() {
         List<Modelo_Estudiante> lista = new ArrayList<>();
         final String sql = "SELECT id, nombre, apellidos, casa, curso, patronus FROM ESTUDIANTES";
@@ -233,6 +381,22 @@ public abstract class BaseDAO {
         }
         return lista;
     }
+
+    /**
+     * Obtiene el prefijo de dos letras asociado a la casa ({@code getCasa()}) para su uso,
+     * por ejemplo, en la generación de IDs o códigos.
+     *
+     * @return El prefijo de dos letras para la casa:
+     * <ul>
+     * <li>"GR" para Gryffindor</li>
+     * <li>"HF" para Hufflepuff</li>
+     * <li>"RV" para Ravenclaw</li>
+     * <li>"SL" para Slytherin</li>
+     * <li>"HO" por defecto para cualquier otra casa o valor.</li>
+     * </ul>
+     *
+     * @author Gaizka
+     */
     protected String getPrefijoCasa() {
         return switch (getCasa().toLowerCase()) {
             case "gryffindor" -> "GR";
@@ -245,16 +409,16 @@ public abstract class BaseDAO {
     /**
      * Genera un nuevo ID con prefijo según la casa.
      * Ejemplo: GR1, HF2, RV3, SL1, HO4...
-     */
-    /**
+     *
      * Genera un nuevo ID con prefijo según la casa (compatible con todos los motores).
-     */
-    /**
+     *
      * Genera un nuevo ID numérico local (sin prefijo) para las casas.
-     */
-    /**
-     * Genera un nuevo ID numérico (como texto) para la tabla ESTUDIANTES.
-     * Compatible con bases que usan IDs tipo String.
+     *
+     * @param conn La conexión a la base de datos que se utilizará.
+     * @return El siguiente ID numérico disponible. Retorna {@code 1} si la tabla está vacía.
+     * @throws SQLException Si ocurre un error durante la ejecución de la consulta SQL.
+     *
+     * @author Gaizka
      */
     protected String generarNuevoIdNumerico(Connection conn) throws SQLException {
         String sql = "SELECT id FROM ESTUDIANTES";
@@ -378,9 +542,17 @@ public abstract class BaseDAO {
     }
 
 
-    // ============================================================
-    // === SHUTDOWN ===============================================
-    // ============================================================
+    /**
+     * Cierra el pool de hilos asociado a la base de datos si aún no está cerrado.
+     * <p>
+     * Este metodo comprueba si el {@code dbExecutor} sigue activo y, en ese caso,
+     * lo apaga de forma ordenada para liberar los recursos asociados.
+     * </p>
+     *
+     * <p>También muestra un mensaje en consola indicando que el pool ha sido cerrado.</p>
+     *
+     * @author Gaizka, Xiker
+     */
     public static void shutdown() {
         if (!dbExecutor.isShutdown()) {
             dbExecutor.shutdown();
