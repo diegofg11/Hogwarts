@@ -180,7 +180,7 @@
 
     <build>
         <!-- mantengo tu carpeta target relativa -->
-        <directory>../target</directory>
+        <directory>./target</directory>
 
         <plugins>
 
