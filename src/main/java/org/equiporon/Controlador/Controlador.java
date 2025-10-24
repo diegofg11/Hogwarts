@@ -20,6 +20,9 @@ import java.util.concurrent.CompletableFuture;
 
 import java.sql.Connection;
 import java.util.List;
+
+import static org.equiporon.DAO.BaseDAO.comprobarEstudiante;
+
 /**
  * Controlador principal del proyecto Hogwarts.
  * Permite seleccionar una casa desde el menú y conectarse
@@ -190,6 +193,7 @@ public class Controlador {
                     txtPatronus.getText()
             );
 
+            if (comprobarEstudiante(nuevo)) {
             new SQLiteDAO().hacerBackupInstantaneo();
 
             // 🔄 Ejecutar asincrónicamente aunque devuelva Future
@@ -208,9 +212,14 @@ public class Controlador {
                 } else {
                     mostrarError("❌ No se pudo añadir el estudiante.");
                 }
-            }));
+            }));}
 
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            mostrarError("Error al añadir estudiante: " + "Curso vacío o incorrecto, debe ser un numero del 1 al 7");
+            e.printStackTrace();
+        }
+
+        catch (Exception e) {
             mostrarError("Error al añadir estudiante: " + e.getMessage());
             e.printStackTrace();
         }
