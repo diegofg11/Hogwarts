@@ -26,7 +26,7 @@ public class MariaDBDAO extends BaseDAO {
     /**
      * {@inheritDoc}
      *
-     * Implementación del método abstracto para identificar la entidad
+     * Implementación del metodo abstracto para identificar la entidad
      * de la base de datos que maneja esta clase DAO.
      *
      * En este caso, devuelve la cadena literal "Hogwarts" ya que esta
@@ -43,7 +43,7 @@ public class MariaDBDAO extends BaseDAO {
     /**
      * {@inheritDoc}
      *
-     * Implementa el método abstracto para proporcionar una conexión activa
+     * Implementa el metodo abstracto para proporcionar una conexión activa
      * a la base de datos de Hogwarts.
      *
      * Utiliza la clase de utilidad estática {@code ConexionBD} para
@@ -62,7 +62,7 @@ public class MariaDBDAO extends BaseDAO {
     /**
      * Inserta un nuevo registro de estudiante en la tabla {@code ESTUDIANTES} de Hogwarts (MariaDB).
      *
-     * Este método primero valida el objeto {@code Modelo_Estudiante} y luego determina
+     * Este metodo primero valida el objeto {@code Modelo_Estudiante} y luego determina
      * el **prefijo de casa** (GR, HF, RV, SL o HO) para generar un **nuevo ID único**
      * para el estudiante en el sistema central de Hogwarts.
      *
@@ -128,7 +128,7 @@ public class MariaDBDAO extends BaseDAO {
     /**
      * Edita un registro de estudiante existente en la base de datos de Hogwarts (MariaDB).
      *
-     * Este método delega la lógica de actualización SQL al método {@code super.editarEstudiante()}
+     * Este metodo delega la lógica de actualización SQL al metodo {@code super.editarEstudiante()}
      * definido en {@code BaseDAO}.
      *
      * Si la actualización en Hogwarts es exitosa ({@code ok} es true) y la operación
@@ -251,11 +251,11 @@ public class MariaDBDAO extends BaseDAO {
      * central de Hogwarts hacia la base de datos de la casa correspondiente.
      *
      * **Mecanismo de Propagación:**
-     * 1. El método extrae el **prefijo de dos letras** (ej: "GR", "HF") del ID de Hogwarts
+     * 1. El metodo extrae el **prefijo de dos letras** (ej: "GR", "HF") del ID de Hogwarts
      * para determinar la casa de destino (Gryffindor, Hufflepuff, etc.) y, por ende, el {@code BaseDAO} a utilizar.
      * 2. Una vez que se identifica el DAO de la casa, se extrae el **ID numérico** (sin prefijo)
      * para adaptarlo al formato de la casa.
-     * 3. Finalmente, ejecuta el método {@code borrarEstudiante()} en el DAO de la casa,
+     * 3. Finalmente, ejecuta el metodo {@code borrarEstudiante()} en el DAO de la casa,
      * marcando la operación como sincronización ({@code true}) para evitar ciclos de borrado.
      *
      * @param id El ID del estudiante en Hogwarts (con prefijo de casa, ej: "RV205") que ha sido borrado.
