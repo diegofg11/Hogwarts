@@ -121,6 +121,7 @@ Cada contenedor debe mostrarse con su puerto asignado (1521, 1527, 9092, 9001, 3
 
 Este archivo contiene las rutas JDBC para todas las bases de datos.
 Debe encontrarse en la carpeta resources del proyecto (`/Hogwarts/src/main/resources`).
+Teneis una plantilla como la de aqui abajo en la carpeta config dentro de la carpeta Hogwarts_Entrega
 
 Ejemplo de configuración:
 ```properties
