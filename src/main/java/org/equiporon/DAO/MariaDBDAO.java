@@ -9,7 +9,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+/**
+ * DAO de la base de datos de Hogwarts en MariaDB
+ *
+ * Clase MariaDBDAO encargada de manejar la conexión y operaciones
+ * con la base de datos MariaDB.
+ *
+ * Contiene métodos para insertar, obtener, actualizar y eliminar registros
+ * de estudiantes.
+ *
+ * @author Diego,Unai, Gaizka, Igor
+ */
 public class MariaDBDAO extends BaseDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(MariaDBDAO.class);
@@ -29,6 +39,12 @@ public class MariaDBDAO extends BaseDAO {
     // --------------------------
     @Override
     public boolean insertarEstudiante(Modelo_Estudiante e, boolean esSincronizacion) {
+
+        // 1. AÑADIR LA VALIDACIÓN QUE ESTABA EN BaseDAO
+        if (!comprobarEstudiante(e)) {
+            return false;
+        }
+
         final String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = getConnection();
@@ -113,7 +129,8 @@ public class MariaDBDAO extends BaseDAO {
     // 🔹 SINCRONIZAR HACIA LAS CASAS
     // --------------------------
     private void sincronizarConCasa(Modelo_Estudiante e, String tipo) {
-        String casa = e.getCasa().toLowerCase();
+        String casa = e.getCasa().trim().toLowerCase();
+
         BaseDAO daoCasa = switch (casa) {
             case "gryffindor" -> new DerbyDAO();
             case "hufflepuff" -> new H2DAO();
@@ -127,20 +144,28 @@ public class MariaDBDAO extends BaseDAO {
             return;
         }
 
-        // ⚙️ Quitar el prefijo antes de sincronizar con la casa
-        if (e.getId().length() > 2 && e.getId().matches("^[A-Z]{2}\\d+$")) {
-            e.setId(e.getId().substring(2));
+        // ⚙️ Crear copia con ID sin prefijo (para la casa)
+        String idNumerico = e.getId().replaceAll("^(GR|HF|RV|SL)", "");  // <-- quita prefijo
+        Modelo_Estudiante copia = new Modelo_Estudiante(
+                idNumerico,
+                e.getNombre(),
+                e.getApellidos(),
+                e.getCasa(),
+                e.getCurso(),
+                e.getPatronus()
+        );
+
+        // 🧱 Ejecutar la operación en la casa
+        switch (tipo) {
+            case "insert" -> daoCasa.insertarEstudiante(copia, true);
+            case "update" -> daoCasa.editarEstudiante(copia, true);
+            case "delete" -> daoCasa.borrarEstudiante(copia.getId(), true);
         }
 
-        switch (tipo) {
-            case "insert" -> daoCasa.insertarEstudiante(e, true);
-            case "update" -> daoCasa.editarEstudiante(e, true);
-            case "delete" -> daoCasa.borrarEstudiante(e.getId(), true);
-        }
-        SQLiteDAO sqlite = new SQLiteDAO();
-        sqlite.sincronizarDesdeHogwarts(e, tipo);
-        logger.info("🔄 Hogwarts → {} ({} ID {}).", casa, tipo, e.getId());
+        logger.info("🔄 Hogwarts → {} ({} ID {}).", e.getCasa(), tipo, e.getId());
     }
+
+
 
     /**
      * 🔁 Sincroniza un borrado desde Hogwarts hacia la casa correspondiente.
