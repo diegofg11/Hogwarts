@@ -179,10 +179,6 @@ public class Controlador {
     // ----------------- CRUD -----------------
     @FXML
     void clickOnAdd(ActionEvent event) {
-        if (daoActual == null) {
-            mostrarError("Selecciona una casa antes de añadir un estudiante.");
-            return;
-        }
 
         try {
             Modelo_Estudiante nuevo = new Modelo_Estudiante(
@@ -227,7 +223,6 @@ public class Controlador {
      * y sincroniza con la base correspondiente.
      */
     private void actualizarEnBD(Modelo_Estudiante est) {
-        if (daoActual == null) return;
 
         new SQLiteDAO().hacerBackupInstantaneo();
 
