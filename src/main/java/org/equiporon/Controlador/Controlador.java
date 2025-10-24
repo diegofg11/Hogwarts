@@ -563,7 +563,20 @@ public class Controlador {
         tableCasa.setText(bundle.getString("label.casa"));
         tableCurso.setText(bundle.getString("label.curso"));
         tablePatronus.setText(bundle.getString("label.patronus"));
+
+        // --- Tooltips ---
+        choiceCasas.getTooltip().setText(bundle.getString("tooltip.comboCasas"));
+        txtNombre.getTooltip().setText(bundle.getString("tooltip.nombreEstudiante"));
+        txtApellidos.getTooltip().setText(bundle.getString("tooltip.apellidosEstudiante"));
+        txtCurso.getTooltip().setText(bundle.getString("tooltip.cursoEstudiante"));
+        txtPatronus.getTooltip().setText(bundle.getString("tooltip.patronusEstudiante"));
+        txtCasa.getTooltip().setText(bundle.getString("tooltip.casaEstudiante"));
+        tablaEstudiantes.getTooltip().setText(bundle.getString("tooltip.tablaEstudiantes"));
+        botAdd.getTooltip().setText(bundle.getString("tooltip.botonAdd"));
+        botBorrar.getTooltip().setText(bundle.getString("tooltip.botonBorrar"));
+        botDeshacer.getTooltip().setText(bundle.getString("tooltip.botonDeshacer"));
     }
+
 
 
 }

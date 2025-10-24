@@ -48,9 +48,9 @@
         </MenuBar>
 
         <ComboBox fx:id="choiceCasas" layoutX="147.0" layoutY="75.0" prefHeight="30.0" prefWidth="200.0"
-                  AnchorPane.leftAnchor="147.0" AnchorPane.rightAnchor="244.60000000000002" AnchorPane.topAnchor="75.0">
+                  AnchorPane.leftAnchor="147.0" AnchorPane.rightAnchor="244.6" AnchorPane.topAnchor="75.0">
             <tooltip>
-                <Tooltip text="Selecciona una casa para mostrar sus estudiantes" />
+                <Tooltip text="%tooltip.comboCasas" />
             </tooltip>
         </ComboBox>
 
@@ -72,35 +72,35 @@
                 <Label fx:id="lblNombre" text="%label.nombre" />
                 <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <tooltip>
-                        <Tooltip text="Introduce el nombre del estudiante" />
+                        <Tooltip text="%tooltip.nombreEstudiante" />
                     </tooltip>
                 </TextField>
 
                 <Label fx:id="lblApellidos" text="%label.apellidos" GridPane.rowIndex="1" />
                 <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="1">
                     <tooltip>
-                        <Tooltip text="Introduce los apellidos del estudiante" />
+                        <Tooltip text="%tooltip.apellidosEstudiante" />
                     </tooltip>
                 </TextField>
 
                 <Label fx:id="lblCurso" text="%label.curso" GridPane.rowIndex="2" />
                 <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="2">
                     <tooltip>
-                        <Tooltip text="Introduce el curso del estudiante" />
+                        <Tooltip text="%tooltip.cursoEstudiante" />
                     </tooltip>
                 </TextField>
 
                 <Label fx:id="lblPatronus" text="%label.patronus" GridPane.rowIndex="3" />
                 <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3">
                     <tooltip>
-                        <Tooltip text="Introduce el Patronus del estudiante" />
+                        <Tooltip text="%tooltip.patronusEstudiante" />
                     </tooltip>
                 </TextField>
 
                 <Label fx:id="lblCasa" text="%label.casa" GridPane.rowIndex="4" />
                 <TextField fx:id="txtCasa" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
                     <tooltip>
-                        <Tooltip text="Muestra o cambia la casa del estudiante" />
+                        <Tooltip text="%tooltip.casaEstudiante" />
                     </tooltip>
                 </TextField>
             </children>
@@ -119,21 +119,21 @@
                 <Button fx:id="botAdd" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         onAction="#clickOnAdd" text="%button.add" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                     <tooltip>
-                        <Tooltip text="Añadir un nuevo estudiante a la casa seleccionada" />
+                        <Tooltip text="%tooltip.botonAdd" />
                     </tooltip>
                 </Button>
 
                 <Button fx:id="botBorrar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         onAction="#clickOnBorrar" text="%button.delete" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                     <tooltip>
-                        <Tooltip text="Eliminar al estudiante seleccionado" />
+                        <Tooltip text="%tooltip.botonBorrar" />
                     </tooltip>
                 </Button>
 
                 <Button fx:id="botDeshacer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         onAction="#clickOnUndo" text="%button.undo" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
                     <tooltip>
-                        <Tooltip text="Deshacer los últimos cambios" />
+                        <Tooltip text="%tooltip.botonDeshacer" />
                     </tooltip>
                 </Button>
             </children>
@@ -153,7 +153,7 @@
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
             <tooltip>
-                <Tooltip text="Lista de estudiantes de la casa actual" />
+                <Tooltip text="%tooltip.tablaEstudiantes" />
             </tooltip>
         </TableView>
 
