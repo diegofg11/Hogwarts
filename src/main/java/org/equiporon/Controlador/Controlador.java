@@ -469,12 +469,16 @@ public class Controlador {
             • Rubén
             • Unai
             • Gaizka
+            • Igor
+            • Xiker
+            
+            
 
             ⚙️ Tecnologías:
             • JavaFX 23
             • JDBC
             • Maven
-            • MariaDB / Oracle / H2 / Derby / HSQLDB
+            • MariaDB / Oracle / H2 / Derby / HSQLDB / SQLite
             """);
         about.showAndWait();
     }
