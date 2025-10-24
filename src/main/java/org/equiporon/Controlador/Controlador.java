@@ -18,21 +18,17 @@ import org.equiporon.Modelo.Modelo_Estudiante;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 
-/**
- * Controlador principal de la aplicación Hogwarts Manager.
- * Gestiona la interfaz, CRUD de estudiantes y sincronización entre bases de datos.
- */
 public class Controlador {
 
     private static final Logger logger = LoggerFactory.getLogger(Controlador.class);
 
-    // --- Elementos FXML ---
+    // --- FXML ---
     @FXML private AnchorPane rootPane;
     @FXML private Label lblCasaSeleccionada;
     @FXML private ComboBox<String> choiceCasas;
@@ -76,62 +72,18 @@ public class Controlador {
     private String casaActual = null;
     private BaseDAO daoActual = null;
 
-    // Contador para backups
-    private int contadorOperaciones = 0;
-
     // ----------------- Inicialización -----------------
-
-    /**
-     * Inicializa la interfaz: tablas editables, ComboBox de casas,
-     * colores, imágenes y conexión inicial a la base de datos.
-     */
     @FXML
     private void initialize() {
-        tablaEstudiantes.setEditable(true);
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
 
+        tablaEstudiantes.setEditable(true);
         tableNombre.setCellFactory(TextFieldTableCell.forTableColumn());
         tableApellidos.setCellFactory(TextFieldTableCell.forTableColumn());
         tablePatronus.setCellFactory(TextFieldTableCell.forTableColumn());
         tableCurso.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
 
-        tableNombre.setOnEditCommit(event -> {
-            Modelo_Estudiante est = event.getRowValue();
-            est.setNombre(event.getNewValue());
-            actualizarEnBD(est);
-        });
-
-        tableApellidos.setOnEditCommit(event -> {
-            Modelo_Estudiante est = event.getRowValue();
-            est.setApellidos(event.getNewValue());
-            actualizarEnBD(est);
-        });
-
-        tablePatronus.setOnEditCommit(event -> {
-            Modelo_Estudiante est = event.getRowValue();
-            est.setPatronus(event.getNewValue());
-            actualizarEnBD(est);
-        });
-
-        tableCurso.setOnEditCommit(event -> {
-            Modelo_Estudiante est = event.getRowValue();
-            Integer nuevoCurso = event.getNewValue();
-
-            if (nuevoCurso == null || nuevoCurso <= 0) {
-                mostrarError(bundle.getString("alert.error.invalid_course"));
-                event.getRowValue().setCurso(event.getOldValue());
-                tablaEstudiantes.refresh();
-                return;
-            }
-
-            est.setCurso(nuevoCurso);
-            actualizarEnBD(est);
-        });
-
-        choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
-        choiceCasas.setValue("Hogwarts");
-
-// Actualizar los encabezados de la tabla
+        // Encabezados de tabla i18n
         tableId.setText(bundle.getString("label.id"));
         tableNombre.setText(bundle.getString("label.nombre"));
         tableApellidos.setText(bundle.getString("label.apellidos"));
@@ -139,12 +91,38 @@ public class Controlador {
         tableCurso.setText(bundle.getString("label.curso"));
         tablePatronus.setText(bundle.getString("label.patronus"));
 
+        // Factories
+        tableId.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getId()));
+        tableNombre.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombre()));
+        tableApellidos.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getApellidos()));
+        tableCasa.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getCasa()));
+        tableCurso.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getCurso()).asObject());
+        tablePatronus.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getPatronus()));
 
-        choiceCasas.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                seleccionarCasa(newVal);
-                aplicarColorVentana(newVal);
-                aplicarImagenesCasa(newVal);
+        // Edición inline
+        tableNombre.setOnEditCommit(ev -> { ev.getRowValue().setNombre(ev.getNewValue()); actualizarEnBDAsync(ev.getRowValue()); });
+        tableApellidos.setOnEditCommit(ev -> { ev.getRowValue().setApellidos(ev.getNewValue()); actualizarEnBDAsync(ev.getRowValue()); });
+        tablePatronus.setOnEditCommit(ev -> { ev.getRowValue().setPatronus(ev.getNewValue()); actualizarEnBDAsync(ev.getRowValue()); });
+        tableCurso.setOnEditCommit(ev -> {
+            Integer nuevoCurso = ev.getNewValue();
+            if (nuevoCurso == null || nuevoCurso <= 0) {
+                mostrarError(bundle.getString("alert.error.invalid_course"));
+                ev.getRowValue().setCurso(ev.getOldValue());
+                tablaEstudiantes.refresh();
+                return;
+            }
+            ev.getRowValue().setCurso(nuevoCurso);
+            actualizarEnBDAsync(ev.getRowValue());
+        });
+
+        // Casas + UI
+        choiceCasas.getItems().addAll("Hogwarts", "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin");
+        choiceCasas.setValue("Hogwarts");
+        choiceCasas.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            if (newV != null) {
+                seleccionarCasa(newV);
+                aplicarColorVentana(newV);
+                aplicarImagenesCasa(newV);
             }
         });
 
@@ -153,6 +131,7 @@ public class Controlador {
         aplicarImagenesCasa("Hogwarts");
         seleccionarCasa("Hogwarts");
 
+        // Backup inicial (si lo usas)
         try {
             SQLiteDAO sqlite = new SQLiteDAO();
             sqlite.hacerBackupCompleto();
@@ -162,13 +141,6 @@ public class Controlador {
     }
 
     // ----------------- Selección de casa -----------------
-
-    /**
-     * Selecciona la casa indicada, conecta con la base de datos correspondiente
-     * y actualiza la tabla y campos de la interfaz.
-     *
-     * @param casa nombre de la casa seleccionada
-     */
     private void seleccionarCasa(String casa) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
         casaActual = casa;
@@ -191,28 +163,17 @@ public class Controlador {
             txtCasa.setEditable("Hogwarts".equalsIgnoreCase(casa));
             if ("Hogwarts".equalsIgnoreCase(casa)) txtCasa.setPromptText(bundle.getString("label.casa"));
 
-            cargarEstudiantes();
+            cargarEstudiantesAsync();
         } catch (Exception e) {
             mostrarError(bundle.getString("alert.error.connect_db") + casa + ": " + e.getMessage());
         }
     }
 
-
-    // ----------------- CRUD -----------------
-
-    /**
-     * Añade un nuevo estudiante a la base de datos de la casa seleccionada.
-     *
-     * @param event evento de botón
-     */
+    // ----------------- CRUD (ASÍNCRONO) -----------------
     @FXML
     void clickOnAdd(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
-
-        if (daoActual == null) {
-            mostrarError(bundle.getString("alert.error.no_house_selected"));
-            return;
-        }
+        if (daoActual == null) { mostrarError(bundle.getString("alert.error.no_house_selected")); return; }
 
         try {
             Modelo_Estudiante nuevo = new Modelo_Estudiante(
@@ -224,127 +185,100 @@ public class Controlador {
                     txtPatronus.getText()
             );
 
-            contadorOperaciones++;
-            if (contadorOperaciones % 2 == 0) {
-                SQLiteDAO sqlite = new SQLiteDAO();
-                sqlite.hacerBackupCompleto();
-            }
+            new SQLiteDAO().hacerBackupInstantaneo();
 
-            if (daoActual.insertarEstudiante(nuevo, false)) {
-                mostrarInfo(bundle.getString("alert.info.student_added") + casaActual);
-                limpiarCampos();
-                cargarEstudiantes();
-            } else mostrarError(bundle.getString("alert.error.add_student"));
+            daoActual.insertarAsync(nuevo)
+                    .thenAccept(ok -> Platform.runLater(() -> {
+                        if (ok) {
+                            mostrarInfo(bundle.getString("alert.info.student_added") + casaActual);
+                            limpiarCampos();
+                            cargarEstudiantesAsync();
+                        } else {
+                            mostrarError(bundle.getString("alert.error.add_student"));
+                        }
+                    }))
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> mostrarError(bundle.getString("alert.error.add_student") + ex.getMessage()));
+                        return null;
+                    });
+
         } catch (Exception e) {
             mostrarError(bundle.getString("alert.error.add_student") + e.getMessage());
         }
     }
 
-
-    /**
-     * Actualiza un estudiante editado en la tabla y sincroniza con la base de datos.
-     * Muestra mensajes de éxito o error usando los textos del ResourceBundle.
-     *
-     * @param est estudiante a actualizar
-     */
-    private void actualizarEnBD(Modelo_Estudiante est) {
+    private void actualizarEnBDAsync(Modelo_Estudiante est) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
         if (daoActual == null) return;
 
-        try {
-            boolean resultado = false;
-            if (daoActual instanceof DerbyDAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof H2DAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof HSQLDBDAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof OracleDAO dao) resultado = dao.editarEstudiante(est, false);
-            else if (daoActual instanceof MariaDBDAO dao) resultado = dao.editarEstudiante(est, false);
+        new SQLiteDAO().hacerBackupInstantaneo();
 
-            if (resultado) {
-                contadorOperaciones++;
-                if (contadorOperaciones % 2 == 0) {
-                    SQLiteDAO sqlite = new SQLiteDAO();
-                    sqlite.hacerBackupCompleto();
-                }
-                // Mensaje de éxito usando properties
-                mostrarInfo(bundle.getString("alert.info.student_updated") + " " + casaActual);
-            } else {
-                mostrarError(bundle.getString("alert.error.update_student"));
-            }
-        } catch (Exception e) {
-            mostrarError(bundle.getString("alert.error.update_student") + ": " + e.getMessage());
-        }
+        daoActual.editarAsync(est)
+                .thenAccept(ok -> Platform.runLater(() -> {
+                    if (ok) {
+                        logger.info("✅ {}", bundle.getString("alert.info.student_updated") + " " + casaActual);
+                    } else {
+                        mostrarError(bundle.getString("alert.error.update_student"));
+                    }
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> mostrarError(bundle.getString("alert.error.update_student") + ": " + ex.getMessage()));
+                    return null;
+                });
     }
 
-
-    /**
-     * Deshace los cambios restaurando Hogwarts desde el último backup de SQLite.
-     *
-     * @param event evento de botón
-     */
     @FXML
-    private void clickOnUndo(javafx.event.ActionEvent event) {
+    void clickOnBorrar(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+        if (daoActual == null) { mostrarError(bundle.getString("alert.error.no_house_selected")); return; }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                bundle.getString("alert.confirm.restore_backup"));
+        Modelo_Estudiante sel = tablaEstudiantes.getSelectionModel().getSelectedItem();
+        if (sel == null) { mostrarError(bundle.getString("alert.error.no_student_selected")); return; }
+
+        new SQLiteDAO().hacerBackupInstantaneo();
+
+        daoActual.borrarAsync(sel.getId())
+                .thenAccept(ok -> Platform.runLater(() -> {
+                    if (ok) {
+                        mostrarInfo(bundle.getString("alert.info.student_deleted") + casaActual);
+                        cargarEstudiantesAsync();
+                    } else {
+                        mostrarError(bundle.getString("alert.error.delete_student"));
+                    }
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> mostrarError(bundle.getString("alert.error.delete_student") + ": " + ex.getMessage()));
+                    return null;
+                });
+    }
+
+    @FXML
+    private void clickOnUndo(ActionEvent event) {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, bundle.getString("alert.confirm.restore_backup"));
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
                 SQLiteDAO sqlite = new SQLiteDAO();
                 sqlite.restaurarBackupEnHogwarts(casaActual);
                 mostrarInfo(bundle.getString("alert.info.restored_backup"));
-                cargarEstudiantes();
+                cargarEstudiantesAsync();
             }
         });
     }
 
-
-    /**
-     * Borra el estudiante seleccionado de la base de datos.
-     *
-     * @param event evento de botón
-     */
-    @FXML
-    void clickOnBorrar(ActionEvent event) {
-        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
-
-        if (daoActual == null) {
-            mostrarError(bundle.getString("alert.error.no_house_selected"));
-            return;
-        }
-
-        Modelo_Estudiante seleccionado = tablaEstudiantes.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            mostrarError(bundle.getString("alert.error.no_student_selected"));
-            return;
-        }
-
-        if (daoActual.borrarEstudiante(seleccionado.getId(), false)) {
-            mostrarInfo(bundle.getString("alert.info.student_deleted") + casaActual);
-            cargarEstudiantes();
-
-            contadorOperaciones++;
-            if (contadorOperaciones % 2 == 0) {
-                SQLiteDAO sqlite = new SQLiteDAO();
-                sqlite.hacerBackupCompleto();
-            }
-        } else mostrarError(bundle.getString("alert.error.delete_student"));
-    }
-
-    // ----------------- Utilidades -----------------
-
-    /** Carga todos los estudiantes de la base actual en la tabla. */
-    private void cargarEstudiantes() {
+    // ----------------- Carga (ASÍNCRONA) -----------------
+    private void cargarEstudiantesAsync() {
         if (daoActual == null) return;
 
-        try {
-            List<Modelo_Estudiante> estudiantes = daoActual.obtenerTodos();
-            tablaEstudiantes.getItems().setAll(estudiantes);
-        } catch (Exception e) {
-            mostrarError("Error al cargar estudiantes: " + e.getMessage());
-        }
+        daoActual.obtenerTodosAsync()
+                .thenAccept(lista -> Platform.runLater(() -> tablaEstudiantes.getItems().setAll(lista)))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> mostrarError("Error al cargar estudiantes: " + ex.getMessage()));
+                    return null;
+                });
     }
 
-    /** Limpia los campos de texto de la interfaz. */
+    // ----------------- Utilidades UI -----------------
     private void limpiarCampos() {
         txtNombre.clear();
         txtApellidos.clear();
@@ -352,7 +286,6 @@ public class Controlador {
         txtPatronus.clear();
     }
 
-    /** Muestra un mensaje de error en un Alert. */
     private void mostrarError(String mensaje) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -363,7 +296,6 @@ public class Controlador {
         });
     }
 
-    /** Muestra un mensaje informativo en un Alert. */
     private void mostrarInfo(String mensaje) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -374,11 +306,9 @@ public class Controlador {
         });
     }
 
-    /** Aplica las imágenes (escudo y banner) según la casa seleccionada. */
     private void aplicarImagenesCasa(String casa) {
         String basePath = "/images/";
         String nombre = casa.toLowerCase();
-
         try {
             Image escudo = new Image(getClass().getResourceAsStream(basePath + nombre + "_escudo.png"));
             Image banner = new Image(getClass().getResourceAsStream(basePath + nombre + "_banner.png"));
@@ -388,47 +318,29 @@ public class Controlador {
         } catch (Exception ignored) {}
     }
 
-    /** Cambia el color de fondo de la ventana según la casa. */
     private void aplicarColorVentana(String casa) {
         if (rootPane == null) return;
         rootPane.getStyleClass().removeAll("gryffindor", "slytherin", "ravenclaw", "hufflepuff", "hogwarts");
         rootPane.getStyleClass().add(casa.toLowerCase());
     }
 
-    /**
-     * Configura el ComboBox de casas para mostrar colores personalizados.
-     */
     private void setupComboBoxColors() {
         choiceCasas.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
+            @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    setStyle(getCasaColorStyle(item));
-                }
+                if (empty || item == null) { setText(null); setStyle(""); }
+                else { setText(item); setStyle(getCasaColorStyle(item)); }
             }
         });
-
         choiceCasas.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
+            @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    setStyle(getCasaColorStyle(item));
-                }
+                if (empty || item == null) { setText(null); setStyle(""); }
+                else { setText(item); setStyle(getCasaColorStyle(item)); }
             }
         });
     }
 
-    /** Devuelve el estilo CSS según la casa. */
     private String getCasaColorStyle(String casa) {
         return switch (casa) {
             case "Gryffindor" -> "-fx-background-color: #7F0909; -fx-text-fill: #FFC500;";
@@ -440,12 +352,9 @@ public class Controlador {
     }
 
     // ----------------- Menú superior -----------------
-
-    /** Maneja el cierre de la aplicación desde el menú File. */
     @FXML
     void clickOnFile(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
-
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle(bundle.getString("file.title"));
         confirm.setHeaderText(bundle.getString("file.header"));
@@ -467,116 +376,47 @@ public class Controlador {
         });
     }
 
-
-    /** Muestra la ayuda de la aplicación desde el menú Help. */
     @FXML
     void clickOnHelp(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
         Alert help = new Alert(Alert.AlertType.INFORMATION);
-        help.setTitle(bundle.getString("help.title"));          // <-- cambiado
+        help.setTitle(bundle.getString("help.title"));
         help.setHeaderText(bundle.getString("help.header"));
         help.setContentText(bundle.getString("help.content"));
         help.showAndWait();
     }
 
-
-    /** Muestra información acerca de la aplicación desde el menú About. */
     @FXML
     void clickOnAbout(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
         Alert about = new Alert(Alert.AlertType.INFORMATION);
-        about.setTitle(bundle.getString("about.title"));        // <-- cambiado
+        about.setTitle(bundle.getString("about.title"));
         about.setHeaderText(bundle.getString("about.header"));
         about.setContentText(bundle.getString("about.content"));
         about.showAndWait();
     }
 
-
-    // ----------------- Gestión de idioma -----------------
-
-    /**
-     * Cambia el idioma de la interfaz según el menú seleccionado.
-     *
-     * @param event evento del menú
-     */
+    // ----------------- Cambiar idioma -----------------
     @FXML
     private void cambiarIdioma(ActionEvent event) {
         MenuItem source = (MenuItem) event.getSource();
-        Locale locale;
-
-        switch (source.getId()) {
-            case "menuEspanol" -> locale = new Locale("es", "ES");
-            case "menuIngles" -> locale = new Locale("en", "US");
-            case "menuParsel" -> locale = new Locale("la");
-            default -> locale = Locale.getDefault();
-        }
+        Locale locale = switch (source.getId()) {
+            case "menuEspanol" -> new Locale("es", "ES");
+            case "menuIngles" -> new Locale("en", "US");
+            case "menuParsel" -> new Locale("la");
+            default -> Locale.getDefault();
+        };
 
         Locale.setDefault(locale);
 
         try {
             ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", locale);
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/primary.fxml"), bundle);
-
             Parent newRoot = loader.load();
-
             Scene scene = rootPane.getScene();
             scene.setRoot(newRoot);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
-
-    /** Actualiza todos los textos de la interfaz con el ResourceBundle proporcionado. */
-    private void actualizarTextos(ResourceBundle bundle) {
-        // --- Labels principales ---
-        lblNombre.setText(bundle.getString("label.nombre"));
-        lblApellidos.setText(bundle.getString("label.apellidos"));
-        lblCurso.setText(bundle.getString("label.curso"));
-        lblPatronus.setText(bundle.getString("label.patronus"));
-        lblCasa.setText(bundle.getString("label.casa"));
-        lblId.setText(bundle.getString("label.id"));
-
-        // --- Botones ---
-        botAdd.setText(bundle.getString("button.add"));
-        botBorrar.setText(bundle.getString("button.delete"));
-        botDeshacer.setText(bundle.getString("button.undo"));
-
-        // --- Menús ---
-        menuFile.setText(bundle.getString("menu.file"));
-        menuHelp.setText(bundle.getString("menu.help"));
-        menuLanguage.setText(bundle.getString("menu.language"));
-
-        menuItemClose.setText(bundle.getString("menuitem.close"));
-        menuItemHelp.setText(bundle.getString("menuitem.help"));
-        menuItemAbout.setText(bundle.getString("menuitem.about"));
-        menuEspanol.setText(bundle.getString("menuitem.espanol"));
-        menuIngles.setText(bundle.getString("menuitem.english"));
-        menuParsel.setText(bundle.getString("menuitem.parsel"));
-
-        // --- Encabezados de la tabla ---
-        tableId.setText(bundle.getString("label.id"));
-        tableNombre.setText(bundle.getString("label.nombre"));
-        tableApellidos.setText(bundle.getString("label.apellidos"));
-        tableCasa.setText(bundle.getString("label.casa"));
-        tableCurso.setText(bundle.getString("label.curso"));
-        tablePatronus.setText(bundle.getString("label.patronus"));
-
-        // --- Tooltips ---
-        choiceCasas.getTooltip().setText(bundle.getString("tooltip.comboCasas"));
-        txtNombre.getTooltip().setText(bundle.getString("tooltip.nombreEstudiante"));
-        txtApellidos.getTooltip().setText(bundle.getString("tooltip.apellidosEstudiante"));
-        txtCurso.getTooltip().setText(bundle.getString("tooltip.cursoEstudiante"));
-        txtPatronus.getTooltip().setText(bundle.getString("tooltip.patronusEstudiante"));
-        txtCasa.getTooltip().setText(bundle.getString("tooltip.casaEstudiante"));
-        tablaEstudiantes.getTooltip().setText(bundle.getString("tooltip.tablaEstudiantes"));
-        botAdd.getTooltip().setText(bundle.getString("tooltip.botonAdd"));
-        botBorrar.getTooltip().setText(bundle.getString("tooltip.botonBorrar"));
-        botDeshacer.getTooltip().setText(bundle.getString("tooltip.botonDeshacer"));
-    }
-
-
-
 }

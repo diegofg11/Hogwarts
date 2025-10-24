@@ -116,37 +116,6 @@ public abstract class BaseDAO {
     // ============================================================
 
     /**
-     * Genera el siguiente ID numérico consecutivo disponible para la base de datos local
-     * consultando el valor máximo actual de la columna {@code id} en la tabla {@code ESTUDIANTES}.
-     *
-     * <p>
-     * El tipo de dato para la conversión del ID se ajusta dinámicamente:
-     * <ul>
-     * <li>Usa {@code NUMBER} para la casa "Ravenclaw" (asumiendo que usa Oracle).</li>
-     * <li>Usa {@code INTEGER} para las demás casas (asumiendo bases de datos como MySQL/MariaDB).</li>
-     * </ul>
-     *
-     * @param conn La conexión a la base de datos que se utilizará.
-     * @return El siguiente ID numérico disponible. Retorna {@code 1} si la tabla está vacía.
-     * @throws SQLException Si ocurre un error durante la ejecución de la consulta SQL.
-     *
-     * @author Gaizka
-     */
-    protected int generarNuevoIdLocal(Connection conn) throws SQLException {
-        String tipo = getCasa().equalsIgnoreCase("Ravenclaw") ? "NUMBER" : "INTEGER";
-        String sql = "SELECT MAX(CAST(id AS " + tipo + ")) AS maximo FROM ESTUDIANTES";
-
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                int ultimo = rs.getInt("maximo");
-                return rs.wasNull() ? 1 : ultimo + 1;
-            }
-        }
-        return 1;
-    }
-
-    /**
      * Inserta un nuevo estudiante en la base de datos local
      * y, opcionalmente, sincroniza la inserción con la base de datos central de Hogwarts.
      *
