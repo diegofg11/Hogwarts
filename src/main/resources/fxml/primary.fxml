@@ -35,7 +35,7 @@
                 </Menu>
                 <Menu fx:id="menuLanguage" text="%menu.language">
                     <items>
-                        <MenuItem fx:id="menuEspañol" onAction="#cambiarIdioma" text="%menuitem.espanol" />
+                        <MenuItem fx:id="menuEspanol" onAction="#cambiarIdioma" text="%menuitem.espanol" />
                         <MenuItem fx:id="menuIngles" onAction="#cambiarIdioma" text="%menuitem.english" />
                         <MenuItem fx:id="menuParsel" onAction="#cambiarIdioma" text="%menuitem.parsel" />
                     </items>
@@ -60,7 +60,7 @@
             </rowConstraints>
 
             <children>
-                <Label fx:id="lblNombre" text="%label.nombre" GridPane.rowIndex="0" />
+                <Label fx:id="lblNombre" text="%label.nombre" />
                 <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                 <Label fx:id="lblApellidos" text="%label.apellidos" GridPane.rowIndex="1" />
