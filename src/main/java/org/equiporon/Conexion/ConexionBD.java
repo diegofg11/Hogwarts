@@ -2,7 +2,6 @@ package org.equiporon.Conexion;
 
 import java.io.File;
 import java.sql.*;
-
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.slf4j.Logger;

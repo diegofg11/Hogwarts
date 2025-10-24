@@ -7,6 +7,10 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import org.equiporon.Utils.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +74,8 @@ public class App extends Application {
      * @throws IOException si ocurre un error al cargar el archivo FXML.
      */
     static void setRoot(String fxml, String title) throws IOException {
-        Scene scene = new Scene(loadFXML(fxml));
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+        Scene scene = new Scene(loadFXML(fxml,bundle));
         //scene.getStylesheets().add(App.class.getResource("/styles/Styles.css").toExternalForm());
         stage.setMinWidth(600);
         stage.setMinHeight(600);
@@ -88,10 +93,11 @@ public class App extends Application {
      *
      * @param fxml nombre del archivo FXML (sin extensión) que se desea cargar.
      * @return el nodo raíz ({@link Parent}) del archivo FXML cargado.
-     * @throws IOException si no se puede encontrar o cargar el archivo FXML.
+     * @throws IOException si no se puede encontrar o cargar el archivo FXML
      */
-    private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/fxml/" + fxml + ".fxml"));
+    // ✅ Nueva versión de loadFXML con bundle
+    private static Parent loadFXML(String fxml, ResourceBundle bundle) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/fxml/" + fxml + ".fxml"), bundle);
         return fxmlLoader.load();
     }
 
