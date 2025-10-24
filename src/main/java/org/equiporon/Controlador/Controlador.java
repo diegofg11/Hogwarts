@@ -53,26 +53,32 @@ public class Controlador {
     @FXML private ImageView bannerIzquierdo;
     @FXML private ImageView bannerDerecho;
 
-    // Menú e idioma
-    @FXML private Menu menuFile;
-    @FXML private Menu menuHelp;
-    @FXML private Menu menuLanguage;
-    @FXML private MenuItem menuItemClose;
-    @FXML private MenuItem menuItemHelp;
-    @FXML private MenuItem menuItemAbout;
-    @FXML private MenuItem menuEspanol;
-    @FXML private MenuItem menuIngles;
-    @FXML private MenuItem menuParsel;
-    @FXML private Label lblNombre;
-    @FXML private Label lblApellidos;
-    @FXML private Label lblCurso;
-    @FXML private Label lblPatronus;
+
 
     // Estado
     private String casaActual = null;
     private BaseDAO daoActual = null;
 
     // ----------------- Inicialización -----------------
+    /**
+     * Inicializa los componentes gráficos de la interfaz JavaFX y configura el comportamiento base de la aplicación.
+     * <p>
+     * Este metodo se ejecuta automáticamente al cargar el archivo FXML.
+     * Se encarga de:
+     * <ul>
+     *     <li>Configurar la edición de las columnas de la tabla de estudiantes.</li>
+     *     <li>Aplicar internacionalización (i18n) a los encabezados de la tabla.</li>
+     *     <li>Asignar las factorías de celdas para enlazar los valores de {@link org.equiporon.Modelo.Modelo_Estudiante}.</li>
+     *     <li>Habilitar la edición en línea y su sincronización con la base de datos.</li>
+     *     <li>Inicializar el combo de selección de casas con sus estilos visuales y eventos asociados.</li>
+     *     <li>Establecer por defecto la casa “Hogwarts”.</li>
+     *     <li>Realizar un backup inicial de la base de datos mediante {@link org.equiporon.DAO.SQLiteDAO#hacerBackupCompleto()}.</li>
+     * </ul>
+     * En caso de error durante la inicialización o el backup, se mostrará una alerta informativa al usuario.
+     *
+     * @see org.equiporon.DAO.SQLiteDAO
+     * @see org.equiporon.Modelo.Modelo_Estudiante
+     */
     @FXML
     private void initialize() {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
@@ -140,7 +146,18 @@ public class Controlador {
         }
     }
 
-    // ----------------- Selección de casa -----------------
+    /**
+     * Cambia la casa activa y configura su conexión a la base de datos.
+     * <p>
+     * Actualiza el campo de texto, asigna el {@link org.equiporon.DAO.BaseDAO} correspondiente
+     * según la casa seleccionada y carga los estudiantes con {@link #cargarEstudiantesAsync()}.
+     * Muestra un mensaje de error si ocurre algún problema de conexión.
+     * </p>
+     *
+     * @param casa Nombre de la casa seleccionada (por ejemplo, "Gryffindor" o "Hogwarts").
+     * @see org.equiporon.Conexion.ConexionBD
+     * @see #cargarEstudiantesAsync()
+     */
     private void seleccionarCasa(String casa) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
         casaActual = casa;
@@ -170,9 +187,27 @@ public class Controlador {
     }
 
     // ----------------- CRUD (ASÍNCRONO) -----------------
+    /**
+     * Añade un nuevo estudiante a la base de datos de la casa actual.
+     * <p>
+     * Crea un objeto {@link org.equiporon.Modelo.Modelo_Estudiante} con los datos del formulario,
+     * realiza un backup rápido con {@link org.equiporon.DAO.SQLiteDAO#hacerBackupInstantaneo()},
+     * e inserta el registro de forma asíncrona mediante el {@link org.equiporon.DAO.BaseDAO} activo.
+     * Si la inserción es correcta, actualiza la tabla y limpia los campos.
+     * </p>
+     *
+     *
+     * @param event Evento del botón “Añadir”.
+     *
+     * @author Gaizka,Ruben,Unai,Xiker
+     * @see org.equiporon.Modelo.Modelo_Estudiante
+     * @see org.equiporon.DAO.BaseDAO#insertarAsync(Modelo_Estudiante)
+     */
 
     @FXML
     void clickOnAdd(ActionEvent event) {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
+        if (daoActual == null) { mostrarError(bundle.getString("alert.error.no_house_selected")); return; }
 
         try {
             Modelo_Estudiante nuevo = new Modelo_Estudiante(
@@ -212,7 +247,18 @@ public class Controlador {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Actualiza de forma asíncrona los datos de un estudiante en la base de datos activa.
+     * <p>
+     * Realiza un backup instantáneo con {@link org.equiporon.DAO.SQLiteDAO#hacerBackupInstantaneo()}
+     * y ejecuta la actualización mediante {@link org.equiporon.DAO.BaseDAO#editarAsync(Modelo_Estudiante)}.
+     * Si ocurre un error, muestra un mensaje al usuario.
+     * </p>
+     *
+     * @param est Estudiante a actualizar en la base de datos.
+     * @see org.equiporon.Modelo.Modelo_Estudiante
+     * @see org.equiporon.DAO.BaseDAO#editarAsync(Modelo_Estudiante)
+     */
 
     private void actualizarEnBDAsync(Modelo_Estudiante est) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
@@ -233,6 +279,18 @@ public class Controlador {
                     return null;
                 });
     }
+    /**
+     * Elimina el estudiante seleccionado de la base de datos activa de forma asíncrona.
+     * <p>
+     * Realiza un backup instantáneo con {@link org.equiporon.DAO.SQLiteDAO#hacerBackupInstantaneo()}
+     * y utiliza {@link org.equiporon.DAO.BaseDAO#borrarAsync(String)} para eliminar el registro.
+     * Tras la eliminación, actualiza la tabla o muestra un mensaje de error si falla la operación.
+     * </p>
+     *
+     * @param event Evento del botón “Borrar”.
+     * @see org.equiporon.Modelo.Modelo_Estudiante
+     * @see org.equiporon.DAO.BaseDAO#borrarAsync(String)
+     */
 
     @FXML
     void clickOnBorrar(ActionEvent event) {
@@ -259,6 +317,19 @@ public class Controlador {
                 });
     }
 
+
+    /**
+     * Restaura el respaldo más reciente de la base de datos para la casa actual.
+     * <p>
+     * Solicita confirmación al usuario y, si acepta, utiliza
+     * {@link org.equiporon.DAO.SQLiteDAO#restaurarBackupEnHogwarts(String)} para recuperar los datos.
+     * Tras la restauración, muestra un mensaje informativo y recarga la tabla de estudiantes.
+     * </p>
+     *
+     * @param event Evento del botón “Deshacer”.
+     * @see org.equiporon.DAO.SQLiteDAO#restaurarBackupEnHogwarts(String)
+     */
+
     @FXML
     private void clickOnUndo(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
@@ -274,6 +345,16 @@ public class Controlador {
     }
 
     // ----------------- Carga (ASÍNCRONA) -----------------
+    /**
+     * Carga de forma asíncrona todos los estudiantes de la casa actual.
+     * <p>
+     * Utiliza {@link org.equiporon.DAO.BaseDAO#obtenerTodosAsync()} para recuperar los registros
+     * y actualiza la tabla en el hilo de la interfaz. Si ocurre un error, muestra un mensaje al usuario.
+     * </p>
+     *
+     * @see org.equiporon.DAO.BaseDAO#obtenerTodosAsync()
+     */
+
     private void cargarEstudiantesAsync() {
         if (daoActual == null) return;
 
@@ -286,12 +367,31 @@ public class Controlador {
     }
 
     // ----------------- Utilidades UI -----------------
+    /**
+     * Limpia los campos de texto del formulario de entrada de datos.
+     * <p>
+     * Deja vacíos los campos de nombre, apellidos, curso y patronus
+     * para facilitar la inserción de un nuevo registro.
+     * </p>
+     *
+     * @author Ruben,Unai
+     */
+
     private void limpiarCampos() {
         txtNombre.clear();
         txtApellidos.clear();
         txtCurso.clear();
         txtPatronus.clear();
     }
+    /**
+     * Muestra una alerta de error con el mensaje especificado.
+     * <p>
+     * La alerta se ejecuta en el hilo de la interfaz mediante {@link javafx.application.Platform#runLater(Runnable)}.
+     * </p>
+     *
+     * @author Ruben,Unai
+     * @param mensaje Texto del error a mostrar.
+     */
 
     private void mostrarError(String mensaje) {
         Platform.runLater(() -> {
@@ -302,6 +402,15 @@ public class Controlador {
             alert.showAndWait();
         });
     }
+    /**
+     * Muestra una alerta informativa con el mensaje especificado.
+     * <p>
+     * Se ejecuta en el hilo de la interfaz y detiene la interacción hasta que el usuario cierre la alerta.
+     * </p>
+     *
+     * @author Unai, Ruben
+     * @param mensaje Texto informativo a mostrar.
+     */
 
     private void mostrarInfo(String mensaje) {
         Platform.runLater(() -> {
@@ -312,7 +421,16 @@ public class Controlador {
             alert.showAndWait();
         });
     }
-
+    /**
+     * Aplica las imágenes (escudo y banners) correspondientes a la casa indicada.
+     * <p>
+     * Carga los recursos desde la carpeta <code>/images/</code> y actualiza los componentes
+     * {@link javafx.scene.image.ImageView} del interfaz.
+     * </p>
+     *
+     * @author Xiker
+     * @param casa Nombre de la casa (por ejemplo, "Gryffindor", "Slytherin", "Hogwarts").
+     */
     private void aplicarImagenesCasa(String casa) {
         String basePath = "/images/";
         String nombre = casa.toLowerCase();
@@ -324,13 +442,30 @@ public class Controlador {
             bannerDerecho.setImage(banner);
         } catch (Exception ignored) {}
     }
+    /**
+     * Cambia el color de fondo de la ventana según la casa seleccionada.
+     * <p>
+     * Modifica las clases CSS aplicadas al panel raíz para reflejar el tema de color correspondiente.
+     * </p>
+     *
+     * @author Xiker
+     * @param casa Nombre de la casa activa.
+     */
 
     private void aplicarColorVentana(String casa) {
         if (rootPane == null) return;
         rootPane.getStyleClass().removeAll("gryffindor", "slytherin", "ravenclaw", "hufflepuff", "hogwarts");
         rootPane.getStyleClass().add(casa.toLowerCase());
     }
-
+    /**
+     * Configura los estilos visuales del ComboBox de selección de casas.
+     * <p>
+     * Aplica colores personalizados a cada elemento y al botón principal del ComboBox,
+     * utilizando {@link #getCasaColorStyle(String)}.
+     * </p>
+     *
+     * @author Xiker
+     */
     private void setupComboBoxColors() {
         choiceCasas.setCellFactory(listView -> new ListCell<>() {
             @Override protected void updateItem(String item, boolean empty) {
@@ -347,7 +482,14 @@ public class Controlador {
             }
         });
     }
-
+    /**
+     * Devuelve el estilo CSS asociado a la casa especificada.
+     *
+     * @param casa Nombre de la casa.
+     * @return Cadena con el estilo CSS correspondiente (color de fondo y texto).
+     *
+     * @author Xiker
+     */
     private String getCasaColorStyle(String casa) {
         return switch (casa) {
             case "Gryffindor" -> "-fx-background-color: #7F0909; -fx-text-fill: #FFC500;";
@@ -359,6 +501,17 @@ public class Controlador {
     }
 
     // ----------------- Menú superior -----------------
+    /**
+     * Cierra la aplicación tras confirmar la acción con el usuario.
+     * <p>
+     * Muestra un cuadro de confirmación y, si se acepta, cierra todas las conexiones
+     * de las bases de datos y finaliza la ejecución de la aplicación.
+     * </p>
+     *
+     * @param event Evento del menú “Archivo → Cerrar”.
+     * @author Xiker
+     */
+
     @FXML
     void clickOnFile(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
@@ -384,6 +537,13 @@ public class Controlador {
     }
 
     @FXML
+    /**
+     * Muestra una ventana de ayuda con información general sobre el uso de la aplicación.
+     *
+     * @param event Evento del menú “Ayuda”.
+     * @author Xiker
+     */
+
     void clickOnHelp(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
         Alert help = new Alert(Alert.AlertType.INFORMATION);
@@ -392,7 +552,12 @@ public class Controlador {
         help.setContentText(bundle.getString("help.content"));
         help.showAndWait();
     }
-
+    /**
+     * Muestra una ventana con la información “Acerca de” la aplicación.
+     *
+     * @param event Evento del menú “Acerca de”.
+     * @author Xiker
+     */
     @FXML
     void clickOnAbout(ActionEvent event) {
         ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", Locale.getDefault());
@@ -404,6 +569,17 @@ public class Controlador {
     }
 
     // ----------------- Cambiar idioma -----------------
+    /**
+     * Cambia el idioma de la interfaz de usuario.
+     * <p>
+     * Ajusta el {@link java.util.Locale} actual según la opción seleccionada
+     * y recarga los recursos del archivo FXML con los textos traducidos.
+     * </p>
+     *
+     * @param event Evento del menú de cambio de idioma.
+     * @author Xiker
+     */
+
     @FXML
     private void cambiarIdioma(ActionEvent event) {
         MenuItem source = (MenuItem) event.getSource();

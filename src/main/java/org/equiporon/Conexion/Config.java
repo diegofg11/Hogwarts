@@ -42,6 +42,8 @@ public class Config {
      *
      * @param key La clave (nombre) de la propiedad a buscar (ej. "mariadb.url").
      * @return El valor (String) asociado a la clave, o <code>null</code> si la clave no se encuentra.
+     *
+     * @author Diego
      */
     public static String get(String key) {
         return props.getProperty(key);
@@ -53,6 +55,8 @@ public class Config {
      * Obtiene la URL de conexión para la base de datos MariaDB.
      *
      * @return El valor de la propiedad "mariadb.url".
+     *
+     * @author Diego
      */
     public static String getMariaDBUrl()      { return get("mariadb.url"); }
 
@@ -60,6 +64,8 @@ public class Config {
      * Obtiene el nombre de usuario para la base de datos MariaDB.
      *
      * @return El valor de la propiedad "mariadb.user".
+     *
+     * @author Diego
      */
     public static String getMariaDBUser()     { return get("mariadb.user"); }
 
@@ -67,6 +73,8 @@ public class Config {
      * Obtiene la contraseña para la base de datos MariaDB.
      *
      * @return El valor de la propiedad "mariadb.password".
+     *
+     * @author Diego
      */
     public static String getMariaDBPassword() { return get("mariadb.password"); }
 
@@ -76,6 +84,8 @@ public class Config {
      * Obtiene la URL de conexión para la base de datos Gryffindor.
      *
      * @return El valor de la propiedad "gryffindor.url".
+     *
+     * @author Diego
      */
     public static String getGryffindorUrl()      { return get("gryffindor.url"); }
 
@@ -83,6 +93,8 @@ public class Config {
      * Obtiene el nombre de usuario para la base de datos Gryffindor.
      *
      * @return El valor de la propiedad "gryffindor.user".
+     *
+     * @author Diego
      */
     public static String getGryffindorUser()     { return get("gryffindor.user"); }
 
@@ -90,6 +102,8 @@ public class Config {
      * Obtiene la contraseña para la base de datos Gryffindor.
      *
      * @return El valor de la propiedad "gryffindor.password".
+     *
+     * @author Diego
      */
     public static String getGryffindorPassword() { return get("gryffindor.password"); }
 
@@ -99,6 +113,8 @@ public class Config {
      * Obtiene la URL de conexión para la base de datos Ravenclaw.
      *
      * @return El valor de la propiedad "ravenclaw.url".
+     *
+     * @author Diego
      */
     public static String getRavenclawUrl()      { return get("ravenclaw.url"); }
 
@@ -106,6 +122,8 @@ public class Config {
      * Obtiene el nombre de usuario para la base de datos Ravenclaw.
      *
      * @return El valor de la propiedad "ravenclaw.user".
+     *
+     * @author Diego
      */
     public static String getRavenclawUser()     { return get("ravenclaw.user"); }
 
@@ -113,6 +131,8 @@ public class Config {
      * Obtiene la contraseña para la base de datos Ravenclaw.
      *
      * @return El valor de la propiedad "ravenclaw.password".
+     *
+     * @author Diego
      */
     public static String getRavenclawPassword() { return get("ravenclaw.password"); }
 
@@ -122,6 +142,8 @@ public class Config {
      * Obtiene la URL de conexión para la base de datos Hufflepuff.
      *
      * @return El valor de la propiedad "hufflepuff.url".
+     *
+     * @author Diego
      */
     public static String getHufflepuffUrl()      { return get("hufflepuff.url"); }
 
@@ -129,6 +151,8 @@ public class Config {
      * Obtiene el nombre de usuario para la base de datos Hufflepuff.
      *
      * @return El valor de la propiedad "hufflepuff.user".
+     *
+     * @author Diego
      */
     public static String getHufflepuffUser()     { return get("hufflepuff.user"); }
 
@@ -136,6 +160,8 @@ public class Config {
      * Obtiene la contraseña para la base de datos Hufflepuff.
      *
      * @return El valor de la propiedad "hufflepuff.password".
+     *
+     * @author Diego
      */
     public static String getHufflepuffPassword() { return get("hufflepuff.password"); }
 
@@ -145,6 +171,8 @@ public class Config {
      * Obtiene la URL de conexión para la base de datos Slytherin.
      *
      * @return El valor de la propiedad "slytherin.url".
+     *
+     * @author Diego
      */
     public static String getSlytherinUrl()      { return get("slytherin.url"); }
 
@@ -152,6 +180,8 @@ public class Config {
      * Obtiene el nombre de usuario para la base de datos Slytherin.
      *
      * @return El valor de la propiedad "slytherin.user".
+     *
+     * @author Diego
      */
     public static String getSlytherinUser()     { return get("slytherin.user"); }
 
@@ -159,6 +189,8 @@ public class Config {
      * Obtiene la contraseña para la base de datos Slytherin.
      *
      * @return El valor de la propiedad "slytherin.password".
+     *
+     * @author Diego
      */
     public static String getSlytherinPassword() { return get("slytherin.password"); }
 }

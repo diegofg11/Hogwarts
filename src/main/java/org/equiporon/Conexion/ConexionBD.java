@@ -39,6 +39,8 @@ public class ConexionBD {
      * @return Un objeto {@link Connection} a la base de datos de la casa,
      * o <code>null</code> si la casa no es válida o si ocurre un error de SQL
      * durante la conexión.
+     *
+     * @author Gaizka,Diego
      */
     public static Connection conectarCasa(String casa) {
         String url, user, password;
@@ -93,6 +95,8 @@ public class ConexionBD {
      *
      * @return Un objeto {@link Connection} a MariaDB, o <code>null</code> si
      * ocurre un error de SQL.
+     *
+     * @author Gaizka, Diego
      */
     public static Connection getConnection() {
         try {
@@ -121,6 +125,8 @@ public class ConexionBD {
      *
      * @return Un objeto {@link Connection} a la base de datos SQLite, o <code>null</code>
      * si ocurre un error al cargar el driver o al conectar.
+     *
+     * @author Gaizka
      */
     public static Connection getSQLiteConnection() {
         try {

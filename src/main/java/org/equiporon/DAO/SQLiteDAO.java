@@ -60,6 +60,8 @@ public class SQLiteDAO extends BaseDAO {
      * @param conn La conexión activa a la base de datos SQLite.
      * @param e El estudiante ({@code Modelo_Estudiante}) que se va a insertar.
      * @throws SQLException Si ocurre un error de base de datos durante la inserción.
+     *
+     * @author Gaizka
      */
     private void insertarBackup(Connection conn, Modelo_Estudiante e) throws SQLException {
         String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
@@ -121,6 +123,8 @@ public class SQLiteDAO extends BaseDAO {
      * El metodo borra todos los registros existentes en la tabla ESTUDIANTES
      * de la base de datos SQLite y, a continuación, copia todos los registros
      * desde la base de datos principal (MariaDB) a SQLite.
+     *
+     * @author Gaizka
      */
     public void hacerBackupCompleto() {
         try (Connection connSqlite = getConnection();
@@ -167,6 +171,8 @@ public class SQLiteDAO extends BaseDAO {
      *<br>
      * @param casaARevertir Indica el alcance de la restauración ("Hogwarts" para total,
      * o el nombre de una casa para parcial).
+     *
+     * @author Gaizka
      */
     public void restaurarBackupEnHogwarts(String casaARevertir) {
         try (Connection connSqlite = getConnection()) {
@@ -268,6 +274,8 @@ public class SQLiteDAO extends BaseDAO {
      *<br>
      * Restaura una casa específica desde la lista de estudiantes del backup,
      * insertando solo los que pertenecen a esa casa.
+     *
+     * @author Gaizka
      */
     private void restaurarCasa(String nombreCasa, Connection conn, java.util.List<Modelo_Estudiante> lista) {
         if (conn == null) {

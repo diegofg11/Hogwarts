@@ -297,6 +297,8 @@ public class MariaDBDAO extends BaseDAO {
      * @param casaPrefijo El prefijo de dos letras de la casa (ej: "GR" para Gryffindor) para la cual se genera el ID.
      * @return El nuevo ID único generado para Hogwarts (ej: "GR102" o "SL1").
      * @throws SQLException Si ocurre un error durante la ejecución de la consulta SQL.
+     *
+     * @author Gaizka
      */
 
     private String generarNuevoIdHogwarts(Connection conn, String casaPrefijo) throws SQLException {
