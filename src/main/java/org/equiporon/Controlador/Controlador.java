@@ -290,7 +290,7 @@ public class Controlador {
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
                 SQLiteDAO sqlite = new SQLiteDAO();
-                sqlite.restaurarBackupEnHogwarts();
+                sqlite.restaurarBackupEnHogwarts(casaActual);
                 mostrarInfo(bundle.getString("alert.info.restored_backup"));
                 cargarEstudiantes();
             }
