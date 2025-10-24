@@ -439,7 +439,7 @@ public class Controlador {
         help.setContentText("""
             🧙‍♂️ Guía rápida:
             • Selecciona una casa en el menú desplegable.
-            • Añade, edita o elimina estudiantes.
+            • Añade, edita o elimina estudiantes y deshace cambios.
             • Los cambios se sincronizan con la base central (MariaDB).
 
             📦 Bases de datos:
@@ -448,6 +448,12 @@ public class Controlador {
             Slytherin  → HSQLDB
             Ravenclaw  → Oracle
             Hogwarts   → MariaDB
+            
+            Funciones:
+            - Añadir: Rellenar todos los campos y pulsar el boton añadir.
+            - Borrar: Seleccionar alumno en la tabla y pulsar el boton borrar.
+            - Deshacer: Deshace el ultimo cambio realizado despues de pulsar algun boton.
+            - Editar: Seleccionar alumno en la tabla y hacer doble click en el campo que queremos editar.
             """);
         help.showAndWait();
     }
