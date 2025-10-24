@@ -18,7 +18,7 @@ import java.sql.ResultSet;
  * Incluye métodos para crear la tabla, insertar, obtener,
  * actualizar y eliminar registros de estudiantes.
  *
- * @author Diego, Unai, Gaizka, Igor
+ * @author Diego, Unai, Gaizka, Ruben, Igor
  */
 public class SQLiteDAO extends BaseDAO {
 
@@ -54,6 +54,13 @@ public class SQLiteDAO extends BaseDAO {
         }
     }
 
+    /**
+     * Inserta un nuevo estudiante en la base de datos de backup (SQLite).
+     *<br>
+     * @param conn La conexión activa a la base de datos SQLite.
+     * @param e El estudiante ({@code Modelo_Estudiante}) que se va a insertar.
+     * @throws SQLException Si ocurre un error de base de datos durante la inserción.
+     */
     private void insertarBackup(Connection conn, Modelo_Estudiante e) throws SQLException {
         String sql = "INSERT INTO ESTUDIANTES (id, nombre, apellidos, casa, curso, patronus) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -68,6 +75,17 @@ public class SQLiteDAO extends BaseDAO {
         logger.info("💾 Copiado a SQLite (ID {}).", e.getId());
     }
 
+    /**
+     * Actualiza un estudiante existente en la base de datos de backup (SQLite).
+     *<br>
+     * Utiliza el ID del objeto {@code e} para encontrar el registro y actualiza
+     * el resto de sus campos.
+     *<br>
+     * @param conn La conexión activa a la base de datos SQLite.
+     * @param e El objeto estudiante con los datos actualizados (el ID se usa
+     * para la cláusula WHERE).
+     * @throws SQLException Si ocurre un error durante el UPDATE.
+     */
     private void editarBackup(Connection conn, Modelo_Estudiante e) throws SQLException {
         String sql = "UPDATE ESTUDIANTES SET nombre=?, apellidos=?, casa=?, curso=?, patronus=? WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -81,7 +99,14 @@ public class SQLiteDAO extends BaseDAO {
         }
         logger.info("✏️ Actualizado en SQLite (ID {}).", e.getId());
     }
-
+    /**
+     * Elimina un estudiante específico de la tabla ESTUDIANTES en la conexión
+     * de backup (SQLite) proporcionada.
+     *<br>
+     * @param conn La conexión activa a la base de datos SQLite.
+     * @param id El ID del estudiante que se desea eliminar.
+     * @throws SQLException Si ocurre un error al ejecutar la sentencia DELETE.
+     */
     private void borrarBackup(Connection conn, String id) throws SQLException {
         String sql = "DELETE FROM ESTUDIANTES WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -90,6 +115,13 @@ public class SQLiteDAO extends BaseDAO {
         }
         logger.info("🗑️ Borrado de SQLite (ID {}).", id);
     }
+    /**
+     * Realiza una copia de seguridad completa de la tabla ESTUDIANTES.
+     *<br>
+     * El metodo borra todos los registros existentes en la tabla ESTUDIANTES
+     * de la base de datos SQLite y, a continuación, copia todos los registros
+     * desde la base de datos principal (MariaDB) a SQLite.
+     */
     public void hacerBackupCompleto() {
         try (Connection connSqlite = getConnection();
              Connection connMaria = ConexionBD.getConnection()) {
@@ -125,6 +157,17 @@ public class SQLiteDAO extends BaseDAO {
             logger.error("⚠️ Error haciendo backup en SQLite.", e);
         }
     }
+
+    /**
+     * Restaura la base de datos de estudiantes desde el backup de SQLite.
+     *<br>
+     * Siempre restaura la base de datos principal "Hogwarts".
+     * Si 'casaARevertir' es "Hogwarts", restaura también las 4 casas.
+     * Si 'casaARevertir' es una casa específica, solo restaura esa casa.
+     *<br>
+     * @param casaARevertir Indica el alcance de la restauración ("Hogwarts" para total,
+     * o el nombre de una casa para parcial).
+     */
     public void restaurarBackupEnHogwarts(String casaARevertir) {
         try (Connection connSqlite = getConnection()) {
             if (connSqlite == null) {
@@ -222,8 +265,7 @@ public class SQLiteDAO extends BaseDAO {
 
     /**
      * Restaura una casa específica desde la lista de estudiantes del backup.
-     */
-    /**
+     *<br>
      * Restaura una casa específica desde la lista de estudiantes del backup,
      * insertando solo los que pertenecen a esa casa.
      */
