@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -16,7 +17,10 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane fx:id="rootPane" prefHeight="581.0" prefWidth="595.0" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.equiporon.Controlador.Controlador">
+<AnchorPane fx:id="rootPane" prefHeight="581.0" prefWidth="595.0" stylesheets="@../styles/Styles.css"
+            xmlns="http://javafx.com/javafx/24.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.equiporon.Controlador.Controlador">
 
     <children>
 
@@ -40,13 +44,18 @@
                         <MenuItem fx:id="menuParsel" onAction="#cambiarIdioma" text="%menuitem.parsel" />
                     </items>
                 </Menu>
-
             </menus>
         </MenuBar>
 
-        <ComboBox fx:id="choiceCasas" layoutX="147.0" layoutY="75.0" prefHeight="30.0" prefWidth="200.0" AnchorPane.leftAnchor="147.0" AnchorPane.rightAnchor="244.60000000000002" AnchorPane.topAnchor="75.0" />
+        <ComboBox fx:id="choiceCasas" layoutX="147.0" layoutY="75.0" prefHeight="30.0" prefWidth="200.0"
+                  AnchorPane.leftAnchor="147.0" AnchorPane.rightAnchor="244.60000000000002" AnchorPane.topAnchor="75.0">
+            <tooltip>
+                <Tooltip text="Selecciona una casa para mostrar sus estudiantes" />
+            </tooltip>
+        </ComboBox>
 
-        <GridPane hgap="5.0" layoutX="56.0" layoutY="145.0" prefWidth="260.0" vgap="15.0" AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="145.0">
+        <GridPane hgap="5.0" layoutX="56.0" layoutY="145.0" prefWidth="260.0" vgap="15.0"
+                  AnchorPane.leftAnchor="56.0" AnchorPane.topAnchor="145.0">
             <columnConstraints>
                 <ColumnConstraints percentWidth="30.0" />
                 <ColumnConstraints percentWidth="70.0" />
@@ -61,19 +70,39 @@
 
             <children>
                 <Label fx:id="lblNombre" text="%label.nombre" />
-                <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <tooltip>
+                        <Tooltip text="Introduce el nombre del estudiante" />
+                    </tooltip>
+                </TextField>
 
                 <Label fx:id="lblApellidos" text="%label.apellidos" GridPane.rowIndex="1" />
-                <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="txtApellidos" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <tooltip>
+                        <Tooltip text="Introduce los apellidos del estudiante" />
+                    </tooltip>
+                </TextField>
 
                 <Label fx:id="lblCurso" text="%label.curso" GridPane.rowIndex="2" />
-                <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <TextField fx:id="txtCurso" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <tooltip>
+                        <Tooltip text="Introduce el curso del estudiante" />
+                    </tooltip>
+                </TextField>
 
                 <Label fx:id="lblPatronus" text="%label.patronus" GridPane.rowIndex="3" />
-                <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <TextField fx:id="txtPatronus" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                    <tooltip>
+                        <Tooltip text="Introduce el Patronus del estudiante" />
+                    </tooltip>
+                </TextField>
 
                 <Label fx:id="lblCasa" text="%label.casa" GridPane.rowIndex="4" />
-                <TextField fx:id="txtCasa" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <TextField fx:id="txtCasa" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                    <tooltip>
+                        <Tooltip text="Muestra o cambia la casa del estudiante" />
+                    </tooltip>
+                </TextField>
             </children>
         </GridPane>
 
@@ -87,13 +116,31 @@
                 <RowConstraints minHeight="10.0" percentHeight="33.3" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Button fx:id="botAdd" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onAction="#clickOnAdd" text="%button.add" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-                <Button fx:id="botBorrar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onAction="#clickOnBorrar" text="%button.delete" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
-                <Button fx:id="botDeshacer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onAction="#clickOnUndo" text="%button.undo" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
+                <Button fx:id="botAdd" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        onAction="#clickOnAdd" text="%button.add" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+                    <tooltip>
+                        <Tooltip text="Añadir un nuevo estudiante a la casa seleccionada" />
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="botBorrar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        onAction="#clickOnBorrar" text="%button.delete" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                    <tooltip>
+                        <Tooltip text="Eliminar al estudiante seleccionado" />
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="botDeshacer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        onAction="#clickOnUndo" text="%button.undo" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
+                    <tooltip>
+                        <Tooltip text="Deshacer los últimos cambios" />
+                    </tooltip>
+                </Button>
             </children>
         </GridPane>
 
-        <TableView fx:id="tablaEstudiantes" layoutX="56.0" layoutY="346.4" prefHeight="215.0" prefWidth="435.0" AnchorPane.bottomAnchor="23.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="54.0" AnchorPane.topAnchor="343.0">
+        <TableView fx:id="tablaEstudiantes" layoutX="56.0" layoutY="346.4" prefHeight="215.0" prefWidth="435.0"
+                   AnchorPane.bottomAnchor="23.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="54.0" AnchorPane.topAnchor="343.0">
             <columns>
                 <TableColumn fx:id="tableId" prefWidth="75.0" text="%label.id" />
                 <TableColumn fx:id="tableNombre" prefWidth="75.0" text="%label.nombre" />
@@ -105,21 +152,27 @@
             <columnResizePolicy>
                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
+            <tooltip>
+                <Tooltip text="Lista de estudiantes de la casa actual" />
+            </tooltip>
         </TableView>
 
-        <ImageView fx:id="escudoCasa" fitHeight="93.0" fitWidth="78.0" layoutX="371.0" layoutY="41.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="371.0" AnchorPane.rightAnchor="142.70481262207034" AnchorPane.topAnchor="41.0">
+        <ImageView fx:id="escudoCasa" fitHeight="93.0" fitWidth="78.0" layoutX="371.0" layoutY="41.0"
+                   pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="371.0" AnchorPane.topAnchor="41.0">
             <image>
                 <Image url="@../images/hogwarts_escudo.png" />
             </image>
         </ImageView>
 
-        <ImageView fx:id="bannerIzquierdo" fitHeight="93.0" fitWidth="100.0" layoutX="17.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="22.0">
+        <ImageView fx:id="bannerIzquierdo" fitHeight="93.0" fitWidth="100.0" layoutX="17.0" layoutY="29.0"
+                   pickOnBounds="true" preserveRatio="true" AnchorPane.leftAnchor="4.0" AnchorPane.topAnchor="22.0">
             <image>
                 <Image url="@../images/hogwarts_banner.png" />
             </image>
         </ImageView>
 
-        <ImageView fx:id="bannerDerecho" fitHeight="93.0" fitWidth="100.0" layoutX="490.0" layoutY="29.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="22.0">
+        <ImageView fx:id="bannerDerecho" fitHeight="93.0" fitWidth="100.0" layoutX="490.0" layoutY="29.0"
+                   pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="4.0" AnchorPane.topAnchor="22.0">
             <image>
                 <Image url="@../images/hogwarts_banner.png" />
             </image>
